@@ -8,19 +8,23 @@ import { itilTypeEnum } from "./itil-shared";
  * Phase 3c/6 extension once notifications exist to actually escalate to
  * (a breached SLA with no one to notify is just a flag).
  */
-export const slaPolicies = pgTable("sla_policies", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  entityId: uuid("entity_id")
-    .notNull()
-    .references(() => entities.id),
-  name: text("name").notNull(),
-  description: text("description"),
-  ttoMinutes: integer("tto_minutes"), // time-to-own (first response) target; null = not tracked
-  ttrMinutes: integer("ttr_minutes"), // time-to-resolve target; null = not tracked
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-});
+export const slaPolicies = pgTable(
+  "sla_policies",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    entityId: uuid("entity_id")
+      .notNull()
+      .references(() => entities.id),
+    name: text("name").notNull(),
+    description: text("description"),
+    ttoMinutes: integer("tto_minutes"), // time-to-own (first response) target; null = not tracked
+    ttrMinutes: integer("ttr_minutes"), // time-to-resolve target; null = not tracked
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("sla_policies_entity_idx").on(table.entityId)],
+);
 
 export const slaTypeEnum = pgEnum("sla_type", ["tto", "ttr"]);
 export type SlaType = (typeof slaTypeEnum.enumValues)[number];

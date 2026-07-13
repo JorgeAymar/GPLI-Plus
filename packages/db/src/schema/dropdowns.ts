@@ -34,7 +34,10 @@ export const dropdownItems = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("dropdown_items_category_entity_idx").on(table.categoryId, table.entityId)],
+  (table) => [
+    index("dropdown_items_category_entity_idx").on(table.categoryId, table.entityId),
+    index("dropdown_items_entity_idx").on(table.entityId),
+  ],
 );
 
 export type DropdownCategory = typeof dropdownCategories.$inferSelect;

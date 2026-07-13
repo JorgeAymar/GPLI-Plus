@@ -33,32 +33,32 @@ export function WebhookForm({ entityId }: { entityId: string }) {
     <form action={formAction} className="space-y-3">
       <input type="hidden" name="entityId" value={entityId} />
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="webhook-name" className="text-sm font-medium">Nombre</label>
+        <input id="webhook-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Tipo de item</label>
-        <input name="itemType" required placeholder="ticket" className={inputClass} />
+        <label htmlFor="webhook-item-type" className="text-sm font-medium">Tipo de item</label>
+        <input id="webhook-item-type" name="itemType" required placeholder="ticket" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Evento</label>
-        <select name="event" required defaultValue="create" className={inputClass}>
+        <label htmlFor="webhook-event" className="text-sm font-medium">Evento</label>
+        <select id="webhook-event" name="event" required defaultValue="create" className={inputClass}>
           <option value="create">create</option>
           <option value="update">update</option>
           <option value="delete">delete</option>
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">URL de destino</label>
-        <input name="url" type="url" required placeholder="https://ejemplo.com/webhook" className={inputClass} />
+        <label htmlFor="webhook-url" className="text-sm font-medium">URL de destino</label>
+        <input id="webhook-url" name="url" type="url" required placeholder="https://ejemplo.com/webhook" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Secreto (mín. 8 caracteres, firma HMAC-SHA256)</label>
-        <input name="secret" required minLength={8} className={inputClass} />
+        <label htmlFor="webhook-secret" className="text-sm font-medium">Secreto (mín. 8 caracteres, firma HMAC-SHA256)</label>
+        <input id="webhook-secret" name="secret" required minLength={8} className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Reintentos máximos (opcional, por defecto 3)</label>
-        <input name="maxRetries" type="number" min={1} className={inputClass} />
+        <label htmlFor="webhook-max-retries" className="text-sm font-medium">Reintentos máximos (opcional, por defecto 3)</label>
+        <input id="webhook-max-retries" name="maxRetries" type="number" min={1} className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

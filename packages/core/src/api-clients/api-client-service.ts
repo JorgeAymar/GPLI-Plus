@@ -2,8 +2,8 @@ import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { and, eq } from "drizzle-orm";
 import { apiClients, db, type ApiClient } from "@itsm/db";
+import { SALT_ROUNDS } from "../constants";
 
-const SALT_ROUNDS = 12;
 const RAW_KEY_PREFIX = "sk_";
 // "sk_" (3 chars) + 8 hex chars = 11 - long enough to narrow candidates via an
 // indexed lookup, short enough to stay cheap to store/scan (Stripe/GitHub pattern).
@@ -13,8 +13,8 @@ const PREFIX_LENGTH = 11;
  * Simple bearer-token API client (Stripe-style), not an OAuth2 client.
  *
  * Generates a raw key of the form `sk_<48 hex chars>`, hashes it with bcrypt
- * (same SALT_ROUNDS as packages/core/src/users/user-service.ts) and persists
- * only the hash + a short unhashed prefix for candidate lookup.
+ * (shared SALT_ROUNDS constant, same as packages/core/src/users/user-service.ts)
+ * and persists only the hash + a short unhashed prefix for candidate lookup.
  *
  * IMPORTANT: `rawKey` is returned here and ONLY here. It is never stored in
  * plaintext, so once the caller stops holding onto this return value there is

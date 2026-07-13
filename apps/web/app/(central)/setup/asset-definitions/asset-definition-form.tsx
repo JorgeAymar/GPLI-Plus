@@ -26,8 +26,9 @@ export function AssetDefinitionForm() {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Clave (key)</label>
+        <label htmlFor="asset-definition-key" className="text-sm font-medium">Clave (key)</label>
         <input
+          id="asset-definition-key"
           name="key"
           required
           placeholder="security_camera"
@@ -35,16 +36,18 @@ export function AssetDefinitionForm() {
         />
       </div>
       <div>
-        <label className="text-sm font-medium">Nombre</label>
+        <label htmlFor="asset-definition-name" className="text-sm font-medium">Nombre</label>
         <input
+          id="asset-definition-name"
           name="name"
           required
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />
       </div>
       <div>
-        <label className="text-sm font-medium">Icono (opcional)</label>
+        <label htmlFor="asset-definition-icon" className="text-sm font-medium">Icono (opcional)</label>
         <input
+          id="asset-definition-icon"
           name="icon"
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />

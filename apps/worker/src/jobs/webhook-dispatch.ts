@@ -2,7 +2,7 @@ import { dispatchPendingWebhooks } from "@itsm/core";
 import type { PgBoss } from "pg-boss";
 
 const QUEUE_NAME = "webhook-dispatch";
-const CRON = "* * * * *"; // every minute
+const CRON = process.env.WEBHOOK_DISPATCH_CRON ?? "* * * * *"; // every minute
 
 /** Registers the recurring webhook-queue drain - see webhook-service.ts dispatchPendingWebhooks(). */
 export async function registerWebhookDispatchJob(boss: PgBoss): Promise<void> {

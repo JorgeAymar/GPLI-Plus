@@ -25,8 +25,9 @@ export function LinkAssetForm({ contractId, assets }: { contractId: string; asse
   return (
     <form action={formAction} className="flex items-end gap-2">
       <div className="flex-1">
-        <label className="text-sm font-medium">Activo</label>
+        <label htmlFor="link-asset-asset-id" className="text-sm font-medium">Activo</label>
         <select
+          id="link-asset-asset-id"
           name="assetId"
           required
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"

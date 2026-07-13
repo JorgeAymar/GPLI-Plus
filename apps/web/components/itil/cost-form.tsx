@@ -32,12 +32,12 @@ export function CostForm({ itilType, itilId }: { itilType: ItilType; itilId: str
   return (
     <form action={formAction} className="flex items-end gap-2">
       <div>
-        <label className="text-sm font-medium">Tipo</label>
-        <input name="costType" required placeholder="Mano de obra" className={inputClass} />
+        <label htmlFor="itil-cost-type" className="text-sm font-medium">Tipo</label>
+        <input id="itil-cost-type" name="costType" required placeholder="Mano de obra" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Monto</label>
-        <input name="amount" type="number" step="0.01" min="0" required className={inputClass} />
+        <label htmlFor="itil-cost-amount" className="text-sm font-medium">Monto</label>
+        <input id="itil-cost-amount" name="amount" type="number" step="0.01" min="0" required className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

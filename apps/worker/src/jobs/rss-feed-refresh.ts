@@ -2,7 +2,7 @@ import { listActiveRssFeedsForRefresh, refreshRssFeed } from "@itsm/core";
 import type { PgBoss } from "pg-boss";
 
 const QUEUE_NAME = "rss-feed-refresh-sweep";
-const CRON = "*/15 * * * *"; // every 15 minutes
+const CRON = process.env.RSS_FEED_REFRESH_CRON ?? "*/15 * * * *"; // every 15 minutes
 
 /**
  * Registers the recurring RSS refresh sweep. v1 simplification (documented in

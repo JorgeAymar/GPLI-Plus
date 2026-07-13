@@ -7,21 +7,25 @@ import { users } from "./users";
  * packages/core/src/storage/storage-adapter.ts) at `storageKey` - the DB row
  * only holds metadata, never the file bytes.
  */
-export const documents = pgTable("documents", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  entityId: uuid("entity_id")
-    .notNull()
-    .references(() => entities.id),
-  name: text("name").notNull(),
-  filename: text("filename").notNull(),
-  mimeType: text("mime_type").notNull(),
-  sizeBytes: integer("size_bytes").notNull(),
-  storageKey: text("storage_key").notNull(),
-  uploadedByUserId: uuid("uploaded_by_user_id")
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-});
+export const documents = pgTable(
+  "documents",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    entityId: uuid("entity_id")
+      .notNull()
+      .references(() => entities.id),
+    name: text("name").notNull(),
+    filename: text("filename").notNull(),
+    mimeType: text("mime_type").notNull(),
+    sizeBytes: integer("size_bytes").notNull(),
+    storageKey: text("storage_key").notNull(),
+    uploadedByUserId: uuid("uploaded_by_user_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("documents_entity_idx").on(table.entityId)],
+);
 
 /**
  * Polymorphic attachment link: one document can be attached to any item in

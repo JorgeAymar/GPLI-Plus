@@ -29,12 +29,12 @@ export function SoftwareForm({ entityId }: { entityId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="software-name" className="text-sm font-medium">Nombre</label>
+        <input id="software-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Comentario</label>
-        <textarea name="comment" className={inputClass} />
+        <label htmlFor="software-comment" className="text-sm font-medium">Comentario</label>
+        <textarea id="software-comment" name="comment" className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

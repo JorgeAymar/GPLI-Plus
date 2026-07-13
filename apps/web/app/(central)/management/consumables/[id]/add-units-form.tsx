@@ -25,8 +25,9 @@ export function AddUnitsForm({ consumableItemId }: { consumableItemId: string })
   return (
     <form action={formAction} className="flex items-end gap-2">
       <div>
-        <label className="text-sm font-medium">Cantidad</label>
+        <label htmlFor="add-units-quantity" className="text-sm font-medium">Cantidad</label>
         <input
+          id="add-units-quantity"
           name="quantity"
           type="number"
           min={1}

@@ -34,14 +34,14 @@ export function ActorForm({ itilType, itilId, users }: { itilType: ItilType; iti
   return (
     <form action={formAction} className="space-y-2">
       <div className="flex gap-2">
-        <select name="actorRole" className={inputClass}>
+        <select name="actorRole" aria-label="Rol del actor" className={inputClass}>
           {ACTOR_ROLES.map((r) => (
             <option key={r} value={r}>
               {r}
             </option>
           ))}
         </select>
-        <select name="userId" required className={inputClass}>
+        <select name="userId" aria-label="Usuario" required className={inputClass}>
           {users.map((u) => (
             <option key={u.id} value={u.id}>
               {u.displayName}

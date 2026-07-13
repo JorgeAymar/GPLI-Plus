@@ -31,8 +31,8 @@ export function SlaForm({ itilType, itilId, policies }: { itilType: ItilType; it
   return (
     <form action={formAction} className="flex items-end gap-2">
       <div>
-        <label className="text-sm font-medium">Política</label>
-        <select name="slaPolicyId" required className={inputClass}>
+        <label htmlFor="itil-sla-policy" className="text-sm font-medium">Política</label>
+        <select id="itil-sla-policy" name="slaPolicyId" required className={inputClass}>
           {policies.map((p) => (
             <option key={p.id} value={p.id}>
               {p.name}
@@ -41,8 +41,8 @@ export function SlaForm({ itilType, itilId, policies }: { itilType: ItilType; it
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Tipo</label>
-        <select name="slaType" className={inputClass}>
+        <label htmlFor="itil-sla-type" className="text-sm font-medium">Tipo</label>
+        <select id="itil-sla-type" name="slaType" className={inputClass}>
           <option value="tto">Primera respuesta</option>
           <option value="ttr">Resolución</option>
         </select>

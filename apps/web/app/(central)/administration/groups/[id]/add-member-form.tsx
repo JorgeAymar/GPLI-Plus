@@ -34,8 +34,10 @@ export function AddMemberForm({ groupId, users }: { groupId: string; users: User
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Usuario</label>
-        <select name="userId" required defaultValue="" className={inputClass}>
+        <label htmlFor="add-member-userId" className="text-sm font-medium">
+          Usuario
+        </label>
+        <select id="add-member-userId" name="userId" required defaultValue="" className={inputClass}>
           <option value="" disabled>
             Elegí un usuario
           </option>

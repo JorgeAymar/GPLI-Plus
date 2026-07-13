@@ -58,8 +58,8 @@ function DynamicField({ field, options }: { field: AssetFieldDefinition; options
   if (field.fieldType === "dropdown") {
     return (
       <div>
-        <label className="text-sm font-medium">{field.label}</label>
-        <select name={name} required={field.isRequired} className={inputClass}>
+        <label htmlFor={name} className="text-sm font-medium">{field.label}</label>
+        <select id={name} name={name} required={field.isRequired} className={inputClass}>
           <option value="">(ninguno)</option>
           {options.map((o) => (
             <option key={o.id} value={o.id}>
@@ -74,8 +74,8 @@ function DynamicField({ field, options }: { field: AssetFieldDefinition; options
   if (field.fieldType === "textarea") {
     return (
       <div>
-        <label className="text-sm font-medium">{field.label}</label>
-        <textarea name={name} required={field.isRequired} className={inputClass} />
+        <label htmlFor={name} className="text-sm font-medium">{field.label}</label>
+        <textarea id={name} name={name} required={field.isRequired} className={inputClass} />
       </div>
     );
   }
@@ -83,8 +83,8 @@ function DynamicField({ field, options }: { field: AssetFieldDefinition; options
   const inputType = field.fieldType === "number" ? "number" : field.fieldType === "date" ? "date" : "text";
   return (
     <div>
-      <label className="text-sm font-medium">{field.label}</label>
-      <input name={name} type={inputType} required={field.isRequired} className={inputClass} />
+      <label htmlFor={name} className="text-sm font-medium">{field.label}</label>
+      <input id={name} name={name} type={inputType} required={field.isRequired} className={inputClass} />
     </div>
   );
 }
@@ -106,23 +106,23 @@ export function GenericAssetForm({
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="asset-name" className="text-sm font-medium">Nombre</label>
+        <input id="asset-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Número de serie</label>
-        <input name="serialNumber" className={inputClass} />
+        <label htmlFor="asset-serial-number" className="text-sm font-medium">Número de serie</label>
+        <input id="asset-serial-number" name="serialNumber" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Número de inventario</label>
-        <input name="inventoryNumber" className={inputClass} />
+        <label htmlFor="asset-inventory-number" className="text-sm font-medium">Número de inventario</label>
+        <input id="asset-inventory-number" name="inventoryNumber" className={inputClass} />
       </div>
       {fields.map((field) => (
         <DynamicField key={field.id} field={field} options={dropdownOptions[field.key] ?? []} />
       ))}
       <div>
-        <label className="text-sm font-medium">Comentario</label>
-        <textarea name="comment" className={inputClass} />
+        <label htmlFor="asset-comment" className="text-sm font-medium">Comentario</label>
+        <textarea id="asset-comment" name="comment" className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

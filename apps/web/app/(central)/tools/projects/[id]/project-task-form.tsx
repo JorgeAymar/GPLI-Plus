@@ -32,12 +32,12 @@ export function ProjectTaskForm({ projectId, tasks }: { projectId: string; tasks
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="project-task-name" className="text-sm font-medium">Nombre</label>
+        <input id="project-task-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Tarea padre (opcional)</label>
-        <select name="parentTaskId" defaultValue="" className={inputClass}>
+        <label htmlFor="project-task-parent" className="text-sm font-medium">Tarea padre (opcional)</label>
+        <select id="project-task-parent" name="parentTaskId" defaultValue="" className={inputClass}>
           <option value="">Ninguna (nivel superior)</option>
           {tasks.map((t) => (
             <option key={t.id} value={t.id}>

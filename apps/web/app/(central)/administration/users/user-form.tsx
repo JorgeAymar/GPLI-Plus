@@ -29,24 +29,33 @@ export function UserForm({ entities }: { entities: Entity[] }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre para mostrar</label>
+        <label htmlFor="user-displayName" className="text-sm font-medium">
+          Nombre para mostrar
+        </label>
         <input
+          id="user-displayName"
           name="displayName"
           required
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />
       </div>
       <div>
-        <label className="text-sm font-medium">Usuario</label>
+        <label htmlFor="user-username" className="text-sm font-medium">
+          Usuario
+        </label>
         <input
+          id="user-username"
           name="username"
           required
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />
       </div>
       <div>
-        <label className="text-sm font-medium">Email</label>
+        <label htmlFor="user-email" className="text-sm font-medium">
+          Email
+        </label>
         <input
+          id="user-email"
           name="email"
           type="email"
           required
@@ -54,8 +63,11 @@ export function UserForm({ entities }: { entities: Entity[] }) {
         />
       </div>
       <div>
-        <label className="text-sm font-medium">Contraseña</label>
+        <label htmlFor="user-password" className="text-sm font-medium">
+          Contraseña
+        </label>
         <input
+          id="user-password"
           name="password"
           type="password"
           required
@@ -64,8 +76,11 @@ export function UserForm({ entities }: { entities: Entity[] }) {
         />
       </div>
       <div>
-        <label className="text-sm font-medium">Entidad por defecto</label>
+        <label htmlFor="user-defaultEntityId" className="text-sm font-medium">
+          Entidad por defecto
+        </label>
         <select
+          id="user-defaultEntityId"
           name="defaultEntityId"
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         >

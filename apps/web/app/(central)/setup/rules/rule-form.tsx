@@ -31,21 +31,21 @@ export function RuleForm({ entityId }: { entityId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Tipo de regla (ruleType)</label>
-        <input name="ruleType" required placeholder="ticket, asset_import, right_assignment..." className={inputClass} />
+        <label htmlFor="rule-type" className="text-sm font-medium">Tipo de regla (ruleType)</label>
+        <input id="rule-type" name="ruleType" required placeholder="ticket, asset_import, right_assignment..." className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="rule-name" className="text-sm font-medium">Nombre</label>
+        <input id="rule-name" name="name" required className={inputClass} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Orden (ranking)</label>
-          <input name="ranking" type="number" defaultValue={0} className={inputClass} />
+          <label htmlFor="rule-ranking" className="text-sm font-medium">Orden (ranking)</label>
+          <input id="rule-ranking" name="ranking" type="number" defaultValue={0} className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Coincidencia</label>
-          <select name="matchType" defaultValue="all" className={inputClass}>
+          <label htmlFor="rule-match-type" className="text-sm font-medium">Coincidencia</label>
+          <select id="rule-match-type" name="matchType" defaultValue="all" className={inputClass}>
             <option value="all">Todas (AND)</option>
             <option value="any">Cualquiera (OR)</option>
           </select>

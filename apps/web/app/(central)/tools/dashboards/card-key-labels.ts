@@ -13,4 +13,11 @@ export const CARD_KEY_LABEL: Record<string, string> = {
   yearly_assets: "Activos por año",
   tickets_by_status: "Tickets por estado",
   reservations_usage: "Uso de reservas",
+  // These two were missing even though AVAILABLE_CARD_KEYS (card-provider.ts)
+  // has included them since v1: without an entry here the "Card" <select> and
+  // the card heading on the dashboard detail page fell back to the raw
+  // snake_case key (`CARD_KEY_LABEL[key] ?? key`), showing e.g.
+  // "tickets_created_by_day" to end users instead of a translated label.
+  tickets_created_by_day: "Tickets creados por día",
+  sla_compliance_rate: "Cumplimiento de SLA",
 };

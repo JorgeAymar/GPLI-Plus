@@ -42,12 +42,12 @@ export function CableForm({ assets, cableTypes }: { assets: AssetOption[]; cable
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" className={inputClass} />
+        <label htmlFor="cable-name" className="text-sm font-medium">Nombre</label>
+        <input id="cable-name" name="name" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Extremo A</label>
-        <select name="endpointAAssetId" required defaultValue="" className={inputClass}>
+        <label htmlFor="cable-endpoint-a" className="text-sm font-medium">Extremo A</label>
+        <select id="cable-endpoint-a" name="endpointAAssetId" required defaultValue="" className={inputClass}>
           <option value="" disabled>
             Selecciona un activo...
           </option>
@@ -59,8 +59,8 @@ export function CableForm({ assets, cableTypes }: { assets: AssetOption[]; cable
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Extremo B</label>
-        <select name="endpointBAssetId" required defaultValue="" className={inputClass}>
+        <label htmlFor="cable-endpoint-b" className="text-sm font-medium">Extremo B</label>
+        <select id="cable-endpoint-b" name="endpointBAssetId" required defaultValue="" className={inputClass}>
           <option value="" disabled>
             Selecciona un activo...
           </option>
@@ -73,8 +73,8 @@ export function CableForm({ assets, cableTypes }: { assets: AssetOption[]; cable
       </div>
       {cableTypes.length > 0 ? (
         <div>
-          <label className="text-sm font-medium">Tipo de cable</label>
-          <select name="cableTypeDropdownItemId" defaultValue="" className={inputClass}>
+          <label htmlFor="cable-type" className="text-sm font-medium">Tipo de cable</label>
+          <select id="cable-type" name="cableTypeDropdownItemId" defaultValue="" className={inputClass}>
             <option value="">Ninguno</option>
             {cableTypes.map((t) => (
               <option key={t.id} value={t.id}>
@@ -85,8 +85,8 @@ export function CableForm({ assets, cableTypes }: { assets: AssetOption[]; cable
         </div>
       ) : null}
       <div>
-        <label className="text-sm font-medium">Comentario</label>
-        <textarea name="comment" className={inputClass} rows={2} />
+        <label htmlFor="cable-comment" className="text-sm font-medium">Comentario</label>
+        <textarea id="cable-comment" name="comment" className={inputClass} rows={2} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

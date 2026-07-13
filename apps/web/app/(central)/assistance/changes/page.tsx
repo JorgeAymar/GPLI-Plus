@@ -1,11 +1,15 @@
 import { requireAuthContext } from "@/lib/session";
-import { listChanges } from "@itsm/core";
+import { getDropdownCategoryByKey, listChanges, listDropdownItems } from "@itsm/core";
 import Link from "next/link";
 import { ChangeForm } from "./change-form";
 
 export default async function ChangesPage() {
   const context = await requireAuthContext();
   const changes = await listChanges(context.activeEntity.id, { includeSubtree: true });
+
+  // itil_category is the shared category dropdown for tickets/problems/changes (see seed.ts).
+  const categoryCategory = await getDropdownCategoryByKey("itil_category");
+  const categoryOptions = categoryCategory ? await listDropdownItems(categoryCategory.id, context.activeEntity.id) : [];
 
   return (
     <div className="space-y-6">
@@ -26,7 +30,7 @@ export default async function ChangesPage() {
         </div>
         <div>
           <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo cambio</h2>
-          <ChangeForm entityId={context.activeEntity.id} />
+          <ChangeForm entityId={context.activeEntity.id} categoryOptions={categoryOptions} />
         </div>
       </div>
     </div>

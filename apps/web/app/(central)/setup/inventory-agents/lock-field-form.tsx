@@ -25,8 +25,8 @@ export function LockFieldForm({ assetId }: { assetId: string }) {
   return (
     <form action={formAction} className="flex items-end gap-2">
       <div className="flex-1">
-        <label className="text-sm font-medium">Nombre del campo (ej. name, serialNumber)</label>
-        <input name="fieldName" required placeholder="serialNumber" className={inputClass} />
+        <label htmlFor={`lock-field-name-${assetId}`} className="text-sm font-medium">Nombre del campo (ej. name, serialNumber)</label>
+        <input id={`lock-field-name-${assetId}`} name="fieldName" required placeholder="serialNumber" className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

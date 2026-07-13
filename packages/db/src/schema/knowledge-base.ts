@@ -1,4 +1,4 @@
-import { type AnyPgColumn, boolean, integer, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { type AnyPgColumn, boolean, index, integer, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { entities } from "./entities";
 import { users } from "./users";
 
@@ -22,26 +22,30 @@ export const kbCategories = pgTable("kb_categories", {
  * listKbArticleRevisions/revertKbArticle), the same append-only log every
  * other module reuses instead of per-module audit tables.
  */
-export const kbArticles = pgTable("kb_articles", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  entityId: uuid("entity_id")
-    .notNull()
-    .references(() => entities.id),
-  title: text("title").notNull(),
-  body: text("body").notNull(),
-  isFaq: boolean("is_faq").notNull().default(false),
-  isPinned: boolean("is_pinned").notNull().default(false),
-  authorUserId: uuid("author_user_id")
-    .notNull()
-    .references(() => users.id),
-  viewCount: integer("view_count").notNull().default(0),
-  showInServiceCatalog: boolean("show_in_service_catalog").notNull().default(false),
-  beginDate: timestamp("begin_date", { mode: "date" }),
-  endDate: timestamp("end_date", { mode: "date" }),
-  deletedAt: timestamp("deleted_at", { mode: "date" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-});
+export const kbArticles = pgTable(
+  "kb_articles",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    entityId: uuid("entity_id")
+      .notNull()
+      .references(() => entities.id),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    isFaq: boolean("is_faq").notNull().default(false),
+    isPinned: boolean("is_pinned").notNull().default(false),
+    authorUserId: uuid("author_user_id")
+      .notNull()
+      .references(() => users.id),
+    viewCount: integer("view_count").notNull().default(0),
+    showInServiceCatalog: boolean("show_in_service_catalog").notNull().default(false),
+    beginDate: timestamp("begin_date", { mode: "date" }),
+    endDate: timestamp("end_date", { mode: "date" }),
+    deletedAt: timestamp("deleted_at", { mode: "date" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("kb_articles_entity_idx").on(table.entityId)],
+);
 
 /** Many-to-many pivot, same composite-PK pattern as contractAssets in contracts.ts. */
 export const kbArticleCategories = pgTable(
@@ -58,18 +62,22 @@ export const kbArticleCategories = pgTable(
 );
 
 /** Flat storage, self-FK on parentCommentId for threaded replies - the UI nests them. */
-export const kbArticleComments = pgTable("kb_article_comments", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  articleId: uuid("article_id")
-    .notNull()
-    .references(() => kbArticles.id, { onDelete: "cascade" }),
-  parentCommentId: uuid("parent_comment_id").references((): AnyPgColumn => kbArticleComments.id),
-  authorUserId: uuid("author_user_id")
-    .notNull()
-    .references(() => users.id),
-  content: text("content").notNull(),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-});
+export const kbArticleComments = pgTable(
+  "kb_article_comments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => kbArticles.id, { onDelete: "cascade" }),
+    parentCommentId: uuid("parent_comment_id").references((): AnyPgColumn => kbArticleComments.id),
+    authorUserId: uuid("author_user_id")
+      .notNull()
+      .references(() => users.id),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("kb_article_comments_article_idx").on(table.articleId)],
+);
 
 export type KbCategory = typeof kbCategories.$inferSelect;
 export type NewKbCategory = typeof kbCategories.$inferInsert;

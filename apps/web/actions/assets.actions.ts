@@ -39,6 +39,12 @@ export async function createAssetAction(input: unknown) {
   const context = await requireRightForAssetDefinition(parsed.assetDefinitionId, RIGHT.CREATE);
   const asset = await createAsset(parsed, context.user.id);
   revalidatePath("/assets");
+  // The create form for generic asset types lives on /assets/[assetType] (see
+  // app/(central)/assets/[assetType]/page.tsx), not on /assets - without this,
+  // the "Instancias existentes" list on that page stays stale after creating
+  // a new instance, since revalidatePath only refreshes the exact path given.
+  const definition = await getAssetDefinition(parsed.assetDefinitionId);
+  if (definition) revalidatePath(`/assets/${definition.key}`);
   return asset;
 }
 

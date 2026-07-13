@@ -1,4 +1,4 @@
-import { boolean, jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { assets } from "./assets";
 import { entities } from "./entities";
 
@@ -9,19 +9,23 @@ import { entities } from "./entities";
  * persists on first run); it's how repeat submissions from the same machine
  * are recognized regardless of hostname changes.
  */
-export const inventoryAgents = pgTable("inventory_agents", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  deviceId: text("device_id").notNull().unique(),
-  entityId: uuid("entity_id")
-    .notNull()
-    .references(() => entities.id),
-  name: text("name").notNull(),
-  assetId: uuid("asset_id").references(() => assets.id),
-  lastContactAt: timestamp("last_contact_at", { mode: "date" }),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-});
+export const inventoryAgents = pgTable(
+  "inventory_agents",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    deviceId: text("device_id").notNull().unique(),
+    entityId: uuid("entity_id")
+      .notNull()
+      .references(() => entities.id),
+    name: text("name").notNull(),
+    assetId: uuid("asset_id").references(() => assets.id),
+    lastContactAt: timestamp("last_contact_at", { mode: "date" }),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("inventory_agents_entity_idx").on(table.entityId)],
+);
 
 /**
  * Fields an admin has decided the agent must never overwrite again on a
@@ -45,17 +49,21 @@ export const inventorySubmissionStatusEnum = pgEnum("inventory_submission_status
 export type InventorySubmissionStatus = (typeof inventorySubmissionStatusEnum.enumValues)[number];
 
 /** Audit trail of every payload received from an agent, whether or not it matched/created an asset. */
-export const inventorySubmissions = pgTable("inventory_submissions", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  agentId: uuid("agent_id")
-    .notNull()
-    .references(() => inventoryAgents.id, { onDelete: "cascade" }),
-  rawPayload: jsonb("raw_payload").notNull(),
-  status: inventorySubmissionStatusEnum("status").notNull().default("pending"),
-  rejectionReason: text("rejection_reason"),
-  receivedAt: timestamp("received_at", { mode: "date" }).notNull().defaultNow(),
-  processedAt: timestamp("processed_at", { mode: "date" }),
-});
+export const inventorySubmissions = pgTable(
+  "inventory_submissions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    agentId: uuid("agent_id")
+      .notNull()
+      .references(() => inventoryAgents.id, { onDelete: "cascade" }),
+    rawPayload: jsonb("raw_payload").notNull(),
+    status: inventorySubmissionStatusEnum("status").notNull().default("pending"),
+    rejectionReason: text("rejection_reason"),
+    receivedAt: timestamp("received_at", { mode: "date" }).notNull().defaultNow(),
+    processedAt: timestamp("processed_at", { mode: "date" }),
+  },
+  (table) => [index("inventory_submissions_agent_idx").on(table.agentId)],
+);
 
 export type InventoryAgent = typeof inventoryAgents.$inferSelect;
 export type NewInventoryAgent = typeof inventoryAgents.$inferInsert;

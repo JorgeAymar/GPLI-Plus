@@ -41,8 +41,8 @@ export function ImpactRelationForm({ assetId, assets }: { assetId: string; asset
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Activo relacionado</label>
-        <select name="relatedAssetId" required defaultValue="" className={inputClass}>
+        <label htmlFor="impact-relation-related-asset" className="text-sm font-medium">Activo relacionado</label>
+        <select id="impact-relation-related-asset" name="relatedAssetId" required defaultValue="" className={inputClass}>
           <option value="" disabled>
             Seleccionar...
           </option>
@@ -54,15 +54,15 @@ export function ImpactRelationForm({ assetId, assets }: { assetId: string; asset
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Dirección</label>
-        <select name="relationDirection" defaultValue="depende_de" className={inputClass}>
+        <label htmlFor="impact-relation-direction" className="text-sm font-medium">Dirección</label>
+        <select id="impact-relation-direction" name="relationDirection" defaultValue="depende_de" className={inputClass}>
           <option value="depende_de">Este activo depende de...</option>
           <option value="es_dependencia_de">Este activo es dependencia de...</option>
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Etiqueta (opcional)</label>
-        <input name="label" className={inputClass} placeholder="ej. conexión de red" />
+        <label htmlFor="impact-relation-label" className="text-sm font-medium">Etiqueta (opcional)</label>
+        <input id="impact-relation-label" name="label" className={inputClass} placeholder="ej. conexión de red" />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

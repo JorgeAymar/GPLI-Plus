@@ -36,16 +36,16 @@ export function TimelineForm({ itilType, itilId }: { itilType: ItilType; itilId:
   return (
     <form action={formAction} className="space-y-2">
       <div className="flex gap-2">
-        <select name="itemType" className={inputClass}>
+        <select name="itemType" aria-label="Tipo de entrada" className={inputClass}>
           {ITEM_TYPES.map((t) => (
             <option key={t} value={t}>
               {t}
             </option>
           ))}
         </select>
-        <input name="timeSpentMinutes" type="number" min={0} placeholder="min." className={`${inputClass} w-28`} />
+        <input name="timeSpentMinutes" type="number" min={0} placeholder="min." aria-label="Tiempo dedicado en minutos" className={`${inputClass} w-28`} />
       </div>
-      <textarea name="content" required placeholder="Escribe una nota, seguimiento o solución..." className={inputClass} />
+      <textarea name="content" required placeholder="Escribe una nota, seguimiento o solución..." aria-label="Contenido de la entrada" className={inputClass} />
       <label className="flex items-center gap-2 text-xs">
         <input type="checkbox" name="isPrivate" /> Privado (solo técnicos)
       </label>

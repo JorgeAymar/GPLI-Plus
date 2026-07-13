@@ -26,6 +26,7 @@ export function UseConsumableForm({ consumableId, assets }: { consumableId: stri
     <form action={formAction} className="flex items-center gap-2">
       <select
         name="assignedAssetId"
+        aria-label="Activo a asignar"
         required
         className="rounded-md border border-black/15 bg-transparent px-2 py-1 text-sm dark:border-white/15"
       >

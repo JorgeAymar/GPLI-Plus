@@ -1,4 +1,4 @@
-import { boolean, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 /** Visibility is resource-based (resourceType="rss_feed") via resource_visibility_rules - see visibility-service.ts, not a column here. */
@@ -23,19 +23,23 @@ export const rssFeeds = pgTable("rss_feeds", {
  * deletes every row for a feed and reinserts the freshly fetched+sanitized
  * items each time it runs. See rss-feed-service.ts for the tradeoff note.
  */
-export const rssFeedCachedItems = pgTable("rss_feed_cached_items", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  feedId: uuid("feed_id")
-    .notNull()
-    .references(() => rssFeeds.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  link: text("link").notNull(),
-  publishedAt: timestamp("published_at", { mode: "date" }),
-  // Pre-sanitized (sanitize-html) at fetch time in rss-feed-service.ts - the web UI still renders
-  // this as plain text rather than raw markup, as defense in depth (see tools/rss-feeds/[id]/page.tsx).
-  description: text("description"),
-  fetchedAt: timestamp("fetched_at", { mode: "date" }).notNull().defaultNow(),
-});
+export const rssFeedCachedItems = pgTable(
+  "rss_feed_cached_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    feedId: uuid("feed_id")
+      .notNull()
+      .references(() => rssFeeds.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    link: text("link").notNull(),
+    publishedAt: timestamp("published_at", { mode: "date" }),
+    // Pre-sanitized (sanitize-html) at fetch time in rss-feed-service.ts - the web UI still renders
+    // this as plain text rather than raw markup, as defense in depth (see tools/rss-feeds/[id]/page.tsx).
+    description: text("description"),
+    fetchedAt: timestamp("fetched_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("rss_feed_cached_items_feed_idx").on(table.feedId)],
+);
 
 export type RssFeed = typeof rssFeeds.$inferSelect;
 export type NewRssFeed = typeof rssFeeds.$inferInsert;

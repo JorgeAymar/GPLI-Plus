@@ -17,6 +17,7 @@ export function StatusSelect({
 
   return (
     <select
+      aria-label="Estado"
       defaultValue={currentStatus}
       disabled={isPending}
       onChange={(e) => {

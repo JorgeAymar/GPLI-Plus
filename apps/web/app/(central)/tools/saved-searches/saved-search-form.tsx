@@ -46,12 +46,12 @@ export function SavedSearchForm({ ownerUserId, entityId }: { ownerUserId: string
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="saved-search-name" className="text-sm font-medium">Nombre</label>
+        <input id="saved-search-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Tipo de elemento</label>
-        <select name="itemType" defaultValue="ticket" className={inputClass}>
+        <label htmlFor="saved-search-item-type" className="text-sm font-medium">Tipo de elemento</label>
+        <select id="saved-search-item-type" name="itemType" defaultValue="ticket" className={inputClass}>
           {ITEM_TYPES.map((t) => (
             <option key={t.value} value={t.value}>
               {t.label}
@@ -66,8 +66,8 @@ export function SavedSearchForm({ ownerUserId, entityId }: { ownerUserId: string
         </label>
       </div>
       <div>
-        <label className="text-sm font-medium">Criterios (JSON crudo)</label>
-        <textarea name="queryJson" rows={4} defaultValue={'{\n  "search": ""\n}'} className={`${inputClass} font-mono text-xs`} />
+        <label htmlFor="saved-search-query-json" className="text-sm font-medium">Criterios (JSON crudo)</label>
+        <textarea id="saved-search-query-json" name="queryJson" rows={4} defaultValue={'{\n  "search": ""\n}'} className={`${inputClass} font-mono text-xs`} />
         <p className="mt-1 text-xs opacity-50">
           v1: sin motor de búsqueda genérico todavía - escribe el JSON de criterios a mano (por ejemplo una clave de texto
           &quot;search&quot;).

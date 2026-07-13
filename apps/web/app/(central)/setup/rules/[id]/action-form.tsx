@@ -30,8 +30,8 @@ export function ActionForm({ ruleId }: { ruleId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Tipo de acción</label>
-        <select name="actionType" defaultValue="assign" className={inputClass}>
+        <label htmlFor="rule-action-type" className="text-sm font-medium">Tipo de acción</label>
+        <select id="rule-action-type" name="actionType" defaultValue="assign" className={inputClass}>
           <option value="assign">Asignar</option>
           <option value="append">Agregar al final</option>
           <option value="regex_result">Resultado de regex</option>
@@ -39,12 +39,12 @@ export function ActionForm({ ruleId }: { ruleId: string }) {
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Campo</label>
-        <input name="field" required className={inputClass} />
+        <label htmlFor="rule-action-field" className="text-sm font-medium">Campo</label>
+        <input id="rule-action-field" name="field" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Valor</label>
-        <input name="value" required className={inputClass} />
+        <label htmlFor="rule-action-value" className="text-sm font-medium">Valor</label>
+        <input id="rule-action-value" name="value" required className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

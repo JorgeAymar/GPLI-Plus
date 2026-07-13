@@ -5,13 +5,34 @@ import { listAssetFieldDefinitions } from "./asset-definition-service";
 function baseZodForField(field: AssetFieldDefinition): z.ZodTypeAny {
   switch (field.fieldType) {
     case "text":
-      return z.string().max(1000);
+      return field.isRequired ? z.string().min(1, "Este campo es requerido").max(1000) : z.string().max(1000);
     case "textarea":
-      return z.string().max(10000);
+      return field.isRequired ? z.string().min(1, "Este campo es requerido").max(10000) : z.string().max(10000);
     case "number":
       return z.coerce.number();
     case "boolean":
-      return z.coerce.boolean();
+      // Plain z.coerce.boolean() uses JS `Boolean(value)`, which has two bugs
+      // for a dynamic form field: (1) ANY non-empty string coerces to `true`,
+      // so the literal string "false" becomes boolean `true`; (2) `undefined`
+      // coerces to `false`, so a required boolean field that's simply missing
+      // silently "validates" instead of being rejected. Preprocess narrowly
+      // instead: pass real booleans through untouched, accept the common
+      // textual/numeric representations, and let anything else (including
+      // undefined) fall through to z.boolean()'s normal type-check so a
+      // missing required field still fails validation as expected.
+      return z.preprocess((value) => {
+        if (typeof value === "boolean") return value;
+        if (typeof value === "number") {
+          if (value === 1) return true;
+          if (value === 0) return false;
+        }
+        if (typeof value === "string") {
+          const normalized = value.trim().toLowerCase();
+          if (normalized === "true" || normalized === "1") return true;
+          if (normalized === "false" || normalized === "0") return false;
+        }
+        return value;
+      }, z.boolean());
     case "date":
       return z.coerce.date();
     case "dropdown":

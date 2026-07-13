@@ -8,6 +8,8 @@ interface FormState {
   error?: string;
 }
 
+const LEVELS = [1, 2, 3, 4, 5];
+
 function buildCustomFields(formData: FormData, fields: TicketFieldDefinition[]): Record<string, unknown> {
   const customFields: Record<string, unknown> = {};
   for (const field of fields) {
@@ -37,6 +39,10 @@ function makeAction(entityId: string, fields: TicketFieldDefinition[]) {
         title: formData.get("title") as string,
         content: formData.get("content") as string,
         ticketType,
+        urgency: Number(formData.get("urgency")),
+        impact: Number(formData.get("impact")),
+        priority: Number(formData.get("priority")),
+        categoryDropdownItemId: (formData.get("categoryDropdownItemId") as string) || null,
         customFields: buildCustomFields(formData, fieldsForType(fields, ticketType)),
       });
       return {};
@@ -62,8 +68,8 @@ function DynamicField({ field, options }: { field: TicketFieldDefinition; option
   if (field.fieldType === "dropdown") {
     return (
       <div>
-        <label className="text-sm font-medium">{field.label}</label>
-        <select name={name} required={field.isRequired} className={inputClass}>
+        <label htmlFor={name} className="text-sm font-medium">{field.label}</label>
+        <select id={name} name={name} required={field.isRequired} className={inputClass}>
           <option value="">(ninguno)</option>
           {options.map((o) => (
             <option key={o.id} value={o.id}>
@@ -78,8 +84,8 @@ function DynamicField({ field, options }: { field: TicketFieldDefinition; option
   if (field.fieldType === "textarea") {
     return (
       <div>
-        <label className="text-sm font-medium">{field.label}</label>
-        <textarea name={name} required={field.isRequired} className={inputClass} />
+        <label htmlFor={name} className="text-sm font-medium">{field.label}</label>
+        <textarea id={name} name={name} required={field.isRequired} className={inputClass} />
       </div>
     );
   }
@@ -87,8 +93,8 @@ function DynamicField({ field, options }: { field: TicketFieldDefinition; option
   const inputType = field.fieldType === "number" ? "number" : field.fieldType === "date" ? "date" : "text";
   return (
     <div>
-      <label className="text-sm font-medium">{field.label}</label>
-      <input name={name} type={inputType} required={field.isRequired} className={inputClass} />
+      <label htmlFor={name} className="text-sm font-medium">{field.label}</label>
+      <input id={name} name={name} type={inputType} required={field.isRequired} className={inputClass} />
     </div>
   );
 }
@@ -97,10 +103,12 @@ export function TicketForm({
   entityId,
   fields,
   dropdownOptions,
+  categoryOptions,
 }: {
   entityId: string;
   fields: TicketFieldDefinition[];
   dropdownOptions: Record<string, DropdownItem[]>;
+  categoryOptions: DropdownItem[];
 }) {
   const [ticketType, setTicketType] = useState<"incident" | "request">("incident");
   const [state, formAction, isPending] = useActionState(makeAction(entityId, fields), undefined);
@@ -110,8 +118,9 @@ export function TicketForm({
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Tipo</label>
+        <label htmlFor="ticket-type" className="text-sm font-medium">Tipo</label>
         <select
+          id="ticket-type"
           name="ticketType"
           value={ticketType}
           onChange={(e) => setTicketType(e.target.value as "incident" | "request")}
@@ -122,12 +131,55 @@ export function TicketForm({
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Título</label>
-        <input name="title" required className={inputClass} />
+        <label htmlFor="ticket-title" className="text-sm font-medium">Título</label>
+        <input id="ticket-title" name="title" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Descripción</label>
-        <textarea name="content" required rows={4} className={inputClass} />
+        <label htmlFor="ticket-content" className="text-sm font-medium">Descripción</label>
+        <textarea id="ticket-content" name="content" required rows={4} className={inputClass} />
+      </div>
+      <div>
+        <label htmlFor="ticket-category" className="text-sm font-medium">Categoría</label>
+        <select id="ticket-category" name="categoryDropdownItemId" defaultValue="" className={inputClass}>
+          <option value="">(ninguna)</option>
+          {categoryOptions.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <label htmlFor="ticket-urgency" className="text-sm font-medium">Urgencia</label>
+          <select id="ticket-urgency" name="urgency" defaultValue="3" required className={inputClass}>
+            {LEVELS.map((l) => (
+              <option key={l} value={l}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="ticket-impact" className="text-sm font-medium">Impacto</label>
+          <select id="ticket-impact" name="impact" defaultValue="3" required className={inputClass}>
+            {LEVELS.map((l) => (
+              <option key={l} value={l}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="ticket-priority" className="text-sm font-medium">Prioridad</label>
+          <select id="ticket-priority" name="priority" defaultValue="3" required className={inputClass}>
+            {LEVELS.map((l) => (
+              <option key={l} value={l}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
       {visibleFields.map((field) => (
         <DynamicField key={field.id} field={field} options={dropdownOptions[field.key] ?? []} />

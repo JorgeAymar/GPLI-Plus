@@ -91,7 +91,9 @@ Login de prueba: **admin@itsm.local** / **ChangeMe123!** (cambiar via `SEED_ADMI
 
 Quedan solo por decisión explícita (no son bugs, no se revierten): SAML, sistema de plugins de terceros, OAuth2 completo (quedó bearer token) — riesgo de seguridad desproporcionado para el modelo de negocio.
 
-Detalle completo de cada fase (incluyendo decisiones tomadas sobre la marcha y correcciones a bugs reales de Auth.js/Next.js 16) en [`docs/architecture-plan.md`](docs/architecture-plan.md).
+**Testing**: 672 tests unitarios/integración (Vitest, `packages/core` contra Postgres real) + 149 tests E2E (Playwright/Chromium, `e2e/specs/`, uno por sección del sidebar con login real) — **100% verdes**. Este pase de testing encontró y corrigió bugs reales: coerción de booleanos en campos dinámicos (Assets y Form Builder de Tickets), una tarjeta de dashboard que nunca mostraba datos por mismatch de forma, todo el módulo de Configuración mostrando errores de validación como JSON crudo, Administración sin escribir al audit log, `cron-service.ts` devolviendo timestamps como string en vez de `Date`, y 36 índices de base de datos faltantes (incluyendo el lookup RBAC más caliente de la app, `user_profiles.user_id`, sin índice). Ver `pnpm test` / `pnpm e2e` / `pnpm e2e:report`.
+
+Detalle completo de cada fase (incluyendo decisiones tomadas sobre la marcha y correcciones a bugs reales de Auth.js/Next.js 16) en [`docs/architecture-plan.md`](docs/architecture-plan.md). Guía funcional completa en [`docs/app-guide.md`](docs/app-guide.md); comparación detallada con GLPI original en [`docs/comparison-vs-glpi.md`](docs/comparison-vs-glpi.md).
 
 ## Producción (instalación on-premise vía Docker)
 

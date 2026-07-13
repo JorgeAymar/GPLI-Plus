@@ -24,8 +24,9 @@ export function SoftwareVersionForm({ softwareId }: { softwareId: string }) {
   return (
     <form action={formAction} className="flex items-end gap-2">
       <div className="flex-1">
-        <label className="text-sm font-medium">Versión</label>
+        <label htmlFor="software-version-name" className="text-sm font-medium">Versión</label>
         <input
+          id="software-version-name"
           name="name"
           required
           placeholder="23H2"

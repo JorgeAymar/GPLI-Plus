@@ -43,6 +43,9 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
         <StatusSelect id={ticket.id} currentStatus={ticket.status} updateStatusAction={updateTicketStatusAction} />
       </div>
       <p className="whitespace-pre-wrap text-sm opacity-80">{ticket.content}</p>
+      <p className="text-sm opacity-60">
+        Urgencia: {ticket.urgency} · Impacto: {ticket.impact} · Prioridad: {ticket.priority}
+      </p>
 
       <div className="grid grid-cols-2 gap-8">
         <ActorsSection itilType="ticket" itilId={id} actors={actors} users={users} />

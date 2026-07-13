@@ -29,16 +29,18 @@ export function DropdownItemForm({ categoryId, entityId }: { categoryId: string;
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
+        <label htmlFor="dropdown-item-name" className="text-sm font-medium">Nombre</label>
         <input
+          id="dropdown-item-name"
           name="name"
           required
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />
       </div>
       <div>
-        <label className="text-sm font-medium">Comentario</label>
+        <label htmlFor="dropdown-item-comment" className="text-sm font-medium">Comentario</label>
         <textarea
+          id="dropdown-item-comment"
           name="comment"
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />

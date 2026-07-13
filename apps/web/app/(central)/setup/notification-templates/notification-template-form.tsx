@@ -28,20 +28,20 @@ export function NotificationTemplateForm() {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Clave (key)</label>
-        <input name="key" required placeholder="ticket_solved" className={inputClass} />
+        <label htmlFor="notification-template-key" className="text-sm font-medium">Clave (key)</label>
+        <input id="notification-template-key" name="key" required placeholder="ticket_solved" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="notification-template-name" className="text-sm font-medium">Nombre</label>
+        <input id="notification-template-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Asunto (soporta {"{{placeholders}}"})</label>
-        <input name="subjectTemplate" required placeholder="Tu ticket {{ticketTitle}} fue resuelto" className={inputClass} />
+        <label htmlFor="notification-template-subject" className="text-sm font-medium">Asunto (soporta {"{{placeholders}}"})</label>
+        <input id="notification-template-subject" name="subjectTemplate" required placeholder="Tu ticket {{ticketTitle}} fue resuelto" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Cuerpo</label>
-        <textarea name="bodyTemplate" required rows={4} className={inputClass} />
+        <label htmlFor="notification-template-body" className="text-sm font-medium">Cuerpo</label>
+        <textarea id="notification-template-body" name="bodyTemplate" required rows={4} className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

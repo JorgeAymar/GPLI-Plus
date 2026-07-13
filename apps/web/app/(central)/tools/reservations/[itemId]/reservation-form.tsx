@@ -33,17 +33,17 @@ export function ReservationForm({ reservationItemId }: { reservationItemId: stri
     <form action={formAction} className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Inicio</label>
-          <input name="beginAt" type="datetime-local" required className={inputClass} />
+          <label htmlFor="reservation-begin-at" className="text-sm font-medium">Inicio</label>
+          <input id="reservation-begin-at" name="beginAt" type="datetime-local" required className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Fin</label>
-          <input name="endAt" type="datetime-local" required className={inputClass} />
+          <label htmlFor="reservation-end-at" className="text-sm font-medium">Fin</label>
+          <input id="reservation-end-at" name="endAt" type="datetime-local" required className={inputClass} />
         </div>
       </div>
       <div>
-        <label className="text-sm font-medium">Comentario</label>
-        <textarea name="comment" className={inputClass} rows={2} />
+        <label htmlFor="reservation-comment" className="text-sm font-medium">Comentario</label>
+        <textarea id="reservation-comment" name="comment" className={inputClass} rows={2} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

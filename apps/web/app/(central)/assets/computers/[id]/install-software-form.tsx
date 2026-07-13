@@ -32,8 +32,9 @@ export function InstallSoftwareForm({ assetId, versionOptions }: { assetId: stri
   return (
     <form action={formAction} className="flex items-end gap-2">
       <div className="flex-1">
-        <label className="text-sm font-medium">Software a instalar</label>
+        <label htmlFor="install-software-version" className="text-sm font-medium">Software a instalar</label>
         <select
+          id="install-software-version"
           name="softwareVersionId"
           required
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"

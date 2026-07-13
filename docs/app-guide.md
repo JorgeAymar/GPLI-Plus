@@ -1,0 +1,78 @@
+# Guía funcional de la aplicación
+
+Referencia de qué hace cada pantalla de la plataforma, organizada como aparece en el sidebar. Para el *por qué* de cada decisión técnica y el historial de construcción por fases, ver [`architecture-plan.md`](architecture-plan.md). Para cómo se compara con GLPI, ver [`comparison-vs-glpi.md`](comparison-vs-glpi.md).
+
+Login de prueba: `admin@itsm.local` / `ChangeMe123!` (cambiar antes de un despliegue real vía `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD`).
+
+## Conceptos transversales
+
+- **Entidades**: árbol multi-tenant (`/administration/entities`). Todo objeto (activo, ticket, contrato, etc.) pertenece a una entidad. Los permisos pueden ser específicos de una entidad o recursivos a sus descendientes (vía `ltree`).
+- **Perfiles (RBAC)**: sets de permisos por módulo (`/administration/profiles`), asignables a un usuario en una o más entidades. Cada permiso es un bitmask (`READ`/`CREATE`/`UPDATE`/`DELETE`/`PURGE`/`APPROVE`/`ASSIGN`) sobre ~50 módulos con nombre punteado (`assets.computer`, `assistance.ticket`, etc.). La matriz completa (perfil × módulo × bit) se edita en `/administration/profiles/[id]`.
+- **Interfaz Central vs. Simplified**: un perfil decide si el usuario ve el shell completo de administración (Central) o el portal de autoservicio (Simplified, `/portal`). El redirect de `/` decide según el perfil activo del usuario logueado.
+- **Auditoría**: cada creación/edición relevante queda en `audit_log` (visible en `/administration/audit-log`, filtrable por tipo de objeto/usuario/fecha).
+
+## Asistencia (Helpdesk / ITIL)
+
+- **Tickets** (`/assistance/tickets`): incidentes y solicitudes. Cada ticket tiene urgencia/impacto/prioridad (1-5), categoría, estado (`new → assigned/planned → pending → solved → closed`), actores (requester/assignee/observer), línea de tiempo (seguimientos/tareas), aprobaciones, costos, adjuntos, y campos custom definidos por admin (Form Builder, ver Configuración).
+- **Problemas** (`/assistance/problems`) y **Cambios** (`/assistance/changes`): comparten el mismo motor de actores/timeline/aprobaciones/costos que Tickets (satélites polimórficos reusados, no tablas separadas por tipo). Change tiene además un flujo de aprobación tipo CAB (solicitar → aprobar/rechazar → ejecutar).
+- **Tickets recurrentes** (`/assistance/recurring-tickets`): plantilla + intervalo en minutos; un job del worker genera el siguiente ticket cuando vence.
+- **Catálogo de servicios** (`/setup/service-catalog`, visible también en el Portal): ítems predefinidos que preseleccionan tipo/categoría al crear un ticket.
+
+## Activos
+
+- **Activos genéricos** (`/assets`, `/assets/[tipo]`): cualquier tipo de activo sin tabla propia (Monitor, Impresora, Teléfono, Periférico, Dispositivo no gestionado, y cualquier tipo custom creado por un admin) vive en una tabla única `assets` con campos custom validados dinámicamente.
+- **Computadoras** (`/assets/computers`) y **Equipo de red** (`/assets/network-equipment`): únicos 2 tipos con tabla de extensión propia (SO, dominio, IP/MAC) + componentes (CPU/RAM/disco/etc.) para Computadoras.
+- **Software** (`/assets/software`): catálogo + versiones + licencias (per-seat/per-device/volumen/suscripción/OEM/freeware) + instalaciones por activo, con conteo de asientos usados.
+- **DCIM** (`/assets/dcim`, `/assets/dcim/cables`): racks (posición U), enclosures, clusters, cableado entre activos — todo con FK real a `assets.id` (sin discriminador itemtype+id).
+- **Análisis de impacto** (`/assets/impact/[assetId]`): grafo de dependencias entre activos (qué se ve afectado si este activo falla), navegable hacia adelante/atrás por profundidad.
+
+## Gestión
+
+- **Proveedores** (`/management/suppliers`) y **Contactos** (`/management/contacts`): contactos de proveedor, opcionalmente vinculados a un proveedor.
+- **Contratos** (`/management/contracts`): tipo/frecuencia de facturación + activos vinculados (N:M).
+- **Presupuestos** (`/management/budgets`): montos en centavos (sin floats), vinculables a costos ITIL.
+- **Certificados** (`/management/certificates`): tipo SSL/firma de código/otro, asignable a un activo, con fecha de expiración.
+- **Consumibles** (`/management/consumables`): catálogo (ej. "Tóner HP 26X") + unidades físicas individuales con estado (nueva/en uso/usada), asignables a un activo.
+- **Datacenter/Dominio/Línea/Base de datos**: viven como tipos del framework de Activos (sin tabla propia), aparecen automáticamente en `/assets`.
+
+## Herramientas
+
+- **Base de conocimiento** (`/tools/knowledge-base`): artículos con categorías, comentarios, historial de revisiones (leído directamente del audit log, sin tabla propia), y visibilidad compartible.
+- **Reservas** (`/tools/reservations`): reservar cualquier activo por rango de fechas, con detección de solape.
+- **Proyectos** (`/tools/projects`): tareas (con jerarquía y enlaces), equipo, costos (vinculables a un presupuesto), % completado auto-calculado.
+- **Reportes** (`/tools/reports`): agregaciones on-the-fly (sin tablas propias) — activos por tipo/estado, tickets por estado/día, cumplimiento de SLA, contratos por vencer, uso de reservas, activos por año.
+- **Dashboards** (`/tools/dashboards`): tarjetas configurables respaldadas por las mismas funciones de Reportes, compartibles entre usuarios.
+- **Búsquedas guardadas** (`/tools/saved-searches`) y **Feeds RSS** (`/tools/rss-feeds`): con alertas periódicas (sweep del worker) y validación anti-SSRF en las URLs de feed.
+- **Recordatorios** (`/tools/reminders`): notas personales o compartidas.
+- **Planificación** (`/tools/planning`): vista agregada de Cambios + Proyectos + Reservas en un rango de fechas.
+
+## Administración
+
+- **Entidades** (`/administration/entities`), **Usuarios** (`/administration/users`), **Grupos** (`/administration/groups`), **Perfiles** (`/administration/profiles`): gestión RBAC completa.
+- **Log de auditoría** (`/administration/audit-log`): historial filtrable y paginado de cambios en toda la aplicación.
+
+## Configuración (Setup)
+
+- **Definiciones de activos** (`/setup/asset-definitions`): crear tipos de activo custom con campos dinámicos (texto/número/booleano/fecha/dropdown), sin migraciones.
+- **Dropdowns** (`/setup/dropdowns`): categorías/ítems reusados por activos y campos custom tipo dropdown.
+- **Políticas SLA** (`/setup/sla-policies`), **Plantillas de notificación** (`/setup/notification-templates`).
+- **Motor de reglas** (`/setup/rules`): reglas genéricas (criterios AND/OR + acciones) reusadas por importación de inventario y asignación de entidad/perfil desde LDAP.
+- **Agentes de inventario** (`/setup/inventory-agents`): envíos de un protocolo JSON propio, con bloqueo de campos por admin y promoción de dispositivos no reconocidos a activos genéricos.
+- **Clientes API** (`/setup/api-clients`): tokens bearer estilo Stripe para la API REST pública (`/api/v1/...`).
+- **Webhooks** (`/setup/webhooks`): eventos salientes firmados HMAC-SHA256 con cola de reintentos.
+- **Fuentes de autenticación** (`/setup/auth-sources`): LDAP (bind-search-bind) + OIDC genérico (3 variables de entorno).
+- **Campos de tickets** (`/setup/ticket-fields`): Form Builder — campos custom por tipo de ticket, mismo mecanismo de validación dinámica que Activos.
+- **Panel de Cron** (`/setup/cron-jobs`): estado de los 6 jobs periódicos del worker (SLA, notificaciones, recurrencias, búsquedas guardadas, RSS, webhooks), solo lectura.
+
+## Portal de autoservicio (`/portal`)
+
+Shell separado (interfaz "Simplified") para usuarios finales: catálogo de servicios, formulario simplificado de creación de ticket (con campos custom del Form Builder si están definidos), y "Mis solicitudes".
+
+## API pública (`/api/v1/...`)
+
+Bearer token (no sesión de navegador). `GET /api/v1/[itemtype]` y `GET /api/v1/[itemtype]/[id]` para tickets/assets/computers/problems/changes, con scopes por cliente API. `GET /api/documents/[id]` para descargar adjuntos (requiere sesión).
+
+## Testing
+
+- **Unitarios/integración** (Vitest, `pnpm test`): 672 tests en `packages/core`, contra Postgres real (sin mocks), un archivo por servicio + validación Zod.
+- **End-to-end** (Playwright, `pnpm e2e` / `npx playwright test`): 149 tests en `e2e/specs/`, uno por sección del sidebar, con login real vía UI y datos generados en cada corrida. Reporte HTML: `pnpm e2e:report`.

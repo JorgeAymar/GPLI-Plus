@@ -32,24 +32,24 @@ export function ServiceCatalogItemForm({ entityId }: { entityId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required placeholder="Ej: Restablecer contraseña" className={inputClass} />
+        <label htmlFor="service-catalog-item-name" className="text-sm font-medium">Nombre</label>
+        <input id="service-catalog-item-name" name="name" required placeholder="Ej: Restablecer contraseña" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Descripción</label>
-        <textarea name="description" rows={3} className={inputClass} />
+        <label htmlFor="service-catalog-item-description" className="text-sm font-medium">Descripción</label>
+        <textarea id="service-catalog-item-description" name="description" rows={3} className={inputClass} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Tipo de solicitud</label>
-          <select name="ticketType" defaultValue="request" className={inputClass}>
+          <label htmlFor="service-catalog-item-ticket-type" className="text-sm font-medium">Tipo de solicitud</label>
+          <select id="service-catalog-item-ticket-type" name="ticketType" defaultValue="request" className={inputClass}>
             <option value="request">Solicitud</option>
             <option value="incident">Incidente</option>
           </select>
         </div>
         <div>
-          <label className="text-sm font-medium">Orden</label>
-          <input name="sortOrder" type="number" defaultValue={0} className={inputClass} />
+          <label htmlFor="service-catalog-item-sort-order" className="text-sm font-medium">Orden</label>
+          <input id="service-catalog-item-sort-order" name="sortOrder" type="number" defaultValue={0} className={inputClass} />
         </div>
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}

@@ -39,12 +39,12 @@ export function ContractForm({ entityId, suppliers }: { entityId: string; suppli
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="contract-name" className="text-sm font-medium">Nombre</label>
+        <input id="contract-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Proveedor</label>
-        <select name="supplierId" className={inputClass}>
+        <label htmlFor="contract-supplier" className="text-sm font-medium">Proveedor</label>
+        <select id="contract-supplier" name="supplierId" className={inputClass}>
           <option value="">(ninguno)</option>
           {suppliers.map((s) => (
             <option key={s.id} value={s.id}>
@@ -55,8 +55,8 @@ export function ContractForm({ entityId, suppliers }: { entityId: string; suppli
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Tipo</label>
-          <select name="contractType" className={inputClass}>
+          <label htmlFor="contract-type" className="text-sm font-medium">Tipo</label>
+          <select id="contract-type" name="contractType" className={inputClass}>
             {CONTRACT_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
@@ -65,8 +65,8 @@ export function ContractForm({ entityId, suppliers }: { entityId: string; suppli
           </select>
         </div>
         <div>
-          <label className="text-sm font-medium">Facturación</label>
-          <select name="billingFrequency" className={inputClass}>
+          <label htmlFor="contract-billing-frequency" className="text-sm font-medium">Facturación</label>
+          <select id="contract-billing-frequency" name="billingFrequency" className={inputClass}>
             {BILLING_FREQUENCIES.map((f) => (
               <option key={f} value={f}>
                 {f}
@@ -77,17 +77,17 @@ export function ContractForm({ entityId, suppliers }: { entityId: string; suppli
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Inicio</label>
-          <input name="startDate" type="date" className={inputClass} />
+          <label htmlFor="contract-start-date" className="text-sm font-medium">Inicio</label>
+          <input id="contract-start-date" name="startDate" type="date" className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Fin</label>
-          <input name="endDate" type="date" className={inputClass} />
+          <label htmlFor="contract-end-date" className="text-sm font-medium">Fin</label>
+          <input id="contract-end-date" name="endDate" type="date" className={inputClass} />
         </div>
       </div>
       <div>
-        <label className="text-sm font-medium">Costo</label>
-        <input name="cost" type="number" step="0.01" min="0" className={inputClass} />
+        <label htmlFor="contract-cost" className="text-sm font-medium">Costo</label>
+        <input id="contract-cost" name="cost" type="number" step="0.01" min="0" className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

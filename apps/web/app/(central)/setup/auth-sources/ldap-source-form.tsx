@@ -35,47 +35,47 @@ export function LdapSourceForm() {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required placeholder="LDAP corporativo" className={inputClass} />
+        <label htmlFor="ldap-name" className="text-sm font-medium">Nombre</label>
+        <input id="ldap-name" name="name" required placeholder="LDAP corporativo" className={inputClass} />
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div className="col-span-2">
-          <label className="text-sm font-medium">Host</label>
-          <input name="host" required placeholder="ldap.empresa.com" className={inputClass} />
+          <label htmlFor="ldap-host" className="text-sm font-medium">Host</label>
+          <input id="ldap-host" name="host" required placeholder="ldap.empresa.com" className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Puerto</label>
-          <input name="port" type="number" defaultValue={389} className={inputClass} />
+          <label htmlFor="ldap-port" className="text-sm font-medium">Puerto</label>
+          <input id="ldap-port" name="port" type="number" defaultValue={389} className={inputClass} />
         </div>
       </div>
       <div>
-        <label className="text-sm font-medium">Base DN</label>
-        <input name="baseDn" required placeholder="dc=empresa,dc=com" className={inputClass} />
+        <label htmlFor="ldap-base-dn" className="text-sm font-medium">Base DN</label>
+        <input id="ldap-base-dn" name="baseDn" required placeholder="dc=empresa,dc=com" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Bind DN (cuenta de servicio)</label>
-        <input name="bindDn" required placeholder="cn=admin,dc=empresa,dc=com" className={inputClass} />
+        <label htmlFor="ldap-bind-dn" className="text-sm font-medium">Bind DN (cuenta de servicio)</label>
+        <input id="ldap-bind-dn" name="bindDn" required placeholder="cn=admin,dc=empresa,dc=com" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Contraseña del bind</label>
-        <input name="bindPasswordEncrypted" type="password" required className={inputClass} />
+        <label htmlFor="ldap-bind-password" className="text-sm font-medium">Contraseña del bind</label>
+        <input id="ldap-bind-password" name="bindPasswordEncrypted" type="password" required className={inputClass} />
         <p className="mt-1 text-xs opacity-50">
           Se guarda en texto plano en esta versión (v1) - ver nota de seguridad en la sección de arriba.
         </p>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Campo de login</label>
-          <input name="loginField" defaultValue="uid" className={inputClass} />
+          <label htmlFor="ldap-login-field" className="text-sm font-medium">Campo de login</label>
+          <input id="ldap-login-field" name="loginField" defaultValue="uid" className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Campo de sincronización</label>
-          <input name="syncField" required placeholder="mail" className={inputClass} />
+          <label htmlFor="ldap-sync-field" className="text-sm font-medium">Campo de sincronización</label>
+          <input id="ldap-sync-field" name="syncField" required placeholder="mail" className={inputClass} />
         </div>
       </div>
       <div>
-        <label className="text-sm font-medium">Campo de grupo (opcional)</label>
-        <input name="groupField" placeholder="memberOf" className={inputClass} />
+        <label htmlFor="ldap-group-field" className="text-sm font-medium">Campo de grupo (opcional)</label>
+        <input id="ldap-group-field" name="groupField" placeholder="memberOf" className={inputClass} />
       </div>
       <div className="flex gap-6">
         <label className="flex items-center gap-2 text-sm font-medium">

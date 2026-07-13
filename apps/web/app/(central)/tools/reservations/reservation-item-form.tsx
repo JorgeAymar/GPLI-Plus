@@ -31,8 +31,8 @@ export function ReservationItemForm({ assets }: { assets: AssetOption[] }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Activo</label>
-        <select name="assetId" required className={inputClass}>
+        <label htmlFor="reservation-item-asset" className="text-sm font-medium">Activo</label>
+        <select id="reservation-item-asset" name="assetId" required className={inputClass}>
           {assets.map((a) => (
             <option key={a.id} value={a.id}>
               {a.name}
@@ -41,8 +41,8 @@ export function ReservationItemForm({ assets }: { assets: AssetOption[] }) {
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Comentario</label>
-        <textarea name="comment" className={inputClass} rows={2} />
+        <label htmlFor="reservation-item-comment" className="text-sm font-medium">Comentario</label>
+        <textarea id="reservation-item-comment" name="comment" className={inputClass} rows={2} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

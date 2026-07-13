@@ -27,16 +27,22 @@ export function ProfileForm() {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
+        <label htmlFor="profile-name" className="text-sm font-medium">
+          Nombre
+        </label>
         <input
+          id="profile-name"
           name="name"
           required
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />
       </div>
       <div>
-        <label className="text-sm font-medium">Interfaz</label>
+        <label htmlFor="profile-interface" className="text-sm font-medium">
+          Interfaz
+        </label>
         <select
+          id="profile-interface"
           name="interface"
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         >
@@ -45,8 +51,11 @@ export function ProfileForm() {
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Descripción</label>
+        <label htmlFor="profile-description" className="text-sm font-medium">
+          Descripción
+        </label>
         <textarea
+          id="profile-description"
           name="description"
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />
