@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+
+# Turborepo
+.turbo/
+
+# Build outputs
+dist/
+build/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+playwright/.auth/
+blob-report/
+
+# Drizzle
+packages/db/drizzle/meta/
+
+# Reference source (GLPI clone, not part of our product)
+/source/
