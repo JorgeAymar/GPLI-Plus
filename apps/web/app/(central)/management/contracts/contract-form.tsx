@@ -15,6 +15,7 @@ function makeAction(entityId: string) {
   return async (_prev: FormState | undefined, formData: FormData): Promise<FormState> => {
     try {
       const costRaw = formData.get("cost") as string;
+      const renewalNoticeDaysRaw = formData.get("renewalNoticeDays") as string;
       await createContractAction({
         entityId,
         supplierId: (formData.get("supplierId") as string) || null,
@@ -24,6 +25,7 @@ function makeAction(entityId: string) {
         costCents: costRaw ? Math.round(Number(costRaw) * 100) : null,
         startDate: (formData.get("startDate") as string) || null,
         endDate: (formData.get("endDate") as string) || null,
+        renewalNoticeDays: renewalNoticeDaysRaw ? Number(renewalNoticeDaysRaw) : null,
       });
       return {};
     } catch (err) {
@@ -88,6 +90,20 @@ export function ContractForm({ entityId, suppliers }: { entityId: string; suppli
       <div>
         <label htmlFor="contract-cost" className="text-sm font-medium">Costo</label>
         <input id="contract-cost" name="cost" type="number" step="0.01" min="0" className={inputClass} />
+      </div>
+      <div>
+        <label htmlFor="contract-renewal-notice-days" className="text-sm font-medium">
+          Avisar renovación con (días de anticipación)
+        </label>
+        <input
+          id="contract-renewal-notice-days"
+          name="renewalNoticeDays"
+          type="number"
+          step="1"
+          min="0"
+          placeholder="30"
+          className={inputClass}
+        />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

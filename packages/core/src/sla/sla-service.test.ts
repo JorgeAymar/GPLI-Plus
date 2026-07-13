@@ -1,8 +1,8 @@
-import { auditLog, db, entities, itilActors, itilSlaAssignments, slaPolicies, tickets, users, type Entity, type User } from "@itsm/db";
+import { auditLog, db, entities, itilActors, itilSlaAssignments, queuedNotifications, slaPolicies, tickets, users, type Entity, type User } from "@itsm/db";
 import { eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createEntity } from "../entities/entity-service";
-import { createTicket } from "../itil/ticket-service";
+import { createTicket, updateTicketStatus } from "../itil/ticket-service";
 import { createUser } from "../users/user-service";
 import {
   assignSla,
@@ -44,6 +44,10 @@ afterAll(async () => {
     await db.delete(slaPolicies).where(inArray(slaPolicies.id, policyIds));
   }
   await db.delete(entities).where(eq(entities.id, entity.id));
+  // Resolving a ticket to "solved" queues a notification to its requester (see
+  // itil/ticket-service.ts) - queued_notifications.recipient_user_id has no cascade delete,
+  // so it must be cleared before the user row itself.
+  await db.delete(queuedNotifications).where(eq(queuedNotifications.recipientUserId, requester.id));
   await db.delete(users).where(eq(users.id, requester.id));
 });
 
@@ -130,5 +134,33 @@ describe("sla-service", () => {
 
     const breachRows = await db.select().from(auditLog).where(eq(auditLog.objectId, overdue.id));
     expect(breachRows.some((r) => r.action === "sla_breach")).toBe(true);
+  });
+
+  it("runSlaEscalationSweep never marks an already-solved ticket's assignment as breached, no matter how long ago its dueAt passed (regression)", async () => {
+    // Its own ticket (not the shared one from beforeAll) since this test changes its status.
+    const resolvedTicket = await createTicket({ entityId: entity.id, title: "SLA regression - resolved on time", content: "content" }, requester.id);
+    const policy = await createSlaPolicy({ entityId: entity.id, name: `${PREFIX} resolved-on-time`, ttoMinutes: 30, ttrMinutes: null });
+    policyIds.push(policy.id);
+
+    const assignment = await assignSla("ticket", resolvedTicket.id, { slaPolicyId: policy.id, slaType: "tto" });
+    assignmentIds.push(assignment.id);
+
+    // Resolve the ticket, then force dueAt far into the past - simulating real-world clock
+    // time passing long after an on-time resolution, which is exactly the scenario the naive
+    // `dueAt < now` check (without checking the parent's status) used to get wrong.
+    await updateTicketStatus(resolvedTicket.id, "solved", requester.id);
+    await db
+      .update(itilSlaAssignments)
+      .set({ dueAt: new Date(Date.now() - 60_000) })
+      .where(eq(itilSlaAssignments.id, assignment.id));
+
+    await runSlaEscalationSweep();
+
+    const [reloaded] = await db.select().from(itilSlaAssignments).where(eq(itilSlaAssignments.id, assignment.id));
+    expect(reloaded?.isBreached).toBe(false);
+    expect(reloaded?.breachedAt).toBeNull();
+
+    await db.delete(itilActors).where(eq(itilActors.itilId, resolvedTicket.id));
+    await db.delete(tickets).where(eq(tickets.id, resolvedTicket.id));
   });
 });

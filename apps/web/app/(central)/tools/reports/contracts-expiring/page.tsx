@@ -29,7 +29,7 @@ export default async function ContractsExpiringReportPage({ searchParams }: { se
           defaultValue={withinDays}
           className="w-20 rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />
-        <span className="text-sm opacity-70">días</span>
+        <span className="text-sm opacity-70">días (por defecto, para contratos sin aviso propio configurado)</span>
         <button type="submit" className="rounded-md border border-black/15 px-3 py-2 text-sm dark:border-white/15">
           Aplicar
         </button>
@@ -41,6 +41,7 @@ export default async function ContractsExpiringReportPage({ searchParams }: { se
             <th className="pb-2">Nombre</th>
             <th className="pb-2">Tipo</th>
             <th className="pb-2">Vence</th>
+            <th className="pb-2">Aviso (días)</th>
           </tr>
         </thead>
         <tbody>
@@ -49,11 +50,12 @@ export default async function ContractsExpiringReportPage({ searchParams }: { se
               <td className="py-2">{c.name}</td>
               <td className="py-2 opacity-70">{c.contractType}</td>
               <td className="py-2 opacity-70">{c.endDate ? new Date(c.endDate).toLocaleDateString() : "-"}</td>
+              <td className="py-2 opacity-70">{c.renewalNoticeDays ?? `${withinDays} (por defecto)`}</td>
             </tr>
           ))}
           {contracts.length === 0 ? (
             <tr>
-              <td colSpan={3} className="py-2 opacity-50">
+              <td colSpan={4} className="py-2 opacity-50">
                 Sin contratos por vencer en este rango.
               </td>
             </tr>
