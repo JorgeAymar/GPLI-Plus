@@ -108,9 +108,23 @@ Hasta este punto, el proyecto no tenía ningún test automatizado (Vitest config
 
 **Hallazgos documentados pero no corregidos** (gaps de producto reales, no bugs — decisión consciente de no inventar features fuera de alcance): sin UI de editar/borrar en la mayoría de los módulos (Suppliers, Contracts, Tickets/Problems/Changes, Assets, Dropdowns, etc. — solo creación + algunas transiciones de estado), `updateTicketAction`/`updateProblemAction`/`updateChangeAction` son código muerto desde la UI, `retireConsumable()` no valida el estado actual antes de retirar (asimetría con `useConsumable()`), sin FK real entre `contracts` y `budgets`, `certificate.zod.ts` no valida `validFrom <= validUntil`.
 
-Con la suite corriendo en aislamiento (sin otros procesos compitiendo por CPU/conexiones a Postgres en la misma máquina), el resultado final es **672/672 Vitest + 149/149 Playwright, ambos 100% verdes**.
+Con la suite corriendo en aislamiento (sin otros procesos compitiendo por CPU/conexiones a Postgres en la misma máquina), el resultado final de este primer pase fue **672/672 Vitest + 149/149 Playwright, ambos 100% verdes**.
 
-Dockerfile de producción multi-stage + `.dockerignore` + CI (GitHub Actions) ya están escritos (`apps/web/Dockerfile`, `apps/web/docker-entrypoint.sh`, `.github/workflows/ci.yml`) y `next.config.ts` tiene `output: "standalone"` + `transpilePackages: ["@itsm/db", "@itsm/core"]`. Pendiente de revisión final humana pero funcionalmente completo.
+Dockerfile de producción multi-stage + `.dockerignore` ya están escritos (`apps/web/Dockerfile`, `apps/web/docker-entrypoint.sh`) y `next.config.ts` tiene `output: "standalone"` + `transpilePackages: ["@itsm/db", "@itsm/core"]`. Pendiente de revisión final humana pero funcionalmente completo. (No hay CI configurado en GitHub Actions - se agregó un workflow en algún punto de este pase sin haber sido pedido y se removió a pedido explícito del usuario; el repo no corre pipeline automático en cada push.)
+
+### Segunda ronda: auditoría de campos de DB sin uso + código muerto, 5 bugs adicionales corregidos
+
+Una pasada posterior, específicamente pedida para revisar campos de base de datos sin uso y código muerto, encontró y corrigió 5 problemas reales más (detalle completo con antes/después en [`qa-report.md`](qa-report.md) §7-9):
+
+- **Login LDAP nunca conectado**: `packages/core/src/auth/ldap-service.ts` estaba completo (bind-search-bind, escape RFC-4515) pero `apps/web/lib/auth.ts`'s `authorize()` nunca lo invocaba - LDAP era 100% código muerto sin importar la configuración. Ahora `authorize()` cae a LDAP cuando no hay match local.
+- **SLA sweep marcaba tickets resueltos como incumplidos**: `runSlaEscalationSweep()` no revisaba si el ticket padre ya estaba resuelto antes de marcar `isBreached=true` por `dueAt` vencido.
+- **`users.last_login_at` nunca se escribía**: ahora se estampa en cada login exitoso (local o LDAP) y se muestra en `/administration/users`.
+- **`contracts.renewal_notice_days` sin UI**: el campo existía en el schema pero ni el form de creación lo exponía ni el reporte de vencimientos lo usaba (aplicaba un umbral genérico igual para todos los contratos). Ambos corregidos.
+- **Bug de layout real, encontrado por la propia suite E2E**: 4 páginas con el patrón "tabla + form en `grid grid-cols-2`" (usuarios, clientes API, perfiles, racks DCIM) no tenían `overflow-x-auto`/`min-w-0` - contenido ancho no cortable podía hacer que la tabla se superpusiera visualmente al form vecino e interceptara los clicks de su botón de submit.
+
+El resto de la auditoría (campos de DB write-only o sin campo de formulario, ~50 exports de `packages/core` sin caller, ~17 Server Actions huérfanas, 2 features completas sin superficie de UI — Categorías de KB y "Compartir" recurso) quedó documentado en `qa-report.md` como gap de alcance consciente, no como bug — son "crear+listar sin editar/borrar", el mismo recorte ya documentado arriba, no accidentes nuevos.
+
+Estado final tras esta segunda ronda: **679/679 Vitest + 149/149 Playwright**.
 
 **Dos correcciones de arquitectura sobre la marcha** (documentadas donde corresponde, no re-litigar):
 - Auth.js con Credentials provider **no soporta sesiones en base de datos** (limitación real de la librería, no una elección) → sesión es **JWT** + trigger `update()` para el switch de entidad/perfil sin re-login. Relevante para Fase 6 (LDAP/OIDC/SAML): planificar sobre JWT, no sobre "sesiones en DB".

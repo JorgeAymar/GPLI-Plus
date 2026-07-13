@@ -42,3 +42,6 @@ packages/db/drizzle/meta/
 
 # Reference source (GLPI clone, not part of our product)
 /source/
+
+# graphify (regenerable knowledge-graph artifacts, run /graphify to rebuild)
+/graphify-out/

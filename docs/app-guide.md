@@ -29,7 +29,7 @@ Login de prueba: `admin@itsm.local` / `ChangeMe123!` (cambiar antes de un despli
 ## Gestión
 
 - **Proveedores** (`/management/suppliers`) y **Contactos** (`/management/contacts`): contactos de proveedor, opcionalmente vinculados a un proveedor.
-- **Contratos** (`/management/contracts`): tipo/frecuencia de facturación + activos vinculados (N:M).
+- **Contratos** (`/management/contracts`): tipo/frecuencia de facturación + activos vinculados (N:M) + aviso de renovación configurable por contrato (días de anticipación), usado por el reporte "Contratos por vencer".
 - **Presupuestos** (`/management/budgets`): montos en centavos (sin floats), vinculables a costos ITIL.
 - **Certificados** (`/management/certificates`): tipo SSL/firma de código/otro, asignable a un activo, con fecha de expiración.
 - **Consumibles** (`/management/consumables`): catálogo (ej. "Tóner HP 26X") + unidades físicas individuales con estado (nueva/en uso/usada), asignables a un activo.
@@ -48,7 +48,7 @@ Login de prueba: `admin@itsm.local` / `ChangeMe123!` (cambiar antes de un despli
 
 ## Administración
 
-- **Entidades** (`/administration/entities`), **Usuarios** (`/administration/users`), **Grupos** (`/administration/groups`), **Perfiles** (`/administration/profiles`): gestión RBAC completa.
+- **Entidades** (`/administration/entities`), **Usuarios** (`/administration/users`), **Grupos** (`/administration/groups`), **Perfiles** (`/administration/profiles`): gestión RBAC completa. La lista de usuarios muestra "Último acceso" (estampado en cada login exitoso, local o LDAP).
 - **Log de auditoría** (`/administration/audit-log`): historial filtrable y paginado de cambios en toda la aplicación.
 
 ## Configuración (Setup)
@@ -60,7 +60,7 @@ Login de prueba: `admin@itsm.local` / `ChangeMe123!` (cambiar antes de un despli
 - **Agentes de inventario** (`/setup/inventory-agents`): envíos de un protocolo JSON propio, con bloqueo de campos por admin y promoción de dispositivos no reconocidos a activos genéricos.
 - **Clientes API** (`/setup/api-clients`): tokens bearer estilo Stripe para la API REST pública (`/api/v1/...`).
 - **Webhooks** (`/setup/webhooks`): eventos salientes firmados HMAC-SHA256 con cola de reintentos.
-- **Fuentes de autenticación** (`/setup/auth-sources`): LDAP (bind-search-bind) + OIDC genérico (3 variables de entorno).
+- **Fuentes de autenticación** (`/setup/auth-sources`): LDAP (bind-search-bind, en vivo desde el login de la app: si no hay cuenta local o la contraseña no matchea, cae a LDAP, sincroniza el usuario y asigna entidad/perfil en el primer login) + OIDC genérico (3 variables de entorno).
 - **Campos de tickets** (`/setup/ticket-fields`): Form Builder — campos custom por tipo de ticket, mismo mecanismo de validación dinámica que Activos.
 - **Panel de Cron** (`/setup/cron-jobs`): estado de los 6 jobs periódicos del worker (SLA, notificaciones, recurrencias, búsquedas guardadas, RSS, webhooks), solo lectura.
 
@@ -74,5 +74,7 @@ Bearer token (no sesión de navegador). `GET /api/v1/[itemtype]` y `GET /api/v1/
 
 ## Testing
 
-- **Unitarios/integración** (Vitest, `pnpm test`): 672 tests en `packages/core`, contra Postgres real (sin mocks), un archivo por servicio + validación Zod.
+- **Unitarios/integración** (Vitest, `pnpm test`): 679 tests en `packages/core`, contra Postgres real (sin mocks), un archivo por servicio + validación Zod.
 - **End-to-end** (Playwright, `pnpm e2e` / `npx playwright test`): 149 tests en `e2e/specs/`, uno por sección del sidebar, con login real vía UI y datos generados en cada corrida. Reporte HTML: `pnpm e2e:report`.
+
+Ver [`qa-report.md`](qa-report.md) para el detalle completo de bugs encontrados/corregidos, auditoría de índices, valores hardcodeados, campos de base de datos sin uso y código muerto.
