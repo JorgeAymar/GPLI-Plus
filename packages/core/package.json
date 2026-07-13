@@ -1,0 +1,31 @@
+{
+  "name": "@itsm/core",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "seed": "tsx scripts/seed.ts"
+  },
+  "dependencies": {
+    "@itsm/db": "workspace:*",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "ldapjs": "^3.0.7",
+    "rss-parser": "^3.13.0",
+    "sanitize-html": "^2.17.6",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/ldapjs": "^3.0.6",
+    "@types/sanitize-html": "^2.16.1",
+    "tsx": "^4.23.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

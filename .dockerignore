@@ -1,0 +1,48 @@
+# Docker build context excludes for the itsm-platform monorepo.
+# Keeps the build context small and, critically, keeps the GPL-3.0 GLPI
+# reference clone (/source) OUT of any image we build.
+
+# Dependencies (reinstalled inside the image via pnpm)
+**/node_modules
+.pnpm-store
+
+# Build outputs (regenerated inside the image)
+**/.next
+**/.turbo
+**/dist
+**/build
+**/coverage
+**/playwright-report
+**/test-results
+**/*.tsbuildinfo
+
+# Version control / CI / editor
+.git
+.github
+.vscode
+.idea
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Env files - never bake secrets into an image; pass them at runtime instead
+# (.env.example is just a template and isn't needed to build or run the app)
+.env
+.env.*
+
+# OS cruft
+.DS_Store
+
+# Reference-only material that must never end up in a shippable image
+#  - /source is a clone of upstream GLPI (GPL-3.0), kept only for local
+#    architecture/reference research, not part of our product.
+#  - docs/graphify-out is generated knowledge-graph tooling output.
+/source
+docs/graphify-out
+
+# Large reference docs not needed to build or run the app
+*.pdf
+
+# Misc project docs (not needed inside the image)
+docs/**/*.md
+README.md
