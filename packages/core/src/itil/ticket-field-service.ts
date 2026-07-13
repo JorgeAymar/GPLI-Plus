@@ -52,7 +52,27 @@ function baseZodForField(field: TicketFieldDefinition): z.ZodTypeAny {
     case "number":
       return z.coerce.number();
     case "boolean":
-      return z.coerce.boolean();
+      // Plain z.coerce.boolean() uses JS `Boolean(value)`, which has two bugs for a dynamic
+      // form field: (1) ANY non-empty string coerces to `true`, so the literal string "false"
+      // becomes boolean `true`; (2) `undefined` coerces to `false`, so a required boolean field
+      // that's simply missing silently "validates" instead of being rejected. Preprocess
+      // narrowly instead: pass real booleans through untouched, accept the common
+      // textual/numeric representations, and let anything else (including undefined) fall
+      // through to z.boolean()'s normal type-check so a missing required field still fails
+      // validation as expected. Mirrors the same fix in assets/dynamic-schema.ts.
+      return z.preprocess((value) => {
+        if (typeof value === "boolean") return value;
+        if (typeof value === "number") {
+          if (value === 1) return true;
+          if (value === 0) return false;
+        }
+        if (typeof value === "string") {
+          const normalized = value.trim().toLowerCase();
+          if (normalized === "true" || normalized === "1") return true;
+          if (normalized === "false" || normalized === "0") return false;
+        }
+        return value;
+      }, z.boolean());
     case "date":
       return z.coerce.date();
     case "dropdown":
@@ -62,7 +82,16 @@ function baseZodForField(field: TicketFieldDefinition): z.ZodTypeAny {
 
 function zodForField(field: TicketFieldDefinition): z.ZodTypeAny {
   const base = baseZodForField(field);
-  return field.isRequired ? base : base.nullable().optional();
+  if (!field.isRequired) return base.nullable().optional();
+  // A required text/textarea field that's present but blank ("") passes a plain z.string()
+  // check because an empty string is still a string - defeating the point of "required" from
+  // the admin's perspective. Reject blank values for required free-text fields specifically;
+  // other field types (number/boolean/date/dropdown) don't have an analogous "present but
+  // empty" state so they're left as-is.
+  if (field.fieldType === "text" || field.fieldType === "textarea") {
+    return (base as z.ZodString).min(1, "Este campo es requerido");
+  }
+  return base;
 }
 
 /**

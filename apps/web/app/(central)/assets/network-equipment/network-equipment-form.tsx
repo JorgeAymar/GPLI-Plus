@@ -38,12 +38,12 @@ export function NetworkEquipmentForm({ entityId, deviceTypeOptions }: { entityId
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="network-equipment-name" className="text-sm font-medium">Nombre</label>
+        <input id="network-equipment-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Tipo de equipo</label>
-        <select name="deviceTypeDropdownItemId" className={inputClass}>
+        <label htmlFor="network-equipment-device-type" className="text-sm font-medium">Tipo de equipo</label>
+        <select id="network-equipment-device-type" name="deviceTypeDropdownItemId" className={inputClass}>
           <option value="">(ninguno)</option>
           {deviceTypeOptions.map((o) => (
             <option key={o.id} value={o.id}>
@@ -54,31 +54,31 @@ export function NetworkEquipmentForm({ entityId, deviceTypeOptions }: { entityId
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">IP</label>
-          <input name="ipAddress" placeholder="192.168.1.1" className={inputClass} />
+          <label htmlFor="network-equipment-ip" className="text-sm font-medium">IP</label>
+          <input id="network-equipment-ip" name="ipAddress" placeholder="192.168.1.1" className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">MAC</label>
-          <input name="macAddress" className={inputClass} />
+          <label htmlFor="network-equipment-mac" className="text-sm font-medium">MAC</label>
+          <input id="network-equipment-mac" name="macAddress" className={inputClass} />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Firmware</label>
-          <input name="firmwareVersion" className={inputClass} />
+          <label htmlFor="network-equipment-firmware" className="text-sm font-medium">Firmware</label>
+          <input id="network-equipment-firmware" name="firmwareVersion" className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Puertos</label>
-          <input name="portsCount" type="number" min={0} className={inputClass} />
+          <label htmlFor="network-equipment-ports" className="text-sm font-medium">Puertos</label>
+          <input id="network-equipment-ports" name="portsCount" type="number" min={0} className={inputClass} />
         </div>
       </div>
       <div>
-        <label className="text-sm font-medium">Número de serie</label>
-        <input name="serialNumber" className={inputClass} />
+        <label htmlFor="network-equipment-serial-number" className="text-sm font-medium">Número de serie</label>
+        <input id="network-equipment-serial-number" name="serialNumber" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Comentario</label>
-        <textarea name="comment" className={inputClass} />
+        <label htmlFor="network-equipment-comment" className="text-sm font-medium">Comentario</label>
+        <textarea id="network-equipment-comment" name="comment" className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

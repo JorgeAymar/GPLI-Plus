@@ -34,8 +34,8 @@ export function ProjectTeamForm({ projectId, users }: { projectId: string; users
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Usuario</label>
-        <select name="userId" required className={inputClass}>
+        <label htmlFor="project-team-user" className="text-sm font-medium">Usuario</label>
+        <select id="project-team-user" name="userId" required className={inputClass}>
           {users.map((u) => (
             <option key={u.id} value={u.id}>
               {u.displayName}
@@ -44,8 +44,8 @@ export function ProjectTeamForm({ projectId, users }: { projectId: string; users
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Rol</label>
-        <select name="role" defaultValue="member" className={inputClass}>
+        <label htmlFor="project-team-role" className="text-sm font-medium">Rol</label>
+        <select id="project-team-role" name="role" defaultValue="member" className={inputClass}>
           <option value="member">Miembro</option>
           <option value="owner">Responsable</option>
         </select>

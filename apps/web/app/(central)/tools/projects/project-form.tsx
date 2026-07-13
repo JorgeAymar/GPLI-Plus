@@ -29,12 +29,12 @@ export function ProjectForm({ entityId }: { entityId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="project-name" className="text-sm font-medium">Nombre</label>
+        <input id="project-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Código</label>
-        <input name="code" className={inputClass} />
+        <label htmlFor="project-code" className="text-sm font-medium">Código</label>
+        <input id="project-code" name="code" className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

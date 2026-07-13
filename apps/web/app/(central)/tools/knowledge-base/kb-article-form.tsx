@@ -32,12 +32,12 @@ export function KbArticleForm({ entityId, authorUserId }: { entityId: string; au
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Título</label>
-        <input name="title" required className={inputClass} />
+        <label htmlFor="kb-article-title" className="text-sm font-medium">Título</label>
+        <input id="kb-article-title" name="title" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Contenido</label>
-        <textarea name="body" required rows={6} className={inputClass} />
+        <label htmlFor="kb-article-body" className="text-sm font-medium">Contenido</label>
+        <textarea id="kb-article-body" name="body" required rows={6} className={inputClass} />
       </div>
       <label className="flex items-center gap-2 text-xs">
         <input type="checkbox" name="isFaq" /> Es una pregunta frecuente (FAQ)

@@ -29,8 +29,11 @@ export function AssignForm({ users, profiles, entities }: { users: User[]; profi
   return (
     <form action={formAction} className="grid max-w-2xl grid-cols-2 gap-3">
       <div>
-        <label className="text-sm font-medium">Usuario</label>
+        <label htmlFor="assign-userId" className="text-sm font-medium">
+          Usuario
+        </label>
         <select
+          id="assign-userId"
           name="userId"
           required
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
@@ -43,8 +46,11 @@ export function AssignForm({ users, profiles, entities }: { users: User[]; profi
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Perfil</label>
+        <label htmlFor="assign-profileId" className="text-sm font-medium">
+          Perfil
+        </label>
         <select
+          id="assign-profileId"
           name="profileId"
           required
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
@@ -57,8 +63,11 @@ export function AssignForm({ users, profiles, entities }: { users: User[]; profi
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Entidad</label>
+        <label htmlFor="assign-entityId" className="text-sm font-medium">
+          Entidad
+        </label>
         <select
+          id="assign-entityId"
           name="entityId"
           required
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"

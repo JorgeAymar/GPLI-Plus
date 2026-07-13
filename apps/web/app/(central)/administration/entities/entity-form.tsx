@@ -27,16 +27,22 @@ export function EntityForm({ entities }: { entities: Entity[] }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
+        <label htmlFor="entity-name" className="text-sm font-medium">
+          Nombre
+        </label>
         <input
+          id="entity-name"
           name="name"
           required
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />
       </div>
       <div>
-        <label className="text-sm font-medium">Entidad padre</label>
+        <label htmlFor="entity-parentId" className="text-sm font-medium">
+          Entidad padre
+        </label>
         <select
+          id="entity-parentId"
           name="parentId"
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         >
@@ -49,8 +55,11 @@ export function EntityForm({ entities }: { entities: Entity[] }) {
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Comentario</label>
+        <label htmlFor="entity-comment" className="text-sm font-medium">
+          Comentario
+        </label>
         <textarea
+          id="entity-comment"
           name="comment"
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />

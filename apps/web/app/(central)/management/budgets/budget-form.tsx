@@ -30,12 +30,12 @@ export function BudgetForm({ entityId }: { entityId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="budget-name" className="text-sm font-medium">Nombre</label>
+        <input id="budget-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Monto</label>
-        <input name="amount" type="number" step="0.01" min="0" required className={inputClass} />
+        <label htmlFor="budget-amount" className="text-sm font-medium">Monto</label>
+        <input id="budget-amount" name="amount" type="number" step="0.01" min="0" required className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

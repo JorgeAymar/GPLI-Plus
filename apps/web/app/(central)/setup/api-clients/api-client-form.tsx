@@ -39,8 +39,8 @@ export function ApiClientForm({ entityId, scopeOptions }: { entityId: string; sc
 
       <form action={formAction} className="space-y-3">
         <div>
-          <label className="text-sm font-medium">Nombre</label>
-          <input name="name" required placeholder="Script de integración X" className={inputClass} />
+          <label htmlFor="api-client-name" className="text-sm font-medium">Nombre</label>
+          <input id="api-client-name" name="name" required placeholder="Script de integración X" className={inputClass} />
         </div>
         <div>
           <label className="text-sm font-medium">Scopes (módulos permitidos)</label>

@@ -47,8 +47,8 @@ export function DashboardCardForm({ dashboardId, availableCardKeys }: { dashboar
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Card</label>
-        <select name="cardKey" defaultValue={availableCardKeys[0]} className={inputClass}>
+        <label htmlFor="dashboard-card-key" className="text-sm font-medium">Card</label>
+        <select id="dashboard-card-key" name="cardKey" defaultValue={availableCardKeys[0]} className={inputClass}>
           {availableCardKeys.map((key) => (
             <option key={key} value={key}>
               {CARD_KEY_LABEL[key] ?? key}
@@ -57,8 +57,8 @@ export function DashboardCardForm({ dashboardId, availableCardKeys }: { dashboar
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Tipo de gráfico</label>
-        <select name="chartType" defaultValue="table" className={inputClass}>
+        <label htmlFor="dashboard-card-chart-type" className="text-sm font-medium">Tipo de gráfico</label>
+        <select id="dashboard-card-chart-type" name="chartType" defaultValue="table" className={inputClass}>
           <option value="table">Tabla</option>
           <option value="bar">Barras</option>
           <option value="pie">Circular</option>
@@ -66,20 +66,20 @@ export function DashboardCardForm({ dashboardId, availableCardKeys }: { dashboar
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Posición X</label>
-          <input name="positionX" type="number" min={0} defaultValue={0} className={inputClass} />
+          <label htmlFor="dashboard-card-position-x" className="text-sm font-medium">Posición X</label>
+          <input id="dashboard-card-position-x" name="positionX" type="number" min={0} defaultValue={0} className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Posición Y</label>
-          <input name="positionY" type="number" min={0} defaultValue={0} className={inputClass} />
+          <label htmlFor="dashboard-card-position-y" className="text-sm font-medium">Posición Y</label>
+          <input id="dashboard-card-position-y" name="positionY" type="number" min={0} defaultValue={0} className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Ancho (cols)</label>
-          <input name="width" type="number" min={1} max={12} defaultValue={4} className={inputClass} />
+          <label htmlFor="dashboard-card-width" className="text-sm font-medium">Ancho (cols)</label>
+          <input id="dashboard-card-width" name="width" type="number" min={1} max={12} defaultValue={4} className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Alto (filas)</label>
-          <input name="height" type="number" min={1} defaultValue={3} className={inputClass} />
+          <label htmlFor="dashboard-card-height" className="text-sm font-medium">Alto (filas)</label>
+          <input id="dashboard-card-height" name="height" type="number" min={1} defaultValue={3} className={inputClass} />
         </div>
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}

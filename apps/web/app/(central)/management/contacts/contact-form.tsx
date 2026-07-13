@@ -42,17 +42,17 @@ export function ContactForm({
     <form action={formAction} className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Nombre</label>
-          <input name="firstName" required className={inputClass} />
+          <label htmlFor="contact-first-name" className="text-sm font-medium">Nombre</label>
+          <input id="contact-first-name" name="firstName" required className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Apellido</label>
-          <input name="lastName" required className={inputClass} />
+          <label htmlFor="contact-last-name" className="text-sm font-medium">Apellido</label>
+          <input id="contact-last-name" name="lastName" required className={inputClass} />
         </div>
       </div>
       <div>
-        <label className="text-sm font-medium">Proveedor</label>
-        <select name="supplierId" defaultValue={defaultSupplierId ?? ""} className={inputClass}>
+        <label htmlFor="contact-supplier" className="text-sm font-medium">Proveedor</label>
+        <select id="contact-supplier" name="supplierId" defaultValue={defaultSupplierId ?? ""} className={inputClass}>
           <option value="">(ninguno)</option>
           {suppliers.map((s) => (
             <option key={s.id} value={s.id}>
@@ -63,12 +63,12 @@ export function ContactForm({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Email</label>
-          <input name="email" type="email" className={inputClass} />
+          <label htmlFor="contact-email" className="text-sm font-medium">Email</label>
+          <input id="contact-email" name="email" type="email" className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Teléfono</label>
-          <input name="phone" className={inputClass} />
+          <label htmlFor="contact-phone" className="text-sm font-medium">Teléfono</label>
+          <input id="contact-phone" name="phone" className={inputClass} />
         </div>
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}

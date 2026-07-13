@@ -37,8 +37,8 @@ export function PlaceInRackForm({ rackAssetId, assets }: { rackAssetId: string; 
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Activo</label>
-        <select name="occupantAssetId" required defaultValue="" className={inputClass}>
+        <label htmlFor="place-in-rack-occupant" className="text-sm font-medium">Activo</label>
+        <select id="place-in-rack-occupant" name="occupantAssetId" required defaultValue="" className={inputClass}>
           <option value="" disabled>
             Selecciona un activo...
           </option>
@@ -51,17 +51,17 @@ export function PlaceInRackForm({ rackAssetId, assets }: { rackAssetId: string; 
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Posición U</label>
-          <input name="positionU" type="number" min={1} required className={inputClass} />
+          <label htmlFor="place-in-rack-position-u" className="text-sm font-medium">Posición U</label>
+          <input id="place-in-rack-position-u" name="positionU" type="number" min={1} required className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Altura (U)</label>
-          <input name="unitHeight" type="number" min={1} defaultValue={1} className={inputClass} />
+          <label htmlFor="place-in-rack-unit-height" className="text-sm font-medium">Altura (U)</label>
+          <input id="place-in-rack-unit-height" name="unitHeight" type="number" min={1} defaultValue={1} className={inputClass} />
         </div>
       </div>
       <div>
-        <label className="text-sm font-medium">Orientación</label>
-        <select name="orientation" defaultValue="front" className={inputClass}>
+        <label htmlFor="place-in-rack-orientation" className="text-sm font-medium">Orientación</label>
+        <select id="place-in-rack-orientation" name="orientation" defaultValue="front" className={inputClass}>
           <option value="front">Frontal</option>
           <option value="rear">Trasera</option>
         </select>

@@ -31,11 +31,23 @@ const MAX_PIE_SLICES = 8;
 
 /**
  * Each cardKey's report-service shape is different ({name,count}, {status,count},
- * {year,count}, {assetName,count}, or raw Contract rows for contracts_expiring) -
- * this is the one place that normalizes all of them down to the {label,value}[]
- * shape recharts needs. See card-provider.ts for the raw shapes.
+ * {year,count}, {assetName,count}, {date,count}, or raw Contract rows for
+ * contracts_expiring) - this is the one place that normalizes all of them down
+ * to the {label,value}[] shape recharts needs. See card-provider.ts for the raw
+ * shapes. `sla_compliance_rate` is the one provider that returns a single
+ * object (not an array of rows) - see the dedicated branch below.
  */
 function normalizeForChart(cardKey: string, data: unknown): NormalizedPoint[] {
+  // sla_compliance_rate resolves to a single { total, breached, complianceRate }
+  // object rather than an array of rows (see card-provider.ts / report-service.ts
+  // getSlaComplianceRate) - handle it before the Array.isArray guard below, which
+  // would otherwise always treat it as "no data".
+  if (cardKey === "sla_compliance_rate") {
+    const rate = data as { complianceRate?: number } | null | undefined;
+    if (!rate || typeof rate.complianceRate !== "number") return [];
+    return [{ label: "Cumplimiento", value: Math.round(rate.complianceRate * 100) }];
+  }
+
   if (!Array.isArray(data)) return [];
   const rows = data as Record<string, unknown>[];
 
@@ -50,6 +62,8 @@ function normalizeForChart(cardKey: string, data: unknown): NormalizedPoint[] {
       return rows.map((r) => ({ label: String(r.year ?? ""), value: Number(r.count ?? 0) }));
     case "reservations_usage":
       return rows.map((r) => ({ label: String(r.assetName ?? ""), value: Number(r.count ?? 0) }));
+    case "tickets_created_by_day":
+      return rows.map((r) => ({ label: String(r.date ?? ""), value: Number(r.count ?? 0) }));
     case "contracts_expiring": {
       // Design decision: contracts_expiring returns raw Contract rows (one per
       // contract), not a pre-aggregated count - there's no natural "value" to
@@ -75,9 +89,19 @@ function formatCell(value: unknown): string {
   return String(value);
 }
 
-/** Fully generic - renders whatever columns the raw row shape has, so it works unchanged for all 6 cardKeys. */
+/**
+ * Fully generic - renders whatever columns the raw row shape has, so it works
+ * unchanged for all 8 cardKeys. Most providers resolve to an array of rows,
+ * but `sla_compliance_rate` resolves to a single { total, breached,
+ * complianceRate } object (see card-provider.ts) - treat that as a one-row
+ * table instead of "no data" so its numbers are actually visible.
+ */
 function TableView({ data }: { data: unknown }) {
-  const rows = Array.isArray(data) ? (data as Record<string, unknown>[]) : [];
+  const rows = Array.isArray(data)
+    ? (data as Record<string, unknown>[])
+    : data && typeof data === "object"
+      ? [data as Record<string, unknown>]
+      : [];
   const firstRow = rows[0];
   if (!firstRow) return <p className="text-sm opacity-50">Sin datos.</p>;
   const columns = Object.keys(firstRow);

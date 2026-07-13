@@ -35,8 +35,9 @@ export function FieldDefinitionForm({ assetDefinitionId, dropdownCategories }: {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Clave (key)</label>
+        <label htmlFor="field-definition-key" className="text-sm font-medium">Clave (key)</label>
         <input
+          id="field-definition-key"
           name="key"
           required
           placeholder="screen_size"
@@ -44,16 +45,18 @@ export function FieldDefinitionForm({ assetDefinitionId, dropdownCategories }: {
         />
       </div>
       <div>
-        <label className="text-sm font-medium">Etiqueta</label>
+        <label htmlFor="field-definition-label" className="text-sm font-medium">Etiqueta</label>
         <input
+          id="field-definition-label"
           name="label"
           required
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />
       </div>
       <div>
-        <label className="text-sm font-medium">Tipo de dato</label>
+        <label htmlFor="field-definition-type" className="text-sm font-medium">Tipo de dato</label>
         <select
+          id="field-definition-type"
           name="fieldType"
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         >
@@ -65,8 +68,9 @@ export function FieldDefinitionForm({ assetDefinitionId, dropdownCategories }: {
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Categoría de lista (solo si tipo = dropdown)</label>
+        <label htmlFor="field-definition-dropdown-category" className="text-sm font-medium">Categoría de lista (solo si tipo = dropdown)</label>
         <select
+          id="field-definition-dropdown-category"
           name="dropdownCategoryId"
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         >

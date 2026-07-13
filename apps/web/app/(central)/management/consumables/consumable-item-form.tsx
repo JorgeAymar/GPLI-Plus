@@ -38,12 +38,12 @@ export function ConsumableItemForm({ entityId, suppliers }: { entityId: string; 
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="consumable-item-name" className="text-sm font-medium">Nombre</label>
+        <input id="consumable-item-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Proveedor</label>
-        <select name="supplierId" defaultValue="" className={inputClass}>
+        <label htmlFor="consumable-item-supplier" className="text-sm font-medium">Proveedor</label>
+        <select id="consumable-item-supplier" name="supplierId" defaultValue="" className={inputClass}>
           <option value="">Ninguno</option>
           {suppliers.map((s) => (
             <option key={s.id} value={s.id}>
@@ -53,12 +53,12 @@ export function ConsumableItemForm({ entityId, suppliers }: { entityId: string; 
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Umbral de alerta (stock bajo)</label>
-        <input name="alertThreshold" type="number" min={0} className={inputClass} />
+        <label htmlFor="consumable-item-alert-threshold" className="text-sm font-medium">Umbral de alerta (stock bajo)</label>
+        <input id="consumable-item-alert-threshold" name="alertThreshold" type="number" min={0} className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Comentario</label>
-        <textarea name="comment" className={inputClass} rows={2} />
+        <label htmlFor="consumable-item-comment" className="text-sm font-medium">Comentario</label>
+        <textarea id="consumable-item-comment" name="comment" className={inputClass} rows={2} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

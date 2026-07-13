@@ -32,17 +32,17 @@ export function SlaPolicyForm({ entityId }: { entityId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required placeholder="Estándar 24/7" className={inputClass} />
+        <label htmlFor="sla-policy-name" className="text-sm font-medium">Nombre</label>
+        <input id="sla-policy-name" name="name" required placeholder="Estándar 24/7" className={inputClass} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Tiempo de primera respuesta (min.)</label>
-          <input name="ttoMinutes" type="number" min={1} placeholder="60" className={inputClass} />
+          <label htmlFor="sla-policy-tto" className="text-sm font-medium">Tiempo de primera respuesta (min.)</label>
+          <input id="sla-policy-tto" name="ttoMinutes" type="number" min={1} placeholder="60" className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Tiempo de resolución (min.)</label>
-          <input name="ttrMinutes" type="number" min={1} placeholder="1440" className={inputClass} />
+          <label htmlFor="sla-policy-ttr" className="text-sm font-medium">Tiempo de resolución (min.)</label>
+          <input id="sla-policy-ttr" name="ttrMinutes" type="number" min={1} placeholder="1440" className={inputClass} />
         </div>
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}

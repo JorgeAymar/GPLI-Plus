@@ -2,7 +2,7 @@ import { runRecurringTicketsSweep } from "@itsm/core";
 import type { PgBoss } from "pg-boss";
 
 const QUEUE_NAME = "recurring-tickets-sweep";
-const CRON = "*/15 * * * *"; // every 15 minutes
+const CRON = process.env.RECURRING_TICKETS_CRON ?? "*/15 * * * *"; // every 15 minutes
 
 /** Registers the recurring sweep that fires due recurring_ticket_templates into real tickets. */
 export async function registerRecurringTicketsJob(boss: PgBoss): Promise<void> {

@@ -33,21 +33,21 @@ export function RssFeedForm({ ownerUserId }: { ownerUserId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="rss-feed-name" className="text-sm font-medium">Nombre</label>
+        <input id="rss-feed-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">URL del feed</label>
-        <input name="url" type="url" required placeholder="https://ejemplo.com/feed.xml" className={inputClass} />
+        <label htmlFor="rss-feed-url" className="text-sm font-medium">URL del feed</label>
+        <input id="rss-feed-url" name="url" type="url" required placeholder="https://ejemplo.com/feed.xml" className={inputClass} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Actualizar cada (min)</label>
-          <input name="refreshRateMinutes" type="number" min={1} defaultValue={1440} className={inputClass} />
+          <label htmlFor="rss-feed-refresh-rate" className="text-sm font-medium">Actualizar cada (min)</label>
+          <input id="rss-feed-refresh-rate" name="refreshRateMinutes" type="number" min={1} defaultValue={1440} className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Máx. items</label>
-          <input name="maxItems" type="number" min={1} max={100} defaultValue={20} className={inputClass} />
+          <label htmlFor="rss-feed-max-items" className="text-sm font-medium">Máx. items</label>
+          <input id="rss-feed-max-items" name="maxItems" type="number" min={1} max={100} defaultValue={20} className={inputClass} />
         </div>
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}

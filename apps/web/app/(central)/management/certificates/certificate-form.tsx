@@ -41,38 +41,38 @@ export function CertificateForm({ entityId, assets }: { entityId: string; assets
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="certificate-name" className="text-sm font-medium">Nombre</label>
+        <input id="certificate-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Tipo</label>
-        <select name="certificateType" defaultValue="ssl" className={inputClass}>
+        <label htmlFor="certificate-type" className="text-sm font-medium">Tipo</label>
+        <select id="certificate-type" name="certificateType" defaultValue="ssl" className={inputClass}>
           <option value="ssl">SSL</option>
           <option value="code_signing">Firma de código</option>
           <option value="other">Otro</option>
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Emisor</label>
-        <input name="issuer" className={inputClass} />
+        <label htmlFor="certificate-issuer" className="text-sm font-medium">Emisor</label>
+        <input id="certificate-issuer" name="issuer" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Número de serie</label>
-        <input name="serialNumber" className={inputClass} />
+        <label htmlFor="certificate-serial-number" className="text-sm font-medium">Número de serie</label>
+        <input id="certificate-serial-number" name="serialNumber" className={inputClass} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Válido desde</label>
-          <input name="validFrom" type="date" className={inputClass} />
+          <label htmlFor="certificate-valid-from" className="text-sm font-medium">Válido desde</label>
+          <input id="certificate-valid-from" name="validFrom" type="date" className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Válido hasta</label>
-          <input name="validUntil" type="date" className={inputClass} />
+          <label htmlFor="certificate-valid-until" className="text-sm font-medium">Válido hasta</label>
+          <input id="certificate-valid-until" name="validUntil" type="date" className={inputClass} />
         </div>
       </div>
       <div>
-        <label className="text-sm font-medium">Activo asignado</label>
-        <select name="assignedAssetId" defaultValue="" className={inputClass}>
+        <label htmlFor="certificate-assigned-asset" className="text-sm font-medium">Activo asignado</label>
+        <select id="certificate-assigned-asset" name="assignedAssetId" defaultValue="" className={inputClass}>
           <option value="">Ninguno</option>
           {assets.map((a) => (
             <option key={a.id} value={a.id}>
@@ -82,8 +82,8 @@ export function CertificateForm({ entityId, assets }: { entityId: string; assets
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Comentario</label>
-        <textarea name="comment" className={inputClass} rows={2} />
+        <label htmlFor="certificate-comment" className="text-sm font-medium">Comentario</label>
+        <textarea id="certificate-comment" name="comment" className={inputClass} rows={2} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

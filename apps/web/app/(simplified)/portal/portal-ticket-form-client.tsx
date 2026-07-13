@@ -56,8 +56,10 @@ function DynamicField({ field, options }: { field: TicketFieldDefinition; option
   if (field.fieldType === "dropdown") {
     return (
       <div>
-        <label className="text-sm font-medium">{field.label}</label>
-        <select name={name} required={field.isRequired} className={inputClass}>
+        <label htmlFor={name} className="text-sm font-medium">
+          {field.label}
+        </label>
+        <select id={name} name={name} required={field.isRequired} className={inputClass}>
           <option value="">(ninguno)</option>
           {options.map((o) => (
             <option key={o.id} value={o.id}>
@@ -72,8 +74,10 @@ function DynamicField({ field, options }: { field: TicketFieldDefinition; option
   if (field.fieldType === "textarea") {
     return (
       <div>
-        <label className="text-sm font-medium">{field.label}</label>
-        <textarea name={name} required={field.isRequired} className={inputClass} />
+        <label htmlFor={name} className="text-sm font-medium">
+          {field.label}
+        </label>
+        <textarea id={name} name={name} required={field.isRequired} className={inputClass} />
       </div>
     );
   }
@@ -81,8 +85,10 @@ function DynamicField({ field, options }: { field: TicketFieldDefinition; option
   const inputType = field.fieldType === "number" ? "number" : field.fieldType === "date" ? "date" : "text";
   return (
     <div>
-      <label className="text-sm font-medium">{field.label}</label>
-      <input name={name} type={inputType} required={field.isRequired} className={inputClass} />
+      <label htmlFor={name} className="text-sm font-medium">
+        {field.label}
+      </label>
+      <input id={name} name={name} type={inputType} required={field.isRequired} className={inputClass} />
     </div>
   );
 }
@@ -103,12 +109,22 @@ export function PortalTicketFormClient({
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">¿Qué necesitas?</label>
-        <input name="title" required placeholder="Ej: No puedo entrar a mi correo" className={inputClass} />
+        <label htmlFor="title" className="text-sm font-medium">
+          ¿Qué necesitas?
+        </label>
+        <input
+          id="title"
+          name="title"
+          required
+          placeholder="Ej: No puedo entrar a mi correo"
+          className={inputClass}
+        />
       </div>
       <div>
-        <label className="text-sm font-medium">Cuéntanos más</label>
-        <textarea name="content" required rows={4} className={inputClass} />
+        <label htmlFor="content" className="text-sm font-medium">
+          Cuéntanos más
+        </label>
+        <textarea id="content" name="content" required rows={4} className={inputClass} />
       </div>
       {fields.map((field) => (
         <DynamicField key={field.id} field={field} options={dropdownOptions[field.key] ?? []} />

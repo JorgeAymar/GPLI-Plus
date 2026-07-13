@@ -36,8 +36,8 @@ export function ComponentForm({ assetId }: { assetId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Tipo</label>
-        <select name="componentType" className={inputClass}>
+        <label htmlFor="component-type" className="text-sm font-medium">Tipo</label>
+        <select id="component-type" name="componentType" className={inputClass}>
           {COMPONENT_TYPES.map((t) => (
             <option key={t} value={t}>
               {t}
@@ -46,26 +46,26 @@ export function ComponentForm({ assetId }: { assetId: string }) {
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required placeholder="Intel Core i7-12700K" className={inputClass} />
+        <label htmlFor="component-name" className="text-sm font-medium">Nombre</label>
+        <input id="component-name" name="name" required placeholder="Intel Core i7-12700K" className={inputClass} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Cantidad</label>
-          <input name="quantity" type="number" defaultValue={1} min={1} className={inputClass} />
+          <label htmlFor="component-quantity" className="text-sm font-medium">Cantidad</label>
+          <input id="component-quantity" name="quantity" type="number" defaultValue={1} min={1} className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Capacidad</label>
-          <input name="capacityValue" type="number" className={inputClass} />
+          <label htmlFor="component-capacity-value" className="text-sm font-medium">Capacidad</label>
+          <input id="component-capacity-value" name="capacityValue" type="number" className={inputClass} />
         </div>
       </div>
       <div>
-        <label className="text-sm font-medium">Unidad de capacidad</label>
-        <input name="capacityUnit" placeholder="GB" className={inputClass} />
+        <label htmlFor="component-capacity-unit" className="text-sm font-medium">Unidad de capacidad</label>
+        <input id="component-capacity-unit" name="capacityUnit" placeholder="GB" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Número de serie</label>
-        <input name="serialNumber" className={inputClass} />
+        <label htmlFor="component-serial-number" className="text-sm font-medium">Número de serie</label>
+        <input id="component-serial-number" name="serialNumber" className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

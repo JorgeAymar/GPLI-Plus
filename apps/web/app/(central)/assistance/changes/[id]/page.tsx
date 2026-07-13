@@ -28,6 +28,9 @@ export default async function ChangeDetailPage({ params }: { params: Promise<{ i
         <StatusSelect id={change.id} currentStatus={change.status} updateStatusAction={updateChangeStatusAction} />
       </div>
       <p className="whitespace-pre-wrap text-sm opacity-80">{change.content}</p>
+      <p className="text-sm opacity-60">
+        Urgencia: {change.urgency} · Impacto: {change.impact} · Prioridad: {change.priority}
+      </p>
       {change.plannedStartAt || change.plannedEndAt ? (
         <p className="text-sm opacity-60">
           Planificado: {change.plannedStartAt?.toLocaleString() ?? "?"} → {change.plannedEndAt?.toLocaleString() ?? "?"}

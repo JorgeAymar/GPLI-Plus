@@ -33,20 +33,20 @@ export function RecurringTicketForm({ entityId, users }: { entityId: string; use
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required placeholder="Revisión semanal de backups" className={inputClass} />
+        <label htmlFor="recurring-ticket-name" className="text-sm font-medium">Nombre</label>
+        <input id="recurring-ticket-name" name="name" required placeholder="Revisión semanal de backups" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Título del ticket generado</label>
-        <input name="titleTemplate" required className={inputClass} />
+        <label htmlFor="recurring-ticket-title-template" className="text-sm font-medium">Título del ticket generado</label>
+        <input id="recurring-ticket-title-template" name="titleTemplate" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Descripción del ticket generado</label>
-        <textarea name="contentTemplate" required rows={3} className={inputClass} />
+        <label htmlFor="recurring-ticket-content-template" className="text-sm font-medium">Descripción del ticket generado</label>
+        <textarea id="recurring-ticket-content-template" name="contentTemplate" required rows={3} className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Solicitante</label>
-        <select name="requesterUserId" required className={inputClass}>
+        <label htmlFor="recurring-ticket-requester" className="text-sm font-medium">Solicitante</label>
+        <select id="recurring-ticket-requester" name="requesterUserId" required className={inputClass}>
           {users.map((u) => (
             <option key={u.id} value={u.id}>
               {u.displayName}
@@ -55,8 +55,8 @@ export function RecurringTicketForm({ entityId, users }: { entityId: string; use
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Repetir cada (minutos)</label>
-        <input name="intervalMinutes" type="number" min={1} placeholder="10080 = semanal" className={inputClass} />
+        <label htmlFor="recurring-ticket-interval" className="text-sm font-medium">Repetir cada (minutos)</label>
+        <input id="recurring-ticket-interval" name="intervalMinutes" type="number" min={1} required placeholder="10080 = semanal" className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

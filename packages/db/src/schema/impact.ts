@@ -25,7 +25,10 @@ export const impactRelations = pgTable(
     label: text("label"),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("impact_relations_source_impacted_idx").on(table.sourceAssetId, table.impactedAssetId)],
+  (table) => [
+    index("impact_relations_source_impacted_idx").on(table.sourceAssetId, table.impactedAssetId),
+    index("impact_relations_impacted_idx").on(table.impactedAssetId),
+  ],
 );
 
 export type ImpactRelation = typeof impactRelations.$inferSelect;

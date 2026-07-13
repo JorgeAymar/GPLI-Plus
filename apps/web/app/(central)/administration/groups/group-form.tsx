@@ -28,8 +28,10 @@ export function GroupForm({ entityId }: { entityId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="group-name" className="text-sm font-medium">
+          Nombre
+        </label>
+        <input id="group-name" name="name" required className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

@@ -31,22 +31,22 @@ export function SupplierForm({ entityId }: { entityId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="supplier-name" className="text-sm font-medium">Nombre</label>
+        <input id="supplier-name" name="name" required className={inputClass} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Teléfono</label>
-          <input name="phone" className={inputClass} />
+          <label htmlFor="supplier-phone" className="text-sm font-medium">Teléfono</label>
+          <input id="supplier-phone" name="phone" className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Email</label>
-          <input name="email" type="email" className={inputClass} />
+          <label htmlFor="supplier-email" className="text-sm font-medium">Email</label>
+          <input id="supplier-email" name="email" type="email" className={inputClass} />
         </div>
       </div>
       <div>
-        <label className="text-sm font-medium">Sitio web</label>
-        <input name="website" className={inputClass} />
+        <label htmlFor="supplier-website" className="text-sm font-medium">Sitio web</label>
+        <input id="supplier-website" name="website" className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

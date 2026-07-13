@@ -2,7 +2,7 @@ import { ConsoleTransport, dispatchPendingNotifications } from "@itsm/core";
 import type { PgBoss } from "pg-boss";
 
 const QUEUE_NAME = "notification-dispatch";
-const CRON = "* * * * *"; // every minute
+const CRON = process.env.NOTIFICATION_DISPATCH_CRON ?? "* * * * *"; // every minute
 
 const transport = new ConsoleTransport();
 

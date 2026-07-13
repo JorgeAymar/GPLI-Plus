@@ -45,12 +45,12 @@ export function SoftwareLicenseForm({
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="software-license-name" className="text-sm font-medium">Nombre</label>
+        <input id="software-license-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Tipo de licencia</label>
-        <select name="licenseType" className={inputClass}>
+        <label htmlFor="software-license-type" className="text-sm font-medium">Tipo de licencia</label>
+        <select id="software-license-type" name="licenseType" className={inputClass}>
           {LICENSE_TYPES.map((t) => (
             <option key={t} value={t}>
               {t}
@@ -59,8 +59,8 @@ export function SoftwareLicenseForm({
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Versión (opcional)</label>
-        <select name="softwareVersionId" className={inputClass}>
+        <label htmlFor="software-license-version" className="text-sm font-medium">Versión (opcional)</label>
+        <select id="software-license-version" name="softwareVersionId" className={inputClass}>
           <option value="">(cualquiera)</option>
           {versions.map((v) => (
             <option key={v.id} value={v.id}>
@@ -71,12 +71,12 @@ export function SoftwareLicenseForm({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium">Asientos totales</label>
-          <input name="seatsTotal" type="number" min={0} placeholder="ilimitado" className={inputClass} />
+          <label htmlFor="software-license-seats-total" className="text-sm font-medium">Asientos totales</label>
+          <input id="software-license-seats-total" name="seatsTotal" type="number" min={0} placeholder="ilimitado" className={inputClass} />
         </div>
         <div>
-          <label className="text-sm font-medium">Número de serie</label>
-          <input name="serialNumber" className={inputClass} />
+          <label htmlFor="software-license-serial-number" className="text-sm font-medium">Número de serie</label>
+          <input id="software-license-serial-number" name="serialNumber" className={inputClass} />
         </div>
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}

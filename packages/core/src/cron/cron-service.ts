@@ -45,15 +45,18 @@ export async function listRecentJobRuns(limit: number): Promise<CronJobRun[]> {
   const result = await db.execute<{
     name: string;
     state: string;
-    created_on: Date;
-    started_on: Date | null;
-    completed_on: Date | null;
+    created_on: string;
+    started_on: string | null;
+    completed_on: string | null;
   }>(sql`select name, state, created_on, started_on, completed_on from pgboss.job order by created_on desc limit ${limit}`);
   return result.rows.map((r) => ({
     name: r.name,
     state: r.state,
-    createdOn: r.created_on,
-    startedOn: r.started_on ?? null,
-    completedOn: r.completed_on ?? null,
+    // The pg-boss `job` table's timestamp columns come back as raw strings through
+    // `db.execute()` (unlike Drizzle's schema-typed queries, which auto-coerce to Date) -
+    // parse explicitly rather than trusting the query's type parameter.
+    createdOn: new Date(r.created_on),
+    startedOn: r.started_on ? new Date(r.started_on) : null,
+    completedOn: r.completed_on ? new Date(r.completed_on) : null,
   }));
 }

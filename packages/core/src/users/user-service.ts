@@ -1,8 +1,7 @@
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db, users, type User } from "@itsm/db";
-
-const SALT_ROUNDS = 12;
+import { SALT_ROUNDS } from "../constants";
 
 export async function createUser(input: {
   email: string;

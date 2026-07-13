@@ -48,6 +48,10 @@ export async function createInstallationAction(input: unknown) {
   await requireRight(context, MODULE.ASSETS_SOFTWARE, RIGHT.ASSIGN);
   const parsed = createInstallationSchema.parse(input);
   const result = await createInstallation(parsed);
-  revalidatePath("/assets/software");
+  // Installations are only rendered today on the owning asset's detail page
+  // (e.g. /assets/computers/[id], see install-software-form.tsx) - "/assets/software"
+  // never lists them, so revalidating it left the "Software instalado" list
+  // stale until a hard navigation away and back.
+  revalidatePath(`/assets/computers/${parsed.assetId}`);
   return result;
 }

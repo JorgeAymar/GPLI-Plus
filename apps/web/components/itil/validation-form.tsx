@@ -31,8 +31,8 @@ export function ValidationForm({ itilType, itilId, users }: { itilType: ItilType
   return (
     <form action={formAction} className="flex items-end gap-2">
       <div className="flex-1">
-        <label className="text-sm font-medium">Solicitar aprobación a</label>
-        <select name="validatorId" required className={inputClass}>
+        <label htmlFor="itil-validation-validator" className="text-sm font-medium">Solicitar aprobación a</label>
+        <select id="itil-validation-validator" name="validatorId" required className={inputClass}>
           {users.map((u) => (
             <option key={u.id} value={u.id}>
               {u.displayName}

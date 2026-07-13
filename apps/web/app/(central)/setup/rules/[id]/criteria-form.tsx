@@ -30,12 +30,12 @@ export function CriteriaForm({ ruleId }: { ruleId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Campo</label>
-        <input name="field" required className={inputClass} />
+        <label htmlFor="rule-criteria-field" className="text-sm font-medium">Campo</label>
+        <input id="rule-criteria-field" name="field" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Operador</label>
-        <select name="operator" defaultValue="is" className={inputClass}>
+        <label htmlFor="rule-criteria-operator" className="text-sm font-medium">Operador</label>
+        <select id="rule-criteria-operator" name="operator" defaultValue="is" className={inputClass}>
           <option value="is">Es igual a</option>
           <option value="contains">Contiene</option>
           <option value="regex_match">Coincide con regex</option>
@@ -46,8 +46,8 @@ export function CriteriaForm({ ruleId }: { ruleId: string }) {
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Valor</label>
-        <input name="value" required className={inputClass} />
+        <label htmlFor="rule-criteria-value" className="text-sm font-medium">Valor</label>
+        <input id="rule-criteria-value" name="value" required className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

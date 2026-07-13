@@ -1,11 +1,15 @@
 import { requireAuthContext } from "@/lib/session";
-import { listProblems } from "@itsm/core";
+import { getDropdownCategoryByKey, listDropdownItems, listProblems } from "@itsm/core";
 import Link from "next/link";
 import { ProblemForm } from "./problem-form";
 
 export default async function ProblemsPage() {
   const context = await requireAuthContext();
   const problems = await listProblems(context.activeEntity.id, { includeSubtree: true });
+
+  // itil_category is the shared category dropdown for tickets/problems/changes (see seed.ts).
+  const categoryCategory = await getDropdownCategoryByKey("itil_category");
+  const categoryOptions = categoryCategory ? await listDropdownItems(categoryCategory.id, context.activeEntity.id) : [];
 
   return (
     <div className="space-y-6">
@@ -26,7 +30,7 @@ export default async function ProblemsPage() {
         </div>
         <div>
           <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo problema</h2>
-          <ProblemForm entityId={context.activeEntity.id} />
+          <ProblemForm entityId={context.activeEntity.id} categoryOptions={categoryOptions} />
         </div>
       </div>
     </div>

@@ -34,20 +34,20 @@ export function ComputerForm({ entityId, osOptions }: { entityId: string; osOpti
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
-        <input name="name" required className={inputClass} />
+        <label htmlFor="computer-name" className="text-sm font-medium">Nombre</label>
+        <input id="computer-name" name="name" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Número de serie</label>
-        <input name="serialNumber" className={inputClass} />
+        <label htmlFor="computer-serial-number" className="text-sm font-medium">Número de serie</label>
+        <input id="computer-serial-number" name="serialNumber" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Número de inventario</label>
-        <input name="inventoryNumber" className={inputClass} />
+        <label htmlFor="computer-inventory-number" className="text-sm font-medium">Número de inventario</label>
+        <input id="computer-inventory-number" name="inventoryNumber" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Sistema operativo</label>
-        <select name="osDropdownItemId" className={inputClass}>
+        <label htmlFor="computer-os" className="text-sm font-medium">Sistema operativo</label>
+        <select id="computer-os" name="osDropdownItemId" className={inputClass}>
           <option value="">(ninguno)</option>
           {osOptions.map((o) => (
             <option key={o.id} value={o.id}>
@@ -57,12 +57,12 @@ export function ComputerForm({ entityId, osOptions }: { entityId: string; osOpti
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Dominio</label>
-        <input name="domain" className={inputClass} />
+        <label htmlFor="computer-domain" className="text-sm font-medium">Dominio</label>
+        <input id="computer-domain" name="domain" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Comentario</label>
-        <textarea name="comment" className={inputClass} />
+        <label htmlFor="computer-comment" className="text-sm font-medium">Comentario</label>
+        <textarea id="computer-comment" name="comment" className={inputClass} />
       </div>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button

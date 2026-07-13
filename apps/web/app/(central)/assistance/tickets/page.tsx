@@ -1,5 +1,5 @@
 import { requireAuthContext } from "@/lib/session";
-import { listDropdownItems, listTicketFieldDefinitions, listTickets } from "@itsm/core";
+import { getDropdownCategoryByKey, listDropdownItems, listTicketFieldDefinitions, listTickets } from "@itsm/core";
 import type { DropdownItem } from "@itsm/db";
 import Link from "next/link";
 import { TicketForm } from "./ticket-form";
@@ -28,6 +28,10 @@ export default async function TicketsPage() {
     }
   }
 
+  // itil_category is the shared category dropdown for tickets/problems/changes (see seed.ts).
+  const categoryCategory = await getDropdownCategoryByKey("itil_category");
+  const categoryOptions = categoryCategory ? await listDropdownItems(categoryCategory.id, context.activeEntity.id) : [];
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Tickets</h1>
@@ -47,7 +51,12 @@ export default async function TicketsPage() {
         </div>
         <div>
           <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo ticket</h2>
-          <TicketForm entityId={context.activeEntity.id} fields={fields} dropdownOptions={dropdownOptions} />
+          <TicketForm
+            entityId={context.activeEntity.id}
+            fields={fields}
+            dropdownOptions={dropdownOptions}
+            categoryOptions={categoryOptions}
+          />
         </div>
       </div>
     </div>

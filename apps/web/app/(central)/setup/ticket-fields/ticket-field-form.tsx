@@ -36,24 +36,24 @@ export function TicketFieldForm({ dropdownCategories }: { dropdownCategories: Dr
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Tipo de ticket</label>
-        <select name="ticketType" className={inputClass}>
+        <label htmlFor="ticket-field-ticket-type" className="text-sm font-medium">Tipo de ticket</label>
+        <select id="ticket-field-ticket-type" name="ticketType" className={inputClass}>
           <option value="">(ambos)</option>
           <option value="incident">Incidente</option>
           <option value="request">Solicitud</option>
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Clave (key)</label>
-        <input name="key" required placeholder="urgencia_negocio" className={inputClass} />
+        <label htmlFor="ticket-field-key" className="text-sm font-medium">Clave (key)</label>
+        <input id="ticket-field-key" name="key" required placeholder="urgencia_negocio" className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Etiqueta</label>
-        <input name="label" required className={inputClass} />
+        <label htmlFor="ticket-field-label" className="text-sm font-medium">Etiqueta</label>
+        <input id="ticket-field-label" name="label" required className={inputClass} />
       </div>
       <div>
-        <label className="text-sm font-medium">Tipo de dato</label>
-        <select name="fieldType" className={inputClass}>
+        <label htmlFor="ticket-field-type" className="text-sm font-medium">Tipo de dato</label>
+        <select id="ticket-field-type" name="fieldType" className={inputClass}>
           {FIELD_TYPES.map((t) => (
             <option key={t} value={t}>
               {t}
@@ -62,8 +62,8 @@ export function TicketFieldForm({ dropdownCategories }: { dropdownCategories: Dr
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Categoría de lista (solo si tipo = dropdown)</label>
-        <select name="dropdownCategoryId" className={inputClass}>
+        <label htmlFor="ticket-field-dropdown-category" className="text-sm font-medium">Categoría de lista (solo si tipo = dropdown)</label>
+        <select id="ticket-field-dropdown-category" name="dropdownCategoryId" className={inputClass}>
           <option value="">(ninguna)</option>
           {dropdownCategories.map((c) => (
             <option key={c.id} value={c.id}>
@@ -73,8 +73,8 @@ export function TicketFieldForm({ dropdownCategories }: { dropdownCategories: Dr
         </select>
       </div>
       <div>
-        <label className="text-sm font-medium">Orden</label>
-        <input name="sortOrder" type="number" defaultValue={0} className={inputClass} />
+        <label htmlFor="ticket-field-sort-order" className="text-sm font-medium">Orden</label>
+        <input id="ticket-field-sort-order" name="sortOrder" type="number" defaultValue={0} className={inputClass} />
       </div>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="isRequired" /> Obligatorio
