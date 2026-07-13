@@ -1,6 +1,16 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { accounts, db, sessions, users, verificationTokens } from "@itsm/db";
-import { findUserByEmail, loginSchema, resolveAuthContext, verifyPassword } from "@itsm/core";
+import {
+  assignEntityAndProfileFromLdap,
+  findUserByEmail,
+  listAllEntities,
+  loginSchema,
+  resolveAuthContext,
+  stampLastLogin,
+  syncLdapUser,
+  tryLdapLogin,
+  verifyPassword,
+} from "@itsm/core";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import type { OIDCConfig } from "next-auth/providers";
@@ -79,13 +89,36 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         const parsed = loginSchema.safeParse(raw);
         if (!parsed.success) return null;
 
-        const user = await findUserByEmail(parsed.data.email);
-        if (!user || !user.isActive) return null;
+        const existingUser = await findUserByEmail(parsed.data.email);
+        // A deactivated account can't log in via either path - LDAP falling back to
+        // re-enable a locally-deactivated user would defeat the point of deactivating it.
+        if (existingUser && !existingUser.isActive) return null;
 
-        const valid = await verifyPassword(user, parsed.data.password);
-        if (!valid) return null;
+        if (existingUser) {
+          const valid = await verifyPassword(existingUser, parsed.data.password);
+          if (valid) return { id: existingUser.id, email: existingUser.email, name: existingUser.displayName };
+        }
 
-        return { id: user.id, email: user.email, name: user.displayName };
+        // No local account, or the local password didn't match - fall back to LDAP.
+        // `tryLdapLogin` is a no-op (returns null) when no active ldap_auth_sources
+        // are configured, so this is always safe to attempt.
+        const ldapResult = await tryLdapLogin(parsed.data.email, parsed.data.password);
+        if (!ldapResult) return null;
+
+        const syncedUser = await syncLdapUser(ldapResult.ldapAttributes, ldapResult.source);
+        if (!syncedUser.isActive) return null;
+
+        if (!existingUser) {
+          // Only run entity/profile assignment rules on first sync, not on every
+          // subsequent LDAP login - assignUserProfile has no unique constraint on
+          // (userId, entityId, profileId), see assignEntityAndProfileFromLdap's doc comment.
+          const rootEntity = (await listAllEntities()).find((e) => e.parentId === null);
+          if (rootEntity) {
+            await assignEntityAndProfileFromLdap(syncedUser.id, ldapResult.ldapAttributes, rootEntity.id);
+          }
+        }
+
+        return { id: syncedUser.id, email: syncedUser.email, name: syncedUser.displayName };
       },
     }),
     ...(oidcProvider ? [oidcProvider] : []),
@@ -103,6 +136,10 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         });
         token.activeEntityId = context?.activeEntity.id ?? null;
         token.activeProfileId = context?.activeProfile.id ?? null;
+        // Fires exactly once per sign-in (this branch only runs when `user` is present,
+        // i.e. right after `authorize()` succeeds) - covers both the local and LDAP paths
+        // without duplicating the call in authorize()'s two return branches.
+        await stampLastLogin(user.id);
       }
 
       if (trigger === "update" && session) {

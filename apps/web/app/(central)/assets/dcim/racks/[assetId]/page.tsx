@@ -33,41 +33,43 @@ export default async function RackDetailPage({ params }: { params: Promise<{ ass
       </p>
 
       <div className="grid grid-cols-2 gap-8">
-        <div>
+        <div className="min-w-0">
           <h2 className="mb-2 text-sm font-medium opacity-70">Posiciones ocupadas</h2>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left opacity-60">
-                <th className="pb-2">U</th>
-                <th className="pb-2">Altura</th>
-                <th className="pb-2">Orientación</th>
-                <th className="pb-2">Ocupante</th>
-                <th className="pb-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {slots.map((slot) => (
-                <tr key={slot.id} className="border-t border-black/5 dark:border-white/5">
-                  <td className="py-2">{slot.positionU}</td>
-                  <td className="py-2 opacity-70">{slot.unitHeight}</td>
-                  <td className="py-2 opacity-70">{slot.orientation}</td>
-                  <td className="py-2 opacity-70">
-                    {slot.occupantAssetId ? (assetById.get(slot.occupantAssetId)?.name ?? slot.occupantAssetId) : "-"}
-                  </td>
-                  <td className="py-2">
-                    <RemoveFromRackButton id={slot.id} rackAssetId={assetId} />
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left opacity-60">
+                  <th className="pb-2">U</th>
+                  <th className="pb-2">Altura</th>
+                  <th className="pb-2">Orientación</th>
+                  <th className="pb-2">Ocupante</th>
+                  <th className="pb-2"></th>
                 </tr>
-              ))}
-              {slots.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-2 opacity-50">
-                    Sin posiciones ocupadas todavía.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {slots.map((slot) => (
+                  <tr key={slot.id} className="border-t border-black/5 dark:border-white/5">
+                    <td className="py-2">{slot.positionU}</td>
+                    <td className="py-2 opacity-70">{slot.unitHeight}</td>
+                    <td className="py-2 opacity-70">{slot.orientation}</td>
+                    <td className="py-2 opacity-70">
+                      {slot.occupantAssetId ? (assetById.get(slot.occupantAssetId)?.name ?? slot.occupantAssetId) : "-"}
+                    </td>
+                    <td className="py-2">
+                      <RemoveFromRackButton id={slot.id} rackAssetId={assetId} />
+                    </td>
+                  </tr>
+                ))}
+                {slots.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-2 opacity-50">
+                      Sin posiciones ocupadas todavía.
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
         </div>
         <div>
           <h2 className="mb-2 text-sm font-medium opacity-70">Ubicar un activo</h2>

@@ -203,6 +203,32 @@ describe("report-service", () => {
     expect(ids).not.toContain(expiringPast!.id);
   });
 
+  it("getContractsExpiringReport uses each contract's own renewalNoticeDays instead of the shared withinDays default", async () => {
+    const now = Date.now();
+    // 60 days out: outside the default 30-day window used by the caller, but
+    // inside this contract's own 90-day notice window - it must still show up.
+    const endDate = new Date(now + 60 * 86_400_000);
+
+    const [wideNotice] = await db
+      .insert(contracts)
+      .values({ entityId: entity.id, name: "__vitest_tools__ contract wide-notice", endDate, renewalNoticeDays: 90 })
+      .returning();
+    contractIds.push(wideNotice!.id);
+
+    const reportWithDefault30 = await getContractsExpiringReport(entity.id, 30);
+    expect(reportWithDefault30.map((c) => c.id)).toContain(wideNotice!.id);
+
+    // A contract with no renewalNoticeDays set still falls back to the caller's withinDays.
+    const [noNotice] = await db
+      .insert(contracts)
+      .values({ entityId: entity.id, name: "__vitest_tools__ contract no-notice", endDate })
+      .returning();
+    contractIds.push(noNotice!.id);
+
+    const reportStillDefault30 = await getContractsExpiringReport(entity.id, 30);
+    expect(reportStillDefault30.map((c) => c.id)).not.toContain(noNotice!.id);
+  });
+
   it("getYearlyAssetsReport buckets active assets by the year of createdAt", async () => {
     const assetId = await createTestAsset();
     await db.update(assets).set({ createdAt: new Date("2020-06-15T00:00:00Z") }).where(eq(assets.id, assetId));

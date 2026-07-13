@@ -39,3 +39,8 @@ export async function findUserByEmail(email: string): Promise<User | undefined> 
 export async function listUsers(): Promise<User[]> {
   return db.select().from(users).orderBy(users.displayName);
 }
+
+/** Called from the Auth.js `authorize()` callback on every successful login (local or LDAP). */
+export async function stampLastLogin(userId: string): Promise<void> {
+  await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, userId));
+}

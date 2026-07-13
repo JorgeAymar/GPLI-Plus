@@ -83,27 +83,28 @@ export async function getAssetCountsByStatus(entityId: string, options?: ReportO
 }
 
 /**
- * Contracts (active, non-deleted) whose endDate falls within [now, now + withinDays].
- * Computed entirely in JS (no raw `sql` interval math) so `withinDays` never
- * touches a query template as a string - it's just a plain Date bound.
+ * Contracts (active, non-deleted) whose endDate falls within their own notice
+ * window - `renewalNoticeDays` when the contract sets one, otherwise the
+ * caller-supplied `withinDays` default. The per-contract window can't be
+ * expressed as a single SQL `lte` bound shared by every row, so only the
+ * SQL-cheap part (future endDate, entity scope) is filtered in the query and
+ * the per-contract window check runs in JS afterwards.
  */
 export async function getContractsExpiringReport(entityId: string, withinDays: number, options?: ReportOptions): Promise<Contract[]> {
   const entityIds = await resolveEntityIds(entityId, options);
   const now = new Date();
-  const limit = new Date(now.getTime() + withinDays * 86_400_000);
 
-  return db
+  const candidates = await db
     .select()
     .from(contracts)
-    .where(
-      and(
-        inArray(contracts.entityId, entityIds),
-        isNull(contracts.deletedAt),
-        gte(contracts.endDate, now),
-        lte(contracts.endDate, limit),
-      ),
-    )
+    .where(and(inArray(contracts.entityId, entityIds), isNull(contracts.deletedAt), gte(contracts.endDate, now)))
     .orderBy(asc(contracts.endDate));
+
+  return candidates.filter((c) => {
+    const noticeDays = c.renewalNoticeDays ?? withinDays;
+    const limit = new Date(now.getTime() + noticeDays * 86_400_000);
+    return c.endDate !== null && c.endDate <= limit;
+  });
 }
 
 export interface YearlyAssetCount {
