@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isActiveUserId } from "@itsm/core";
 import { auth } from "@/lib/auth";
 
 // Proxy (formerly "middleware") always runs on the Node.js runtime in
@@ -8,8 +9,19 @@ export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth;
+export default auth(async (req) => {
+  const session = req.auth;
+  // A syntactically valid JWT (has userId) can still be orphaned - the user row
+  // behind it may have been deleted or deactivated after the token was issued.
+  // Checking that here (not just !!session) is what keeps this in sync with
+  // lib/session.ts; treating a merely-decoded JWT as "logged in" let an orphaned
+  // session get bounced forever between "/", "/dashboard" (no context -
+  // redirected here) and "/login" (proxy thought it was logged in). Use the
+  // cheap single-row lookup, not the full resolveAuthContext (user+entity+
+  // profile, several queries) that lib/session.ts already does per request -
+  // this runs on every request the matcher below allows through, including
+  // every Server Action POST, so it needs to stay a single indexed read.
+  const isLoggedIn = session?.userId ? await isActiveUserId(session.userId) : false;
   const isLoginRoute = req.nextUrl.pathname.startsWith("/login");
 
   if (!isLoggedIn && !isLoginRoute) {

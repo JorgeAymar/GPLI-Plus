@@ -36,6 +36,16 @@ export async function findUserByEmail(email: string): Promise<User | undefined> 
   return user;
 }
 
+/**
+ * Single indexed lookup by PK - the cheap half of what resolveAuthContext does, for callers
+ * (proxy.ts) that only need to know "is this session's userId still a real, active user"
+ * and can't afford the full user+entity+profile resolution on every request.
+ */
+export async function isActiveUserId(userId: string): Promise<boolean> {
+  const [user] = await db.select({ isActive: users.isActive }).from(users).where(eq(users.id, userId));
+  return user?.isActive ?? false;
+}
+
 export async function listUsers(): Promise<User[]> {
   return db.select().from(users).orderBy(users.displayName);
 }
