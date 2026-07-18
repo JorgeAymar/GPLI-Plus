@@ -1,4 +1,5 @@
 import { type AuthContext, resolveAuthContext } from "@itsm/core";
+import { redirect } from "next/navigation";
 import { cache } from "react";
 import { auth } from "./auth";
 
@@ -20,7 +21,10 @@ export const getAuthContext = cache(async (): Promise<AuthContext | null> => {
 export async function requireAuthContext(): Promise<AuthContext> {
   const context = await getAuthContext();
   if (!context) {
-    throw new Error("No active session");
+    // A syntactically valid session (proxy.ts already checked req.auth.userId) can still
+    // fail to resolve here - e.g. the user row was deleted/deactivated after the JWT was
+    // issued. Redirect like proxy.ts does instead of crashing the render with a 500.
+    redirect("/login");
   }
   return context;
 }
