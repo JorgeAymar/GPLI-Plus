@@ -18,7 +18,8 @@ La app ya usa "Perfil" (`/administration/profiles`) para **roles RBAC** (Super-A
 2. Endpoint de servidor MCP (`/api/mcp`) usando el SDK oficial `@modelcontextprotocol/sdk`, autenticado con esos tokens personales.
 3. Tools MCP de solo lectura, generadas desde `ITEMTYPE_REGISTRY` (ya existente) — no hay lista hardcodeada por tipo.
 4. Página `/account` ("Mi cuenta") donde el usuario logueado crea/lista/revoca sus propios tokens.
-5. Tests unitarios + E2E cubriendo el flujo completo.
+5. Selector de idioma preferido en la misma página `/account` (sección F) — guarda la preferencia, no traduce la app todavía (ver "Fuera de alcance").
+6. Tests unitarios + E2E cubriendo el flujo completo.
 
 ## Fuera de alcance (explícitamente, no es un olvido)
 
@@ -26,6 +27,7 @@ La app ya usa "Perfil" (`/administration/profiles`) para **roles RBAC** (Super-A
 - **Selección de entidad activa por el usuario dueño del token** — el token siempre usa la entidad/perfil *default* del usuario (igual que el fallback que ya usa `resolveAuthContext` en el login), no una que el usuario elija al crear el token. Si el usuario tiene múltiples asignaciones entidad/perfil, el MCP siempre ve la marcada `isDefault`.
 - **Un servidor MCP por token con más de un `Authorization` scheme** — solo Bearer, igual que `/api/v1` hoy.
 - **Rate limiting / auditoría específica de MCP** más allá de lo que ya existe (`lastUsedAt`, `audit_log` no se toca porque no hay escritura).
+- **Motor de i18n real** (que la app efectivamente renderice en el idioma elegido) — es un subsistema propio e independiente (librería de i18n, extracción de todos los strings hoy hardcodeados en español, propagación del locale) que toca prácticamente todas las páginas de la app. Se dimensiona y diseña por separado, en su propia spec, después de este feature. Esta spec solo guarda la preferencia (sección F) para que ese trabajo futuro tenga de dónde leerla.
 
 ## A. Modelo de datos
 
@@ -116,18 +118,26 @@ Server actions nuevas en `apps/web/actions/account.actions.ts`:
 - `createMyApiClientAction(name: string)` → `requireAuthContext()` + `createPersonalApiClient({ userId: context.user.id, name })`. Sin `requireRight` adicional - crear tu propio token no es un permiso RBAC, cualquier usuario autenticado puede autogestionar su propio acceso MCP.
 - `revokeMyApiClientAction(id: string)` → `requireAuthContext()` + verifica ownership (`client.userId === context.user.id`, si no 403/not-found genérico) antes de `revokeApiClient(id)` - evita que un usuario revoque el token de otro adivinando su id.
 
-## F. Testing
+## F. Idioma preferido (solo la preferencia, no el motor de traducción)
 
-- **Unit** (`packages/core`): `createPersonalApiClient` (prefijo `pat_`, `entityId` null, `userId` seteado), `isActiveUserId` reuso, autorización de tool simulada (usuario sin el right correspondiente → `ForbiddenError`).
+La tabla `users` **ya tiene** una columna `language` (`text`, default `"es"`) — existe desde una fase anterior pero hoy no la lee ni la escribe nada en todo el código (confirmado por búsqueda: cero referencias). No hace falta migración para esta parte, solo conectar lo que ya existe:
+
+- En `/account`: selector (`<select name="language">`) con las opciones `es` ("Español") / `en` (English) - mismo patrón de `<select>` que ya usan otros forms del repo (ej. `change-form.tsx`). Value actual = `context.user.language`.
+- Nueva server action `updateMyLanguageAction(language: "es" | "en")` en `account.actions.ts` → `requireAuthContext()` + valida con un `z.enum(["es", "en"])` (mismo estilo Zod que el resto del repo) + `UPDATE users SET language = $1 WHERE id = $2` (nueva función chica `updateUserLanguage(userId, language)` en `packages/core/src/users/user-service.ts`, mismo archivo que ya tiene `stampLastLogin`) + `revalidatePath("/account")`.
+- **No hace nada más todavía**: guardar la preferencia no cambia ningún texto de la UI en esta spec. Eso es el motor de i18n, fuera de alcance (ver arriba) - queda documentado ahí como el próximo proyecto natural, y ese proyecto futuro ya tiene de dónde leer el idioma de cada usuario sin tener que diseñar el storage de nuevo.
+
+## G. Testing
+
+- **Unit** (`packages/core`): `createPersonalApiClient` (prefijo `pat_`, `entityId` null, `userId` seteado), `isActiveUserId` reuso, autorización de tool simulada (usuario sin el right correspondiente → `ForbiddenError`), `updateUserLanguage` (rechaza valores fuera de `es`/`en`).
 - **Unit** (`apps/web`, si aplica sobre helpers puros de mapeo registro→tool).
-- **E2E** (`e2e/specs/account.spec.ts`, nuevo): login → ir a `/account` → crear token → ver key revelada una vez → revocar → confirma que desaparece de la lista tras recargar.
+- **E2E** (`e2e/specs/account.spec.ts`, nuevo): login → ir a `/account` → crear token → ver key revelada una vez → revocar → confirma que desaparece de la lista tras recargar; cambiar el selector de idioma a `en` → recargar → sigue en `en`.
 - **E2E o script de integración para el endpoint MCP**: llamar `/api/mcp` con un cliente MCP real (`@modelcontextprotocol/sdk`'s `Client` + `StreamableHTTPClientTransport`) contra el token recién creado, listar tools (confirma que aparecen las 9), invocar `list_tickets` y `get_ticket` con datos sembrados, y confirmar que un token de **entidad** (existente) es rechazado con 401 en `/api/mcp`.
 
 ## Checklist de implementación (alto nivel, se detalla en el plan)
 
-1. Migración de schema (`api_clients`: `entityId` nullable, `+userId`, índice).
-2. `createPersonalApiClient` + `listMyApiClients` + ownership check en revoke (packages/core).
+1. Migración de schema (`api_clients`: `entityId` nullable, `+userId`, índice, check constraint).
+2. `createPersonalApiClient` + `listMyApiClients` + ownership check en revoke + `updateUserLanguage` (packages/core).
 3. Dependencia `@modelcontextprotocol/sdk` + `apps/web/app/api/mcp/route.ts` (auth + registro dinámico de tools desde `ITEMTYPE_REGISTRY`).
-4. Página `/account` + `account.actions.ts` + entrada en `nav-sidebar.tsx`.
-5. Tests (unit + e2e) según sección F.
+4. Página `/account` + `account.actions.ts` (tokens + selector de idioma) + entrada en `nav-sidebar.tsx`.
+5. Tests (unit + e2e) según sección G.
 6. Actualizar `docs/architecture-plan.md` con el nuevo módulo, como ya es la convención del repo.
