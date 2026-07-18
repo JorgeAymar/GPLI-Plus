@@ -1122,6 +1122,15 @@ describe("MCP route integration (requires `npm run dev` running)", () => {
     expect(json.error).toMatch(/entidad, no personal/);
   });
 
+  it("rejects a personal (non-entity) token on the entity-only /api/v1 REST API - the symmetric check", async () => {
+    const res = await fetch(`${BASE_URL}/api/v1/tickets`, {
+      headers: { authorization: `Bearer ${personalRawKey}` },
+    });
+    expect(res.status).toBe(401);
+    const json = await res.json();
+    expect(json.error).toMatch(/personal access token/);
+  });
+
   it("lists tools and successfully calls list_tickets with a valid personal token", async () => {
     const client = new Client({ name: "vitest-mcp-client", version: "1.0.0" });
     const transport = new StreamableHTTPClientTransport(new URL(`${BASE_URL}/api/mcp`), {
@@ -1161,7 +1170,7 @@ In `apps/web/package.json`, add a script next to `"test"`:
 
 With `npm run dev` running (and the DB seeded), run: `cd apps/web && npm run test:mcp-integration`
 
-Expected: all 3 tests pass. If "rejects an entity-level token" fails with a 500 instead of 401, re-check `admin.defaultEntityId` is actually set on the seeded admin (`packages/core/scripts/seed.ts` sets this) before debugging the route itself.
+Expected: all 4 tests pass. If "rejects an entity-level token" fails with a 500 instead of 401, re-check `admin.defaultEntityId` is actually set on the seeded admin (`packages/core/scripts/seed.ts` sets this) before debugging the route itself.
 
 - [ ] **Step 4: Commit**
 
