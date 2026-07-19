@@ -73,14 +73,10 @@ export default async function AssetsPage({ searchParams }: { searchParams: Promi
 
       <div>
         <h2 className="mb-2 text-sm font-medium opacity-70">Ir a un tipo específico</h2>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-1">
           {definitions.map((d) => (
-            <Link
-              key={d.id}
-              href={assetTypeHref(d.key)}
-              className="rounded-md border border-black/15 px-3 py-1.5 text-sm dark:border-white/15"
-            >
-              {d.name}
+            <Link key={d.id} href={assetTypeHref(d.key)} className="text-sm underline opacity-70 hover:opacity-100">
+              {d.name} →
             </Link>
           ))}
         </div>
