@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createUserSchema, loginSchema } from "./user.zod";
+import { createUserSchema, loginSchema, SUPPORTED_LANGUAGES, updateLanguageSchema } from "./user.zod";
 
 describe("createUserSchema", () => {
   const valid = {
@@ -84,6 +84,30 @@ describe("loginSchema", () => {
 
   it("rejects a missing password", () => {
     const result = loginSchema.safeParse({ email: "tecnico@example.com" });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("updateLanguageSchema", () => {
+  it("accepts every code listed in SUPPORTED_LANGUAGES", () => {
+    for (const { code } of SUPPORTED_LANGUAGES) {
+      const result = updateLanguageSchema.safeParse({ language: code });
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it("rejects a code not in SUPPORTED_LANGUAGES", () => {
+    const result = updateLanguageSchema.safeParse({ language: "xx" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a missing language", () => {
+    const result = updateLanguageSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a non-string language", () => {
+    const result = updateLanguageSchema.safeParse({ language: 1 });
     expect(result.success).toBe(false);
   });
 });
