@@ -1,6 +1,7 @@
 "use client";
 
 import { revokeMyApiClientAction } from "@/actions/account.actions";
+import { useTranslations } from "next-intl";
 import { useActionState } from "react";
 
 interface RevokeState {
@@ -17,13 +18,14 @@ async function action(_prev: RevokeState | undefined, formData: FormData): Promi
 }
 
 export function RevokeTokenButton({ id }: { id: string }) {
+  const t = useTranslations("account");
   const [state, formAction, isPending] = useActionState(action, undefined);
 
   return (
     <form action={formAction}>
       <input type="hidden" name="id" value={id} />
       <button type="submit" disabled={isPending} className="text-xs text-red-600 hover:underline disabled:opacity-50">
-        {isPending ? "Revocando..." : "Revocar"}
+        {isPending ? t("tokenRevoking") : t("tokenRevoke")}
       </button>
       {state?.error ? <p className="text-xs text-red-600">{state.error}</p> : null}
     </form>

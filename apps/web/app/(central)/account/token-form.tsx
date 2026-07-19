@@ -1,6 +1,7 @@
 "use client";
 
 import { createMyApiClientAction } from "@/actions/account.actions";
+import { useTranslations } from "next-intl";
 import { useActionState } from "react";
 
 interface FormState {
@@ -20,6 +21,7 @@ async function action(_prev: FormState | undefined, formData: FormData): Promise
 }
 
 export function TokenForm() {
+  const t = useTranslations("account");
   const [state, formAction, isPending] = useActionState(action, undefined);
   const inputClass = "mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15";
 
@@ -28,7 +30,7 @@ export function TokenForm() {
       {state?.rawKey ? (
         <div className="space-y-2 rounded-md border border-yellow-500/50 bg-yellow-500/10 p-3">
           <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
-            Token &quot;{state.clientName}&quot; creado. Copiá esta key ahora — no se puede volver a mostrar.
+            {t("tokenCreatedNotice", { name: state.clientName ?? "" })}
           </p>
           <pre className="overflow-x-auto rounded bg-black/80 p-2 text-xs text-green-400">{state.rawKey}</pre>
         </div>
@@ -36,7 +38,7 @@ export function TokenForm() {
 
       <form action={formAction} className="space-y-3">
         <div>
-          <label htmlFor="token-name" className="text-sm font-medium">Nombre</label>
+          <label htmlFor="token-name" className="text-sm font-medium">{t("tokenFormName")}</label>
           <input id="token-name" name="name" required placeholder="claude-desktop" className={inputClass} />
         </div>
         {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
@@ -45,7 +47,7 @@ export function TokenForm() {
           disabled={isPending}
           className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background disabled:opacity-50"
         >
-          {isPending ? "Creando..." : "Crear token"}
+          {isPending ? t("tokenFormCreating") : t("tokenFormCreate")}
         </button>
       </form>
     </div>

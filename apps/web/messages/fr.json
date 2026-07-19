@@ -73,7 +73,7 @@
     "languageSaving": "Enregistrement...",
     "languageSaved": "Enregistré.",
     "tokensHeading": "Jetons MCP",
-    "tokensDescription": "Jetons personnels pour connecter des clients MCP (Claude Desktop, Claude Code, etc.) à {endpoint}. Ils agissent avec vos propres autorisations — lecture seule pour l'instant.",
+    "tokensDescription": "Jetons personnels pour connecter des clients MCP (Claude Desktop, Claude Code, etc.) à <endpoint>/api/mcp</endpoint>. Ils agissent avec vos propres autorisations — lecture seule pour l'instant.",
     "tokenColName": "Nom",
     "tokenColPrefix": "Préfixe",
     "tokenColStatus": "État",

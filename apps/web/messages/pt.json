@@ -73,7 +73,7 @@
     "languageSaving": "Salvando...",
     "languageSaved": "Salvo.",
     "tokensHeading": "Tokens MCP",
-    "tokensDescription": "Tokens pessoais para conectar clientes MCP (Claude Desktop, Claude Code, etc.) a {endpoint}. Eles atuam com as suas próprias permissões — somente leitura por enquanto.",
+    "tokensDescription": "Tokens pessoais para conectar clientes MCP (Claude Desktop, Claude Code, etc.) a <endpoint>/api/mcp</endpoint>. Eles atuam com as suas próprias permissões — somente leitura por enquanto.",
     "tokenColName": "Nome",
     "tokenColPrefix": "Prefixo",
     "tokenColStatus": "Status",

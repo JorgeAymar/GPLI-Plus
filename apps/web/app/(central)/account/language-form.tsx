@@ -2,6 +2,7 @@
 
 import { updateMyLanguageAction } from "@/actions/account.actions";
 import type { SUPPORTED_LANGUAGES } from "@itsm/core";
+import { useTranslations } from "next-intl";
 import { useActionState } from "react";
 
 interface FormState {
@@ -26,12 +27,13 @@ export function LanguageForm({
   currentLanguage: string;
   options: typeof SUPPORTED_LANGUAGES;
 }) {
+  const t = useTranslations("account");
   const [state, formAction, isPending] = useActionState(action, undefined);
 
   return (
     <form action={formAction} className="flex items-center gap-3">
       <label htmlFor="account-language" className="sr-only">
-        Idioma
+        {t("languageHeading")}
       </label>
       <select
         id="account-language"
@@ -50,9 +52,9 @@ export function LanguageForm({
         disabled={isPending}
         className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background disabled:opacity-50"
       >
-        {isPending ? "Guardando..." : "Guardar"}
+        {isPending ? t("languageSaving") : t("languageSave")}
       </button>
-      {state?.saved ? <span className="text-sm text-green-700 dark:text-green-400">Guardado.</span> : null}
+      {state?.saved ? <span className="text-sm text-green-700 dark:text-green-400">{t("languageSaved")}</span> : null}
       {state?.error ? <span className="text-sm text-red-600">{state.error}</span> : null}
     </form>
   );
