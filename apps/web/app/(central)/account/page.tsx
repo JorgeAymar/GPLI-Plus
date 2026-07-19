@@ -1,9 +1,15 @@
 import { requireAuthContext } from "@/lib/session";
 import { listMyApiClients, SUPPORTED_LANGUAGES } from "@itsm/core";
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { LanguageForm } from "./language-form";
 import { RevokeTokenButton } from "./revoke-token-button";
 import { TokenForm } from "./token-form";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("account");
+  return { title: t("title") };
+}
 
 export default async function AccountPage() {
   const context = await requireAuthContext();

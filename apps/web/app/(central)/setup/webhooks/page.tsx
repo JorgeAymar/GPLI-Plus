@@ -3,6 +3,10 @@ import { listWebhooks } from "@itsm/core";
 import Link from "next/link";
 import { WebhookForm } from "./webhook-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Webhooks" };
+
 export default async function WebhooksPage() {
   const context = await requireAuthContext();
   const webhooks = await listWebhooks(context.activeEntity.id, { includeSubtree: true });

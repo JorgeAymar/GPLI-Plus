@@ -3,6 +3,10 @@ import { getSlaComplianceRate, MODULE, requireRight, RIGHT } from "@itsm/core";
 
 const DAYS = 30;
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Cumplimiento de SLA" };
+
 export default async function SlaComplianceReportPage() {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ASSISTANCE_TICKET, RIGHT.READ);

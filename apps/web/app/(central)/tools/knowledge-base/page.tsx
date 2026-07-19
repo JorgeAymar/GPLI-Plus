@@ -3,6 +3,10 @@ import { listKbArticles } from "@itsm/core";
 import Link from "next/link";
 import { KbArticleForm } from "./kb-article-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Base de conocimiento" };
+
 export default async function KnowledgeBasePage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams;
   const context = await requireAuthContext();

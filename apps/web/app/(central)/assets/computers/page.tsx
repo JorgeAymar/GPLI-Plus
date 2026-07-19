@@ -1,14 +1,18 @@
 import { requireAuthContext } from "@/lib/session";
-import { getDropdownCategoryByKey, listComputers, listDropdownItems } from "@itsm/core";
+import { DROPDOWN_CATEGORY, getDropdownCategoryByKey, listComputers, listDropdownItems } from "@itsm/core";
 import Link from "next/link";
 import { ComputerForm } from "./computer-form";
+
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Computadoras" };
 
 export default async function ComputersPage() {
   const context = await requireAuthContext();
 
   const computers = await listComputers(context.activeEntity.id, { includeSubtree: true });
 
-  const osCategory = await getDropdownCategoryByKey("os");
+  const osCategory = await getDropdownCategoryByKey(DROPDOWN_CATEGORY.OS);
   const osOptions = osCategory ? await listDropdownItems(osCategory.id, context.activeEntity.id) : [];
 
   return (

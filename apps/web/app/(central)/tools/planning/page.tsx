@@ -42,6 +42,10 @@ interface PlanningPageProps {
   searchParams: Promise<{ from?: string; to?: string }>;
 }
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Planificación" };
+
 export default async function PlanningPage({ searchParams }: PlanningPageProps) {
   const { from: fromParam, to: toParam } = await searchParams;
 

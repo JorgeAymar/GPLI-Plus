@@ -1,6 +1,10 @@
 import { requireAuthContext } from "@/lib/session";
 import { getAssetCountsByType, MODULE, requireRight, RIGHT } from "@itsm/core";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Activos por tipo" };
+
 export default async function AssetsByTypeReportPage() {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ASSETS_GENERIC, RIGHT.READ);

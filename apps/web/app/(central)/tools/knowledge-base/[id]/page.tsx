@@ -1,9 +1,18 @@
 import { revertKbArticleAction } from "@/actions/knowledge-base.actions";
 import { requireAuthContext } from "@/lib/session";
 import { getKbArticle, incrementKbArticleViewCount, listKbArticleRevisions, listKbComments, listUsers } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { KbCommentForm } from "./kb-comment-form";
 import { RevertButton } from "./revert-button";
+
+// Reads the article only for its title - does NOT call incrementKbArticleViewCount,
+// so visiting a detail page only counts one view (from the page body below), not two.
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const article = await getKbArticle(id);
+  return { title: article?.title ?? "Artículo" };
+}
 
 export default async function KbArticleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

@@ -1,6 +1,13 @@
 import { getAssetDefinition, listAssetFieldDefinitions, listDropdownCategories } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FieldDefinitionForm } from "./field-definition-form";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const definition = await getAssetDefinition(id);
+  return { title: definition?.name ?? "Tipo de activo" };
+}
 
 export default async function AssetDefinitionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

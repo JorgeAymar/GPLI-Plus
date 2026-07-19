@@ -1,6 +1,10 @@
 import { listNotificationTemplates } from "@itsm/core";
 import { NotificationTemplateForm } from "./notification-template-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Plantillas de notificación" };
+
 export default async function NotificationTemplatesPage() {
   const templates = await listNotificationTemplates();
 

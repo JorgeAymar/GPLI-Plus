@@ -1,6 +1,10 @@
 import { listAllEntities, listUsers } from "@itsm/core";
 import { UserForm } from "./user-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Usuarios" };
+
 export default async function UsersPage() {
   const [users, entities] = await Promise.all([listUsers(), listAllEntities()]);
 

@@ -3,6 +3,10 @@ import { SUPPORTED_LANGUAGES } from "@itsm/core";
 import { LoginForm } from "./login-form";
 import { LoginLanguageSwitcher } from "./login-language-switcher";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Iniciar sesión" };
+
 export default async function LoginPage({
   searchParams,
 }: {

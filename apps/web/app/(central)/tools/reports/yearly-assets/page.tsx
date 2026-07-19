@@ -1,6 +1,10 @@
 import { requireAuthContext } from "@/lib/session";
 import { getYearlyAssetsReport, MODULE, requireRight, RIGHT } from "@itsm/core";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Altas de activos por año" };
+
 export default async function YearlyAssetsReportPage() {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ASSETS_GENERIC, RIGHT.READ);

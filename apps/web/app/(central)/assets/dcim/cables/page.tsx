@@ -1,6 +1,10 @@
 import { requireAuthContext } from "@/lib/session";
-import { getDropdownCategoryByKey, listAssets, listCables, listDropdownItems } from "@itsm/core";
+import { DROPDOWN_CATEGORY, getDropdownCategoryByKey, listAssets, listCables, listDropdownItems } from "@itsm/core";
 import { CableForm } from "./cable-form";
+
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Cables" };
 
 export default async function CablesPage() {
   const context = await requireAuthContext();
@@ -8,7 +12,7 @@ export default async function CablesPage() {
   const [cables, allAssets, cableTypeCategory] = await Promise.all([
     listCables(),
     listAssets(context.activeEntity.id, { includeSubtree: true }),
-    getDropdownCategoryByKey("cable_type"),
+    getDropdownCategoryByKey(DROPDOWN_CATEGORY.CABLE_TYPE),
   ]);
 
   const assetById = new Map(allAssets.map((a) => [a.id, a]));

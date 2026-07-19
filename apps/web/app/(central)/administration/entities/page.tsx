@@ -2,6 +2,10 @@ import { listAllEntities } from "@itsm/core";
 import { EntityForm } from "./entity-form";
 import { EntityTree } from "./entity-tree";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Entidades" };
+
 export default async function EntitiesPage() {
   const entities = await listAllEntities();
 

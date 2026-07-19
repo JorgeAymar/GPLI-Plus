@@ -17,7 +17,14 @@ import {
   listUsers,
   listValidations,
 } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const ticket = await getTicket(id);
+  return { title: ticket?.title ?? "Ticket" };
+}
 
 export default async function TicketDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

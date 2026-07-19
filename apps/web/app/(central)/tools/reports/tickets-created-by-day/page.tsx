@@ -3,6 +3,10 @@ import { getTicketsCreatedByDay, MODULE, requireRight, RIGHT } from "@itsm/core"
 
 const DAYS = 30;
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Tickets creados por día" };
+
 export default async function TicketsCreatedByDayReportPage() {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ASSISTANCE_TICKET, RIGHT.READ);

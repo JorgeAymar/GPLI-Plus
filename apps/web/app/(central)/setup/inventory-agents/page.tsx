@@ -13,6 +13,10 @@ const STATUS_LABEL: Record<string, string> = {
   rejected: "rechazado",
 };
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Agentes de inventario" };
+
 export default async function InventoryAgentsPage() {
   const context = await requireAuthContext();
   const agents = await listInventoryAgents(context.activeEntity.id, { includeSubtree: true });

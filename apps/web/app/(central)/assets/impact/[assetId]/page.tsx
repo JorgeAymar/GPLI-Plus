@@ -1,8 +1,19 @@
 import { requireAuthContext } from "@/lib/session";
 import { buildImpactGraph, getAsset, listAssets, listDirectRelations, type ImpactGraphNode } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ImpactRelationForm } from "./impact-relation-form";
 import { RemoveImpactRelationButton } from "./remove-impact-relation-button";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ assetId: string }>;
+}): Promise<Metadata> {
+  const { assetId } = await params;
+  const asset = await getAsset(assetId);
+  return { title: asset ? `Análisis de impacto: ${asset.name}` : "Análisis de impacto" };
+}
 
 /**
  * Flat <ul> per direction, indented via padding-left proportional to depth -

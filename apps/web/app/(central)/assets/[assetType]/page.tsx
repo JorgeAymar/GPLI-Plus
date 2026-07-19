@@ -1,8 +1,19 @@
 import { requireAuthContext } from "@/lib/session";
 import { getAssetDefinitionByKey, listAssetFieldDefinitions, listAssets, listDropdownItems } from "@itsm/core";
 import type { DropdownItem } from "@itsm/db";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { GenericAssetForm } from "./generic-asset-form";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ assetType: string }>;
+}): Promise<Metadata> {
+  const { assetType } = await params;
+  const definition = await getAssetDefinitionByKey(assetType);
+  return { title: definition?.name ?? "Activos" };
+}
 
 export default async function AssetTypePage({ params }: { params: Promise<{ assetType: string }> }) {
   const { assetType } = await params;

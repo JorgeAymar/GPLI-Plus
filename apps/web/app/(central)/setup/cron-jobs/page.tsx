@@ -10,6 +10,10 @@ function stateColorClass(state: string): string {
   return "opacity-60";
 }
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Trabajos programados" };
+
 export default async function CronJobsPage() {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.SETUP_CRON, RIGHT.READ);

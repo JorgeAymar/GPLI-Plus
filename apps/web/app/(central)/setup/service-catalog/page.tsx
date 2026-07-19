@@ -7,6 +7,10 @@ const TICKET_TYPE_LABELS: Record<string, string> = {
   request: "Solicitud",
 };
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Catálogo de servicios" };
+
 export default async function ServiceCatalogPage() {
   const context = await requireAuthContext();
   // onlyActive: false - this is the admin management screen, so disabled

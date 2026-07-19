@@ -12,6 +12,10 @@ const STATUS_LABELS: Record<string, string> = {
   closed: "Cerrado",
 };
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Portal de autoservicio" };
+
 export default async function PortalPage() {
   const context = await requireAuthContext();
   const myTickets = await listTicketsForRequester(context.user.id);

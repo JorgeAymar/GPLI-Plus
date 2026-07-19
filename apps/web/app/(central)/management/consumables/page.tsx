@@ -3,6 +3,10 @@ import { countAvailable, isBelowAlertThreshold, listConsumableItems, listSupplie
 import Link from "next/link";
 import { ConsumableItemForm } from "./consumable-item-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Consumibles" };
+
 export default async function ConsumablesPage() {
   const context = await requireAuthContext();
   const [items, suppliers] = await Promise.all([

@@ -2,6 +2,10 @@ import { requireAuthContext } from "@/lib/session";
 import { listContacts, listSuppliers } from "@itsm/core";
 import { ContactForm } from "./contact-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Contactos" };
+
 export default async function ContactsPage({ searchParams }: { searchParams: Promise<{ supplierId?: string }> }) {
   const { supplierId } = await searchParams;
   const context = await requireAuthContext();

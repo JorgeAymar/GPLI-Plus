@@ -1,14 +1,18 @@
 import { requireAuthContext } from "@/lib/session";
-import { getDropdownCategoryByKey, listChanges, listDropdownItems } from "@itsm/core";
+import { DROPDOWN_CATEGORY, getDropdownCategoryByKey, listChanges, listDropdownItems } from "@itsm/core";
 import Link from "next/link";
 import { ChangeForm } from "./change-form";
+
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Cambios" };
 
 export default async function ChangesPage() {
   const context = await requireAuthContext();
   const changes = await listChanges(context.activeEntity.id, { includeSubtree: true });
 
-  // itil_category is the shared category dropdown for tickets/problems/changes (see seed.ts).
-  const categoryCategory = await getDropdownCategoryByKey("itil_category");
+  // ITIL_CATEGORY is the shared category dropdown for tickets/problems/changes (see seed.ts).
+  const categoryCategory = await getDropdownCategoryByKey(DROPDOWN_CATEGORY.ITIL_CATEGORY);
   const categoryOptions = categoryCategory ? await listDropdownItems(categoryCategory.id, context.activeEntity.id) : [];
 
   return (

@@ -1,7 +1,18 @@
 import { requireAuthContext } from "@/lib/session";
 import { getDropdownCategory, listDropdownItems } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DropdownItemForm } from "./dropdown-item-form";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ categoryId: string }>;
+}): Promise<Metadata> {
+  const { categoryId } = await params;
+  const category = await getDropdownCategory(categoryId);
+  return { title: category?.name ?? "Lista desplegable" };
+}
 
 export default async function DropdownCategoryPage({ params }: { params: Promise<{ categoryId: string }> }) {
   const { categoryId } = await params;

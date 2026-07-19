@@ -1,5 +1,6 @@
 import { requireAuthContext } from "@/lib/session";
 import { countAvailable, getConsumableItem, isBelowAlertThreshold, listAssets, listConsumables } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AddUnitsForm } from "./add-units-form";
 import { RetireConsumableForm, UseConsumableForm } from "./unit-row-actions";
@@ -9,6 +10,12 @@ const STATUS_LABEL: Record<string, string> = {
   in_use: "En uso",
   used: "Usado",
 };
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const item = await getConsumableItem(id);
+  return { title: item?.name ?? "Consumible" };
+}
 
 export default async function ConsumableItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

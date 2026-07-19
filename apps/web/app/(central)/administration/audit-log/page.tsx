@@ -36,6 +36,10 @@ function buildHref(params: AuditLogSearchParams, page: number): string {
   return `/administration/audit-log?${query.toString()}`;
 }
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Registro de auditoría" };
+
 export default async function AuditLogPage({ searchParams }: { searchParams: Promise<AuditLogSearchParams> }) {
   const params = await searchParams;
 

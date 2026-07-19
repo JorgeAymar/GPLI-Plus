@@ -1,5 +1,6 @@
 import { requireAuthContext } from "@/lib/session";
 import { getAsset, listAssets, listRackSlots } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PlaceInRackForm } from "./place-in-rack-form";
 import { RemoveFromRackButton } from "./remove-from-rack-button";
@@ -7,6 +8,16 @@ import { RemoveFromRackButton } from "./remove-from-rack-button";
 // Sensible default for display purposes only (e.g. "slots used of a suggested N") -
 // racks have no stored height field in this slice, so this is not enforced, only shown.
 const SUGGESTED_RACK_HEIGHT_U = 42;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ assetId: string }>;
+}): Promise<Metadata> {
+  const { assetId } = await params;
+  const rack = await getAsset(assetId);
+  return { title: rack?.name ?? "Rack" };
+}
 
 export default async function RackDetailPage({ params }: { params: Promise<{ assetId: string }> }) {
   const { assetId } = await params;

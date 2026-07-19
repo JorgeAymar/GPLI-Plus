@@ -2,6 +2,10 @@ import Link from "next/link";
 import { listDropdownCategories } from "@itsm/core";
 import { DropdownCategoryForm } from "./dropdown-category-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Listas desplegables" };
+
 export default async function DropdownsPage() {
   const categories = await listDropdownCategories();
 

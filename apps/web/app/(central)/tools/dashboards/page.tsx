@@ -3,6 +3,10 @@ import { listDashboardsVisibleTo } from "@itsm/core";
 import Link from "next/link";
 import { DashboardForm } from "./dashboard-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Dashboards" };
+
 export default async function DashboardsPage() {
   const context = await requireAuthContext();
   const dashboards = await listDashboardsVisibleTo(context);

@@ -15,7 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ITSM Platform",
+  title: {
+    default: "ITSM Platform",
+    template: "%s · ITSM Platform",
+  },
   description: "Plataforma ITSM / gestión de activos IT",
 };
 

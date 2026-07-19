@@ -1,7 +1,14 @@
 import { getGroup, listGroupMembers, listUsers } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AddMemberForm } from "./add-member-form";
 import { RemoveMemberButton } from "./remove-member-button";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const group = await getGroup(id);
+  return { title: group?.name ?? "Grupo" };
+}
 
 export default async function GroupDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

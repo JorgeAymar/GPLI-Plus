@@ -5,7 +5,14 @@ import { StatusSelect } from "@/components/itil/status-select";
 import { TimelineSection } from "@/components/itil/timeline-section";
 import { ValidationsSection } from "@/components/itil/validations-section";
 import { getChange, listActors, listCosts, listTimelineItems, listUsers, listValidations } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const change = await getChange(id);
+  return { title: change?.title ?? "Cambio" };
+}
 
 export default async function ChangeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

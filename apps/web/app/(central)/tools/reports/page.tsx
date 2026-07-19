@@ -61,6 +61,10 @@ const REPORT_LINKS: ReportLink[] = [
   },
 ];
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Reportes" };
+
 export default async function ReportsIndexPage() {
   const context = await requireAuthContext();
 

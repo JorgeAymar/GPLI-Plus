@@ -3,6 +3,10 @@ import { listProjects } from "@itsm/core";
 import Link from "next/link";
 import { ProjectForm } from "./project-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Proyectos" };
+
 export default async function ProjectsPage() {
   const context = await requireAuthContext();
   const allProjects = await listProjects(context.activeEntity.id, { includeSubtree: true });

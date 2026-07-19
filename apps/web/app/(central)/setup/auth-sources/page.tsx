@@ -1,6 +1,10 @@
 import { listLdapAuthSources } from "@itsm/core";
 import { LdapSourceForm } from "./ldap-source-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Fuentes de autenticación" };
+
 export default async function AuthSourcesPage() {
   const sources = await listLdapAuthSources();
 

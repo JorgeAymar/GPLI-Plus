@@ -3,6 +3,10 @@ import { listAssets, listReservationItems } from "@itsm/core";
 import Link from "next/link";
 import { ReservationItemForm } from "./reservation-item-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Reservas" };
+
 export default async function ReservationsPage() {
   const context = await requireAuthContext();
   const [items, assets] = await Promise.all([

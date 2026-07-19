@@ -1,13 +1,17 @@
 import { requireAuthContext } from "@/lib/session";
-import { getDropdownCategoryByKey, listDropdownItems, listNetworkEquipment } from "@itsm/core";
+import { DROPDOWN_CATEGORY, getDropdownCategoryByKey, listDropdownItems, listNetworkEquipment } from "@itsm/core";
 import { NetworkEquipmentForm } from "./network-equipment-form";
+
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Equipos de red" };
 
 export default async function NetworkEquipmentPage() {
   const context = await requireAuthContext();
 
   const equipment = await listNetworkEquipment(context.activeEntity.id, { includeSubtree: true });
 
-  const deviceTypeCategory = await getDropdownCategoryByKey("network_equipment_type");
+  const deviceTypeCategory = await getDropdownCategoryByKey(DROPDOWN_CATEGORY.NETWORK_EQUIPMENT_TYPE);
   const deviceTypeOptions = deviceTypeCategory ? await listDropdownItems(deviceTypeCategory.id, context.activeEntity.id) : [];
 
   return (
