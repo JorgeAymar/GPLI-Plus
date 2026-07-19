@@ -1141,7 +1141,7 @@ describe("MCP route integration (requires `npm run dev` running)", () => {
     const { tools } = await client.listTools();
     const toolNames = tools.map((t) => t.name);
     expect(toolNames).toContain("list_tickets");
-    expect(toolNames).toContain("get_ticket");
+    expect(toolNames).toContain("get_tickets"); // ITEMTYPE_REGISTRY keys are plural, so get_<key> is too
     expect(toolNames).toContain("list_assets");
     expect(toolNames).toContain("list_computers");
     expect(toolNames).toContain("list_problems");
