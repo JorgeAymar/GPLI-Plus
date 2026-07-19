@@ -124,7 +124,7 @@ cp .env.production.example .env.production   # ajustar credenciales/URLs reales
 ./scripts/deploy.sh
 ```
 
-El script construye la imagen (`itsm-web:<sha corto de git>`), la despliega con `docker stack deploy -c docker-compose.prod.yml itsm`, y **espera activamente** a que el rollout converja (task nuevo `Running`, task viejo eliminado) antes de reportar éxito — que `docker stack deploy` vuelva sin error no significa que el update ya haya terminado, y el script no asume lo contrario.
+El script construye ambas imágenes (`itsm-web:<sha corto de git>` e `itsm-worker:<mismo sha>`), las despliega con `docker stack deploy -c docker-compose.prod.yml itsm`, y **espera activamente** a que el rollout converja — para `web`: task nuevo `Running` y saludable (pasa el `HEALTHCHECK`), task viejo eliminado; para `worker`: task nuevo `Running` y estable (sin crash-loop) — antes de reportar éxito. Que `docker stack deploy` vuelva sin error no significa que el update ya haya terminado, y el script no asume lo contrario.
 
 ### Actualizar sin downtime
 

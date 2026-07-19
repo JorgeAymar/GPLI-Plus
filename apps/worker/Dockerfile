@@ -36,7 +36,15 @@ FROM node:${NODE_VERSION} AS base
 # deps some transitive packages may ship prebuilt binaries for).
 RUN apk add --no-cache libc6-compat
 ARG PNPM_VERSION
-RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
+# COREPACK_HOME pinned to a fixed, world-readable path: this stage prepares
+# pnpm as root, but `runner` (below) runs it as the non-root "worker" user,
+# whose $HOME differs from root's - without this, corepack's cache is
+# invisible to that user and every container start silently re-downloads
+# pnpm from the npm registry (see the matching fix/rationale in
+# apps/web/Dockerfile's runner stage).
+ENV COREPACK_HOME=/opt/corepack
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate \
+  && chmod -R a+rX /opt/corepack
 WORKDIR /app
 
 # ---------------------------------------------------------------------------
