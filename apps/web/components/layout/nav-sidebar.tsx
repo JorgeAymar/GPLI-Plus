@@ -8,6 +8,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/account", label: "Mi cuenta" },
   { label: "Asistencia", section: true },
   { href: "/assistance/tickets", label: "Tickets" },
   { href: "/assistance/problems", label: "Problemas" },
