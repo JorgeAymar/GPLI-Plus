@@ -10,10 +10,13 @@ import { test, expect, type Page } from "@playwright/test";
  *   /management/consumables (+ /management/consumables/[id], units lifecycle)
  *
  * Known product limitation (documented, not a bug we can fix here): none of these
- * entities have an "editar" (update) UI. Only soft-delete server actions exist for
- * suppliers/contacts, and neither is wired to a button. Consumable *units* are the
- * only sub-resource with real state transitions (new -> in_use -> used), which is
- * why the "editar" requirement is exercised there instead of via a generic edit form.
+ * entities have an "editar" (update) UI. Consumable *units* are the only sub-resource
+ * with real state transitions (new -> in_use -> used), which is why the "editar"
+ * requirement is exercised there instead of via a generic edit form.
+ *
+ * Soft-delete for suppliers/contacts IS wired to a button (ConfirmDeleteButton, native
+ * confirm() dialog) on their listing/detail page - see the "hallazgo" tests below, which
+ * used to document the opposite (no delete UI) and now verify the real delete flow.
  */
 
 /* ------------------------------------------------------------------------- */
@@ -227,14 +230,33 @@ test.describe.serial("Gestión - flujo E2E: Proveedor", () => {
     assertClean(diag);
   });
 
-  test("hallazgo: no hay edición ni borrado disponibles para proveedores en la UI", async ({ page }) => {
+  test("hallazgo: sigue sin haber edición disponible para proveedores en la UI", async ({ page }) => {
     const diag = attachDiagnostics(page);
     await page.goto("/management/suppliers");
 
     const row = page.locator("li").filter({ hasText: supplierName });
     await expect(row).toBeVisible();
-    await expect(row.getByRole("button", { name: /editar|eliminar|borrar/i })).toHaveCount(0);
-    await expect(row.getByRole("link", { name: /editar|eliminar|borrar/i })).toHaveCount(0);
+    await expect(row.getByRole("button", { name: /editar/i })).toHaveCount(0);
+    await expect(row.getByRole("link", { name: /editar/i })).toHaveCount(0);
+
+    assertClean(diag);
+  });
+
+  test("elimina el proveedor tras confirmar el diálogo y desaparece del listado", async ({ page }) => {
+    const diag = attachDiagnostics(page);
+    await page.goto("/management/suppliers");
+
+    const row = page.locator("li").filter({ hasText: supplierName });
+    await expect(row).toBeVisible();
+
+    page.once("dialog", (dialog) => dialog.accept());
+    await row.getByRole("button", { name: "Eliminar" }).click();
+
+    await expect(page.locator("li").filter({ hasText: supplierName })).toHaveCount(0);
+
+    // Persiste tras recargar (soft-delete real, no solo optimismo de UI).
+    await page.reload();
+    await expect(page.locator("li").filter({ hasText: supplierName })).toHaveCount(0);
 
     assertClean(diag);
   });

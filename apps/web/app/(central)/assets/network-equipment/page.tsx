@@ -1,4 +1,5 @@
 import { requireAuthContext } from "@/lib/session";
+import { DataTable } from "@/components/data-table";
 import { DROPDOWN_CATEGORY, getDropdownCategoryByKey, listDropdownItems, listNetworkEquipment } from "@itsm/core";
 import { NetworkEquipmentForm } from "./network-equipment-form";
 
@@ -42,16 +43,17 @@ export default async function NetworkEquipmentPage({ searchParams }: { searchPar
       </form>
 
       <div className="grid grid-cols-2 gap-8">
-        <div>
+        <div className="min-w-0">
           <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
-          <ul className="space-y-1">
-            {equipment.map((e) => (
-              <li key={e.id} className="text-sm">
-                {e.name} {e.ipAddress ? <span className="opacity-40">({e.ipAddress})</span> : null}
-              </li>
-            ))}
-            {equipment.length === 0 ? <li className="text-sm opacity-50">Sin equipos todavía.</li> : null}
-          </ul>
+          <DataTable
+            columns={[
+              { key: "name", label: "Nombre" },
+              { key: "ipAddress", label: "IP", render: (e) => e.ipAddress ?? "-", className: "opacity-70" },
+            ]}
+            rows={equipment}
+            rowKey={(e) => e.id}
+            emptyMessage="Sin equipos todavía."
+          />
         </div>
         <div>
           <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo equipo de red</h2>

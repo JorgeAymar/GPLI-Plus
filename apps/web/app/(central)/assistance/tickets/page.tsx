@@ -1,17 +1,9 @@
 import { requireAuthContext } from "@/lib/session";
+import { StatusBadge } from "@/components/status-badge";
 import { DROPDOWN_CATEGORY, getDropdownCategoryByKey, listDropdownItems, listTicketFieldDefinitions, listTickets } from "@itsm/core";
 import type { DropdownItem } from "@itsm/db";
 import Link from "next/link";
 import { TicketForm } from "./ticket-form";
-
-const STATUS_LABELS: Record<string, string> = {
-  new: "Nuevo",
-  assigned: "Asignado",
-  planned: "Planificado",
-  pending: "Pendiente",
-  solved: "Resuelto",
-  closed: "Cerrado",
-};
 
 import type { Metadata } from "next";
 
@@ -44,10 +36,11 @@ export default async function TicketsPage() {
           <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
           <ul className="space-y-1">
             {tickets.map((t) => (
-              <li key={t.id}>
+              <li key={t.id} className="flex items-center gap-2">
                 <Link href={`/assistance/tickets/${t.id}`} className="text-sm hover:underline">
-                  {t.title} <span className="opacity-40">({STATUS_LABELS[t.status] ?? t.status})</span>
+                  {t.title}
                 </Link>
+                <StatusBadge status={t.status} />
               </li>
             ))}
             {tickets.length === 0 ? <li className="text-sm opacity-50">Sin tickets todavía.</li> : null}
