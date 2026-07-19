@@ -40,6 +40,16 @@ function uniqueName(prefix: string): string {
   return `E2E-ASSETS-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+/**
+ * Distinct, still-greppable prefix for the self-authored test data added in this QA pass (own
+ * values, not copy-pasted from the E2E-ASSETS-* fixtures above) - kept separate so either
+ * generation can be identified/cleaned up independently. Same construction as uniqueName() above,
+ * just a different literal prefix per this pass's task instructions.
+ */
+function qaUniqueName(prefix: string): string {
+  return `QA-ASSETS-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
 // Compartidas entre describes (el orden de declaración en este archivo
 // determina el orden de ejecución real, ya que playwright.config.ts usa
 // fullyParallel:false + workers:1): el describe de "Software" llena
@@ -597,6 +607,282 @@ test.describe.serial("Activo genérico (Monitor) - alta y listado", () => {
     // No existe página de detalle para tipos genéricos en esta versión - no
     // hay ningún enlace desde este listado (hallazgo reportado aparte).
     await expect(row.getByRole("link")).toHaveCount(0);
+
+    health.assertHealthy();
+  });
+});
+
+/* ===========================================================================================
+ * QA pass additions below: (1) own, self-authored realistic test data (QA-ASSETS-* prefix, NOT
+ * copy-pasted from the E2E-ASSETS-* fixtures above) with create -> list persistence checks for
+ * every create-form in this module, including network-equipment which previously had NO create
+ * test at all (only a "page loads" check), and (2) data-type/required-field validation that
+ * asserts the REAL observed browser behavior (via .validity, not guessed). Playwright's .fill()
+ * throws outright for non-numeric text on input[type=number] ("Cannot type text into
+ * input[type=number]") - that's not what a real user typing experiences, so those cases use
+ * .pressSequentially() to simulate actual keystrokes instead, verified manually beforehand.
+ * =========================================================================================== */
+
+test.describe.serial("QA - Network equipment: datos propios y validación de portsCount", () => {
+  const qaEquipmentName = qaUniqueName("NETEQ");
+
+  test("crea un equipo de red con datos propios y aparece en el listado con su IP", async ({ page }) => {
+    const health = watchPageHealth(page);
+    await page.goto("/assets/network-equipment");
+
+    await page.locator('input[name="name"]').fill(qaEquipmentName);
+    await page.locator('input[name="ipAddress"]').fill("10.20.30.40");
+    await page.locator('input[name="macAddress"]').fill("AA:BB:CC:DD:EE:01");
+    await page.locator('input[name="firmwareVersion"]').fill("2.14.1");
+    await page.locator('input[name="portsCount"]').fill("24");
+    await page.locator('textarea[name="comment"]').fill("Switch de acceso creado por la pasada de QA de Activos.");
+    await page.getByRole("button", { name: "Crear equipo de red" }).click();
+
+    await assertNoInlineFormError(page);
+    // network-equipment has no detail page (only alta + listado, see file header comment) - the
+    // list row itself is the only place to confirm persistence, including the ipAddress value.
+    const row = page.locator("li", { hasText: qaEquipmentName });
+    await expect(row).toBeVisible();
+    await expect(row).toContainText("10.20.30.40");
+
+    await page.reload();
+    const rowAfterReload = page.locator("li", { hasText: qaEquipmentName });
+    await expect(rowAfterReload).toBeVisible();
+    await expect(rowAfterReload).toContainText("10.20.30.40");
+
+    health.assertHealthy();
+  });
+
+  test("portsCount: letras tecleadas no se registran, y un valor negativo es bloqueado por la restricción min=0 del input", async ({ page }) => {
+    const health = watchPageHealth(page);
+    await page.goto("/assets/network-equipment");
+
+    const portsInput = page.locator('input[name="portsCount"]');
+
+    // (b) wrong-type: a real user typing letters into a type=number input never gets them
+    // registered - Chromium filters non-numeric keystrokes at the keyboard-event level, verified
+    // manually. .pressSequentially() simulates real keystrokes (.fill() would throw outright).
+    await portsInput.pressSequentially("abc");
+    expect(await portsInput.inputValue()).toBe("");
+
+    // A syntactically-numeric but out-of-range value (min=0) IS accepted into the field's value,
+    // but fails constraint validation.
+    await portsInput.fill("-3");
+    const negativeValidity = await portsInput.evaluate((el: HTMLInputElement) => ({
+      valid: el.validity.valid,
+      rangeUnderflow: el.validity.rangeUnderflow,
+    }));
+    expect(negativeValidity).toEqual({ valid: false, rangeUnderflow: true });
+
+    // Confirm the blocked value never reaches the server: fill the required name and submit
+    // with portsCount=-3 still in place.
+    const bogusName = qaUniqueName("NETEQ-SHOULD-NOT-EXIST");
+    await page.locator('input[name="name"]').fill(bogusName);
+    await page.getByRole("button", { name: "Crear equipo de red" }).click();
+
+    await expect(page).toHaveURL(/\/assets\/network-equipment$/);
+    await expect(page.locator("li", { hasText: bogusName })).toHaveCount(0);
+
+    health.assertHealthy();
+  });
+});
+
+test.describe.serial("QA - Computadoras: datos propios y validación de requerido", () => {
+  const qaComputerName = qaUniqueName("COMPUTER");
+  // Unique per run - assets.inventory_number has a real unique constraint and there's no delete UI.
+  const qaComputerInventory = qaUniqueName("INV-COMPUTER-QA");
+
+  test("crea una computadora con datos propios y aparece en el listado con detalle accesible", async ({ page }) => {
+    const health = watchPageHealth(page);
+    await page.goto("/assets/computers");
+
+    await page.locator('input[name="name"]').fill(qaComputerName);
+    await page.locator('input[name="serialNumber"]').fill(qaUniqueName("SN-COMPUTER-QA"));
+    await page.locator('input[name="inventoryNumber"]').fill(qaComputerInventory);
+    await page.locator('input[name="domain"]').fill("qa.example.local");
+    await page.locator('textarea[name="comment"]').fill("Laptop de desarrollo asignada al equipo de QA.");
+    await page.getByRole("button", { name: "Crear computadora" }).click();
+
+    await assertNoInlineFormError(page);
+    const link = page.getByRole("link", { name: qaComputerName });
+    await expect(link).toBeVisible();
+    await link.click();
+    await page.waitForURL(/\/assets\/computers\/[^/]+$/);
+    await expect(page.getByRole("heading", { name: qaComputerName, level: 1 })).toBeVisible();
+    await expect(page.getByText("qa.example.local")).toBeVisible();
+
+    health.assertHealthy();
+  });
+
+  test("el campo 'name' vacío bloquea el envío nativamente y no crea la computadora", async ({ page }) => {
+    const health = watchPageHealth(page);
+    await page.goto("/assets/computers");
+
+    const nameInput = page.locator('input[name="name"]');
+    // name left empty on purpose - the only required field on this form.
+    await page.locator('input[name="serialNumber"]').fill(qaUniqueName("SN-SHOULD-NOT-EXIST"));
+    await page.getByRole("button", { name: "Crear computadora" }).click();
+
+    const validity = await nameInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+    await expect(page).toHaveURL(/\/assets\/computers$/);
+
+    health.assertHealthy();
+  });
+});
+
+test.describe.serial("QA - Software: datos propios y validación de seatsTotal en licencias", () => {
+  const qaSoftwareName = qaUniqueName("SOFTWARE");
+  let qaSoftwareId: string;
+
+  test("crea un software con datos propios y aparece en el listado con detalle accesible", async ({ page }) => {
+    const health = watchPageHealth(page);
+    await page.goto("/assets/software");
+
+    await page.locator('input[name="name"]').fill(qaSoftwareName);
+    await page.locator('textarea[name="comment"]').fill("Suite ofimática evaluada por la pasada de QA de Activos.");
+    await page.getByRole("button", { name: "Crear software" }).click();
+
+    await assertNoInlineFormError(page);
+    const link = page.getByRole("link", { name: qaSoftwareName });
+    await expect(link).toBeVisible();
+    await link.click();
+    await page.waitForURL(/\/assets\/software\/[^/]+$/);
+    qaSoftwareId = await idFromUrl(page);
+    await expect(page.getByRole("heading", { name: qaSoftwareName, level: 1 })).toBeVisible();
+
+    health.assertHealthy();
+  });
+
+  test("el campo 'name' vacío bloquea el envío nativamente y no crea el software", async ({ page }) => {
+    const health = watchPageHealth(page);
+    await page.goto("/assets/software");
+
+    const nameInput = page.locator('input[name="name"]');
+    await page.getByRole("button", { name: "Crear software" }).click();
+
+    const validity = await nameInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+    await expect(page).toHaveURL(/\/assets\/software$/);
+
+    health.assertHealthy();
+  });
+
+  test("seatsTotal (licencia): letras tecleadas no se registran, y un valor negativo es bloqueado por la restricción min=0 del input", async ({ page }) => {
+    test.skip(!qaSoftwareId, "El software QA no se creó en el paso anterior");
+
+    const health = watchPageHealth(page);
+    await page.goto(`/assets/software/${qaSoftwareId}`);
+
+    const licenseForm = page.locator("form").filter({ has: page.locator('select[name="licenseType"]') });
+    const seatsInput = licenseForm.locator('input[name="seatsTotal"]');
+
+    // (b) wrong-type: verified manually - letters typed key-by-key into a type=number input
+    // never register.
+    await seatsInput.pressSequentially("abc");
+    expect(await seatsInput.inputValue()).toBe("");
+
+    await seatsInput.fill("-10");
+    const negativeValidity = await seatsInput.evaluate((el: HTMLInputElement) => ({
+      valid: el.validity.valid,
+      rangeUnderflow: el.validity.rangeUnderflow,
+    }));
+    expect(negativeValidity).toEqual({ valid: false, rangeUnderflow: true });
+
+    // Confirm the blocked value never reaches the server: fill the required name and submit
+    // with seatsTotal=-10 still in place.
+    const bogusLicenseName = `QA-ASSETS-LICENSE-SHOULD-NOT-EXIST-${Date.now()}`;
+    await licenseForm.locator('input[name="name"]').fill(bogusLicenseName);
+    await licenseForm.getByRole("button", { name: "Crear licencia" }).click();
+
+    await expect(page).toHaveURL(new RegExp(`/assets/software/${qaSoftwareId}$`));
+    await expect(page.getByText(bogusLicenseName)).toHaveCount(0);
+
+    health.assertHealthy();
+  });
+});
+
+test.describe("QA - Cables: datos propios y validación de endpoints requeridos", () => {
+  test("crea un cable con datos propios entre dos activos reales y aparece en la lista", async ({ page }) => {
+    const health = watchPageHealth(page);
+    const qaCableName = qaUniqueName("CABLE");
+
+    await page.goto("/assets/dcim/cables");
+    await page.locator('input[name="name"]').fill(qaCableName);
+    await page.locator('select[name="endpointAAssetId"]').selectOption({ label: sharedComputerAName });
+    await page.locator('select[name="endpointBAssetId"]').selectOption({ label: sharedComputerBName });
+    await page.locator('textarea[name="comment"]').fill("Patch cord de QA entre las dos computadoras compartidas de este spec.");
+    await page.getByRole("button", { name: "Crear cable" }).click();
+
+    await assertNoInlineFormError(page);
+    // Scoped to this cable's own <li> row (by its unique name) rather than a page-wide text
+    // match: the pre-existing "DCIM - ubicar/quitar en rack y crear cable" describe above already
+    // created another A↔B cable between these same two shared computers, so an unscoped match on
+    // "A ↔ B" text resolves to 2 elements (strict-mode violation).
+    const row = page.locator("li", { hasText: qaCableName });
+    await expect(row).toBeVisible();
+    await expect(row).toContainText(new RegExp(`${sharedComputerAName}.*↔.*${sharedComputerBName}`));
+
+    health.assertHealthy();
+  });
+
+  test("endpointAAssetId requerido vacío bloquea el envío nativamente y no crea el cable", async ({ page }) => {
+    const health = watchPageHealth(page);
+    const bogusName = qaUniqueName("CABLE-SHOULD-NOT-EXIST");
+
+    await page.goto("/assets/dcim/cables");
+    await page.locator('input[name="name"]').fill(bogusName);
+    // Both endpoint <select required> start on a disabled, value="" placeholder option - a real
+    // user who never touches them is left on an invalid selection (required + no valid value).
+    const endpointA = page.locator('select[name="endpointAAssetId"]');
+    const initialValidity = await endpointA.evaluate((el: HTMLSelectElement) => ({
+      valid: el.validity.valid,
+      valueMissing: el.validity.valueMissing,
+    }));
+    expect(initialValidity).toEqual({ valid: false, valueMissing: true });
+
+    await page.getByRole("button", { name: "Crear cable" }).click();
+    await expect(page).toHaveURL(/\/assets\/dcim\/cables$/);
+    await expect(page.getByText(bogusName, { exact: false })).toHaveCount(0);
+
+    health.assertHealthy();
+  });
+});
+
+test.describe.serial("QA - DCIM (rack): datos propios vía el formulario genérico y validación de requerido", () => {
+  const qaRackName = qaUniqueName("RACK");
+
+  test("crea un rack con datos propios vía /assets/rack y aparece en el índice de DCIM", async ({ page }) => {
+    const health = watchPageHealth(page);
+
+    await page.goto("/assets/rack");
+    await page.locator('input[name="name"]').fill(qaRackName);
+    await page.locator('input[name="serialNumber"]').fill(qaUniqueName("SN-RACK-QA"));
+    await page.locator('textarea[name="comment"]').fill("Rack de datacenter B creado por la pasada de QA de Activos.");
+    await page.getByRole("button", { name: "Crear" }).click();
+
+    await assertNoInlineFormError(page);
+    await expect(page.getByText(qaRackName)).toBeVisible();
+
+    // Generic asset types have no detail page (see file header comment), but the DCIM index page
+    // links every "rack"-typed asset by name - confirms this create-form's output actually flows
+    // into the DCIM module, not just into the generic /assets/rack listing.
+    await page.goto("/assets/dcim");
+    await expect(page.getByRole("link", { name: qaRackName })).toBeVisible();
+
+    health.assertHealthy();
+  });
+
+  test("el campo 'name' vacío bloquea el envío nativamente y no crea el rack", async ({ page }) => {
+    const health = watchPageHealth(page);
+    await page.goto("/assets/rack");
+
+    const nameInput = page.locator('input[name="name"]');
+    await page.getByRole("button", { name: "Crear" }).click();
+
+    const validity = await nameInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+    await expect(page).toHaveURL(/\/assets\/rack$/);
 
     health.assertHealthy();
   });
