@@ -1,6 +1,12 @@
+import path from "node:path";
 import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "."),
+    },
+  },
   test: {
     // *.integration.test.ts requires a live `npm run dev` server on :3210 (see
     // mcp-route.integration.test.ts) - excluded from the default glob so

@@ -60,20 +60,34 @@ test.describe("Mi cuenta (/account)", () => {
     const diag = diagnostics(page);
     await page.goto("/account");
 
+    // Since next-intl now actually re-renders the page per locale (Task 5/7 of
+    // the i18n pilot), the save button/confirmation text switches language too
+    // once the page has reloaded in "fr" - match both "es" and "fr" labels
+    // rather than hard-coding the Spanish ones, since this test toggles
+    // between the two locales.
+    const saveButton = page.getByRole("button", { name: /^(Guardar|Enregistrer)$/ });
+    const savedNotice = page.getByText(/^(Guardado\.|Enregistré\.)$/);
+
     // try/finally: the reset to "es" must run even if an assertion above throws
     // (e.g. under load) - otherwise admin@itsm.local is left at "fr" for real,
     // silently breaking test 1's hard-coded "es" assertion on the next run.
     try {
       await page.locator('select[name="language"]').selectOption("fr");
-      await page.getByRole("button", { name: "Guardar" }).click();
-      await expect(page.getByText("Guardado.")).toBeVisible();
+      await saveButton.click();
+      await expect(savedNotice).toBeVisible();
 
       await page.reload();
       await expect(page.locator('select[name="language"]')).toHaveValue("fr");
+
+      // Assert real rendered French text (not just the <select> value) - proves
+      // next-intl actually re-renders the page in the chosen locale. Values
+      // must match apps/web/messages/fr.json's account.title / nav.dashboard.
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mon compte");
+      await expect(page.getByRole("link", { name: "Tableau de bord" })).toBeVisible();
     } finally {
       await page.locator('select[name="language"]').selectOption("es");
-      await page.getByRole("button", { name: "Guardar" }).click();
-      await expect(page.getByText("Guardado.")).toBeVisible();
+      await saveButton.click();
+      await expect(savedNotice).toBeVisible();
     }
 
     diag.assertClean();
