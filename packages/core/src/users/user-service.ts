@@ -54,3 +54,10 @@ export async function listUsers(): Promise<User[]> {
 export async function stampLastLogin(userId: string): Promise<void> {
   await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, userId));
 }
+
+/** Validate `language` with `updateLanguageSchema` (packages/core/src/validation/user.zod.ts) before calling this - this function trusts its input, matching every other *-service.ts in this package. */
+export async function updateUserLanguage(userId: string, language: string): Promise<User> {
+  const [updated] = await db.update(users).set({ language }).where(eq(users.id, userId)).returning();
+  if (!updated) throw new Error(`User ${userId} not found`);
+  return updated;
+}

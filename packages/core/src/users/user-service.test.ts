@@ -1,10 +1,10 @@
 import "dotenv/config";
 import { randomUUID } from "node:crypto";
 import { db, users } from "@itsm/db";
-import { inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { createUserSchema, loginSchema } from "../validation/user.zod";
-import { createUser, findUserByEmail, listUsers, verifyPassword } from "./user-service";
+import { createUser, findUserByEmail, listUsers, updateUserLanguage, verifyPassword } from "./user-service";
 
 const PREFIX = "__vitest_platform__";
 const createdUserIds: string[] = [];
@@ -59,6 +59,21 @@ describe("user-service", () => {
     const user = await makeUser();
     const all = await listUsers();
     expect(all.some((u) => u.id === user.id)).toBe(true);
+  });
+
+  it("createUser defaults language to 'es'", async () => {
+    const user = await makeUser({ displayName: "Default Language User" });
+    expect(user.language).toBe("es");
+  });
+
+  it("updateUserLanguage updates the stored language", async () => {
+    const user = await makeUser({ displayName: "Language Update User" });
+
+    const updated = await updateUserLanguage(user.id, "fr");
+    expect(updated.language).toBe("fr");
+
+    const [reloaded] = await db.select().from(users).where(eq(users.id, user.id));
+    expect(reloaded?.language).toBe("fr");
   });
 
   describe("user zod schemas", () => {

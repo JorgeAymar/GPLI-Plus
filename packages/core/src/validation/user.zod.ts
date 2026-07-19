@@ -18,3 +18,26 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
+
+/**
+ * Single source of truth for language codes - both the Zod enum below and
+ * the <select> in apps/web/app/(central)/account/language-form.tsx read from
+ * this, so they can't drift out of sync.
+ */
+export const SUPPORTED_LANGUAGES = [
+  { code: "es", name: "Español" },
+  { code: "en", name: "English" },
+  { code: "pt", name: "Português" },
+  { code: "fr", name: "Français" },
+  { code: "it", name: "Italiano" },
+  { code: "de", name: "Deutsch" },
+] as const;
+
+export type SupportedLanguageCode = (typeof SUPPORTED_LANGUAGES)[number]["code"];
+
+const LANGUAGE_CODES = SUPPORTED_LANGUAGES.map((l) => l.code) as [SupportedLanguageCode, ...SupportedLanguageCode[]];
+
+export const updateLanguageSchema = z.object({
+  language: z.enum(LANGUAGE_CODES),
+});
+export type UpdateLanguageInput = z.infer<typeof updateLanguageSchema>;
