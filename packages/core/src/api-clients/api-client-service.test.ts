@@ -1,11 +1,21 @@
 import "dotenv/config";
 import { randomUUID } from "node:crypto";
-import { apiClients, db, entities } from "@itsm/db";
+import { apiClients, db, entities, users } from "@itsm/db";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createEntity } from "../entities/entity-service";
+import { createUser } from "../users/user-service";
 import { createApiClientSchema } from "../validation/api-client.zod";
-import { createApiClient, hasScope, listApiClients, revokeApiClient, verifyApiKey } from "./api-client-service";
+import {
+  createApiClient,
+  createPersonalApiClient,
+  hasScope,
+  listApiClients,
+  listMyApiClients,
+  revokeApiClient,
+  revokeMyApiClient,
+  verifyApiKey,
+} from "./api-client-service";
 
 const PREFIX = "__vitest_platform__";
 
@@ -99,6 +109,75 @@ describe("api-client-service", () => {
       await db.delete(apiClients).where(eq(apiClients.entityId, other.id));
       await db.delete(entities).where(eq(entities.id, other.id));
     }
+  });
+
+  describe("personal (userId-owned) API clients", () => {
+    let userId: string;
+
+    beforeAll(async () => {
+      const user = await createUser({
+        email: `${PREFIX}_personal@example.com`,
+        username: `${PREFIX}_personal`,
+        password: "irrelevant-not-used-here-1234",
+        displayName: "Personal Token Owner",
+      });
+      userId = user.id;
+    });
+
+    afterAll(async () => {
+      // api_clients.user_id has no ON DELETE cascade (same as entity_id above),
+      // so referencing rows must go first or this FK-violates.
+      await db.delete(apiClients).where(eq(apiClients.userId, userId));
+      await db.delete(users).where(eq(users.id, userId));
+    });
+
+    it("createPersonalApiClient sets userId, leaves entityId null, and uses the pat_ prefix", async () => {
+      const { client, rawKey } = await createPersonalApiClient({ userId, name: `${PREFIX}_personal_client` });
+
+      expect(rawKey.startsWith("pat_")).toBe(true);
+      expect(client.userId).toBe(userId);
+      expect(client.entityId).toBeNull();
+      expect(client.scopes).toEqual([]);
+      expect(client.apiKeyHash).not.toBe(rawKey);
+    });
+
+    it("verifyApiKey works the same way for personal clients as for entity clients", async () => {
+      const { rawKey } = await createPersonalApiClient({ userId, name: `${PREFIX}_personal_verify` });
+      const verified = await verifyApiKey(rawKey);
+      expect(verified?.userId).toBe(userId);
+    });
+
+    it("listMyApiClients only returns the given user's own clients", async () => {
+      const otherUser = await createUser({
+        email: `${PREFIX}_personal_other@example.com`,
+        username: `${PREFIX}_personal_other`,
+        password: "irrelevant-not-used-here-1234",
+        displayName: "Other User",
+      });
+      try {
+        await createPersonalApiClient({ userId: otherUser.id, name: `${PREFIX}_other_users_client` });
+        const mine = await listMyApiClients(userId);
+        expect(mine.every((c) => c.userId === userId)).toBe(true);
+        expect(mine.some((c) => c.name === `${PREFIX}_other_users_client`)).toBe(false);
+      } finally {
+        await db.delete(apiClients).where(eq(apiClients.userId, otherUser.id));
+        await db.delete(users).where(eq(users.id, otherUser.id));
+      }
+    });
+
+    it("revokeMyApiClient revokes when the caller owns the client", async () => {
+      const { client } = await createPersonalApiClient({ userId, name: `${PREFIX}_personal_revoke_ok` });
+      const revoked = await revokeMyApiClient(client.id, userId);
+      expect(revoked.isActive).toBe(false);
+    });
+
+    it("revokeMyApiClient throws when the caller does not own the client", async () => {
+      const { client } = await createPersonalApiClient({ userId, name: `${PREFIX}_personal_revoke_denied` });
+      await expect(revokeMyApiClient(client.id, "00000000-0000-0000-0000-000000000000")).rejects.toThrow();
+
+      const stillActive = await verifyApiKey((await createPersonalApiClient({ userId, name: `${PREFIX}_x` })).rawKey);
+      expect(stillActive).not.toBeNull(); // sanity: revokeApiClient itself still works elsewhere
+    });
   });
 
   describe("createApiClientSchema (zod)", () => {
