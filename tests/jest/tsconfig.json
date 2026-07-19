@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowJs": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["**/*.ts", "../../packages/core/src/**/*.ts", "../../apps/web/**/*.ts"]
+}

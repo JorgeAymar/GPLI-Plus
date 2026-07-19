@@ -46,15 +46,25 @@ export async function resolveAuthContext(session: RawSession | null): Promise<Au
   const [activeProfile] = await db.select().from(profiles).where(eq(profiles.id, profileId));
   if (!activeEntity || !activeProfile) return null;
 
+  // A real `user_profiles` row for this exact (user, entity, profile) triple must exist -
+  // this is not just how `isRecursive` gets its value below, it is the actual authorization
+  // check for "is this user really allowed to be active in this entity+profile". Without it,
+  // a forged or stale session (entityId/profileId that both happen to reference real rows,
+  // but were never actually assigned to this user - e.g. apps/web/actions/session.actions.ts's
+  // switchContext() writes client-supplied ids straight into the JWT with no server-side
+  // check of its own) would resolve into a "valid" AuthContext here, silently defaulting
+  // isRecursive to true. Every other invalid state in this function already returns null
+  // instead of guessing; this must too.
   const [assignment] = await db
     .select()
     .from(userProfiles)
     .where(and(eq(userProfiles.userId, user.id), eq(userProfiles.entityId, entityId), eq(userProfiles.profileId, profileId)));
+  if (!assignment) return null;
 
   return {
     user,
     activeEntity,
     activeProfile,
-    isRecursive: assignment?.isRecursive ?? true,
+    isRecursive: assignment.isRecursive,
   };
 }

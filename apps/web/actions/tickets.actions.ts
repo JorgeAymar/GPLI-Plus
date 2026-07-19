@@ -13,11 +13,27 @@ import {
   updateTicketStatus,
 } from "@itsm/core";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+/**
+ * `schema.parse()` throws a `ZodError` whose `.message` getter is a JSON blob
+ * (see zod's ZodError#message), not a human-readable string - same reasoning
+ * as the identical helper in apps/web/actions/api-clients.actions.ts. Use
+ * `.safeParse` and rethrow a clean, semicolon-joined message so forms can
+ * surface `err.message` directly.
+ */
+function parseInput<Schema extends z.ZodTypeAny>(schema: Schema, input: unknown): z.infer<Schema> {
+  const result = schema.safeParse(input);
+  if (!result.success) {
+    throw new Error(result.error.issues.map((issue) => issue.message).join("; "));
+  }
+  return result.data;
+}
 
 export async function createTicketAction(input: unknown) {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ASSISTANCE_TICKET, RIGHT.CREATE);
-  const parsed = createTicketSchema.parse(input);
+  const parsed = parseInput(createTicketSchema, input);
   const ticket = await createTicket(parsed, context.user.id);
   revalidatePath("/assistance/tickets");
   // Also used by the self-service portal's ticket form (portal-ticket-form-client.tsx) -
@@ -31,7 +47,7 @@ export async function createTicketAction(input: unknown) {
 export async function updateTicketAction(id: string, input: unknown) {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ASSISTANCE_TICKET, RIGHT.UPDATE);
-  const parsed = updateTicketSchema.parse(input);
+  const parsed = parseInput(updateTicketSchema, input);
   const ticket = await updateTicket(id, parsed, context.user.id);
   revalidatePath(`/assistance/tickets/${id}`);
   return ticket;
@@ -40,7 +56,7 @@ export async function updateTicketAction(id: string, input: unknown) {
 export async function updateTicketStatusAction(id: string, status: unknown) {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ASSISTANCE_TICKET, RIGHT.UPDATE);
-  const parsedStatus = itilStatusSchema.parse(status);
+  const parsedStatus = parseInput(itilStatusSchema, status);
   const ticket = await updateTicketStatus(id, parsedStatus, context.user.id);
   revalidatePath(`/assistance/tickets/${id}`);
   return ticket;
