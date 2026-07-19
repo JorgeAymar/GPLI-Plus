@@ -12,6 +12,7 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "test:jest": "jest --config tests/jest/jest.config.js --runInBand --forceExit",
     "db:generate": "pnpm --filter @itsm/db generate",
     "db:migrate": "pnpm --filter @itsm/db migrate",
     "e2e": "playwright test",
@@ -19,6 +20,10 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
+    "@types/jest": "^30.0.0",
+    "dotenv": "^17.4.2",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.11",
     "turbo": "^2.5.0",
     "typescript": "^5.7.0"
   }
