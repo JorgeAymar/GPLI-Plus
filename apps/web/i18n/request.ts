@@ -1,6 +1,6 @@
 import { getRequestConfig } from "next-intl/server";
 import { cookies } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 
 export const SUPPORTED_LOCALES = ["es", "en", "pt", "fr", "it", "de"] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
@@ -21,7 +21,7 @@ export function isSupportedLocale(value: string | undefined): value is Supported
  * 3. Neither -> "es".
  */
 export async function resolveLocale(): Promise<SupportedLocale> {
-  const session = await auth();
+  const session = await getSession();
   if (session?.language && isSupportedLocale(session.language)) {
     return session.language;
   }

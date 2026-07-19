@@ -1,14 +1,14 @@
 import { type AuthContext, resolveAuthContext } from "@itsm/core";
 import { redirect } from "next/navigation";
 import { cache } from "react";
-import { auth } from "./auth";
+import { getSession } from "./auth";
 
 /**
  * Request-memoized auth context (user + active entity + active profile).
  * Hits the DB once per request no matter how many Server Components call it.
  */
 export const getAuthContext = cache(async (): Promise<AuthContext | null> => {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.userId) return null;
 
   return resolveAuthContext({
