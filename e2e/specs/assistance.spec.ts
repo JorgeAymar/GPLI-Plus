@@ -94,6 +94,16 @@ function uniqueTitle(kind: string): string {
   return `E2E-ASSISTANCE-${kind}-${Date.now()}-${Math.floor(Math.random() * 10_000)}`;
 }
 
+/**
+ * Distinct, still-greppable prefix for the self-authored test data added in this QA pass
+ * (own values, not copy-pasted from the E2E-ASSISTANCE-* fixtures above) - kept separate so
+ * either generation can be identified/cleaned up independently. Same construction as
+ * uniqueTitle() above, just a different literal prefix per this pass's task instructions.
+ */
+function qaUniqueTitle(kind: string): string {
+  return `QA-ASSISTANCE-${kind}-${Date.now()}-${Math.floor(Math.random() * 10_000)}`;
+}
+
 async function optionValues(select: Locator): Promise<string[]> {
   return select.locator("option").evaluateAll((opts) => opts.map((o) => (o as HTMLOptionElement).value));
 }
@@ -608,6 +618,240 @@ test.describe.serial("Recurring tickets (/assistance/recurring-tickets)", () => 
     // No delete UI exists for recurring templates either (documented finding, same as the other
     // three entity types - see header comment).
     await expect(page.getByRole("button", { name: /eliminar|borrar/i })).toHaveCount(0);
+
+    expectNoCriticalErrors(diagnostics);
+  });
+});
+
+/* ===========================================================================================
+ * QA pass additions below: (1) own, self-authored realistic test data (QA-ASSISTANCE-* prefix,
+ * NOT copy-pasted from the E2E-ASSISTANCE-* fixtures above) with full create -> list -> detail
+ * persistence checks, and (2) data-type/required-field validation that asserts the REAL observed
+ * behavior (native HTML5 constraint validation results, via .validity - not guessed) rather than
+ * just checking "no crash". Behaviors below were verified manually against the running dev server
+ * before writing the assertions (e.g. Playwright's .fill() actually throws for non-numeric text
+ * on input[type=number] - real users can't type letters into it either, so those cases are
+ * exercised with .pressSequentially() to simulate real keystrokes instead).
+ * =========================================================================================== */
+
+test.describe.serial("QA - Tickets: datos propios y validación de tipos/requeridos", () => {
+  const qaTicketTitle = qaUniqueTitle("TICKET");
+
+  test("crear un ticket con datos propios lo persiste, aparece en la lista y su detalle es accesible", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    const content = "La impresora HP LaserJet del piso 3 no responde a trabajos de impresión desde ayer a las 14:00.";
+
+    await page.goto("/assistance/tickets");
+    await page.locator('select[name="ticketType"]').selectOption("request");
+    await page.locator('input[name="title"]').fill(qaTicketTitle);
+    await page.locator('textarea[name="content"]').fill(content);
+    await page.locator('select[name="categoryDropdownItemId"]').selectOption({ index: 0 });
+    await page.locator('select[name="urgency"]').selectOption("2");
+    await page.locator('select[name="impact"]').selectOption("3");
+    await page.locator('select[name="priority"]').selectOption("2");
+    await fillRequiredDynamicFields(page);
+    await page.getByRole("button", { name: "Crear ticket" }).click();
+
+    await expect(page.locator("p.text-red-600")).toHaveCount(0);
+    await expect(page.locator("li", { hasText: qaTicketTitle })).toBeVisible();
+
+    await page.getByRole("link", { name: qaTicketTitle }).click();
+    await expect(page).toHaveURL(/\/assistance\/tickets\/[0-9a-f-]+$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(qaTicketTitle);
+    await expect(page.getByText(content)).toBeVisible();
+    await expect(page.getByText("Urgencia: 2 · Impacto: 3 · Prioridad: 2")).toBeVisible();
+
+    expectNoCriticalErrors(diagnostics);
+  });
+
+  test("'content' vacío (con título completo) bloquea el envío nativamente y no crea el ticket", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/assistance/tickets");
+
+    // Mirror image of the pre-existing "empty title" test above - this one leaves the OTHER
+    // required field (content) empty instead, so both required text fields get real coverage.
+    const bogusTitle = qaUniqueTitle("TICKET-SHOULD-NOT-EXIST");
+    await page.locator('input[name="title"]').fill(bogusTitle);
+    await page.getByRole("button", { name: "Crear ticket" }).click();
+
+    const contentTextarea = page.locator('textarea[name="content"]');
+    const validity = await contentTextarea.evaluate((el: HTMLTextAreaElement) => ({
+      valid: el.validity.valid,
+      valueMissing: el.validity.valueMissing,
+    }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+    // Native validation blocks the submit client-side - no navigation, no server round trip.
+    await expect(page).toHaveURL(/\/assistance\/tickets$/);
+    await expect(page.locator("li", { hasText: bogusTitle })).toHaveCount(0);
+
+    expectNoCriticalErrors(diagnostics);
+  });
+});
+
+test.describe.serial("QA - Problems: datos propios y validación de requeridos", () => {
+  const qaProblemTitle = qaUniqueTitle("PROBLEM");
+
+  test("crear un problema con datos propios lo persiste, aparece en la lista y su detalle es accesible", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    const content = "Caída intermitente de la VPN corporativa reportada por 6 usuarios distintos en la última semana.";
+
+    await page.goto("/assistance/problems");
+    await page.locator('input[name="title"]').fill(qaProblemTitle);
+    await page.locator('textarea[name="content"]').fill(content);
+    await page.locator('select[name="urgency"]').selectOption("4");
+    await page.locator('select[name="impact"]').selectOption("4");
+    await page.locator('select[name="priority"]').selectOption("3");
+    await page.getByRole("button", { name: "Crear problema" }).click();
+
+    await expect(page.locator("p.text-red-600")).toHaveCount(0);
+    await expect(page.locator("li", { hasText: qaProblemTitle })).toBeVisible();
+
+    await page.getByRole("link", { name: qaProblemTitle }).click();
+    await expect(page).toHaveURL(/\/assistance\/problems\/[0-9a-f-]+$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(qaProblemTitle);
+    await expect(page.getByText(content)).toBeVisible();
+    await expect(page.getByText("Urgencia: 4 · Impacto: 4 · Prioridad: 3")).toBeVisible();
+
+    expectNoCriticalErrors(diagnostics);
+  });
+
+  test("'content' vacío (con título completo) bloquea el envío nativamente y no crea el problema", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/assistance/problems");
+
+    const bogusTitle = qaUniqueTitle("PROBLEM-SHOULD-NOT-EXIST");
+    await page.locator('input[name="title"]').fill(bogusTitle);
+    await page.getByRole("button", { name: "Crear problema" }).click();
+
+    const contentTextarea = page.locator('textarea[name="content"]');
+    const validity = await contentTextarea.evaluate((el: HTMLTextAreaElement) => ({
+      valid: el.validity.valid,
+      valueMissing: el.validity.valueMissing,
+    }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+    await expect(page).toHaveURL(/\/assistance\/problems$/);
+    await expect(page.locator("li", { hasText: bogusTitle })).toHaveCount(0);
+
+    expectNoCriticalErrors(diagnostics);
+  });
+});
+
+test.describe.serial("QA - Changes: datos propios y comportamiento real de las fechas planificadas", () => {
+  const qaChangeTitle = qaUniqueTitle("CHANGE");
+
+  test("crear un cambio con datos propios SIN fechas planificadas (camino nulo) lo persiste y aparece en la lista", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    const content = "Actualización de firmware en el switch core del datacenter B - ventana de mantenimiento a confirmar.";
+
+    await page.goto("/assistance/changes");
+    await page.locator('input[name="title"]').fill(qaChangeTitle);
+    await page.locator('textarea[name="content"]').fill(content);
+    await page.locator('select[name="urgency"]').selectOption("1");
+    await page.locator('select[name="impact"]').selectOption("2");
+    await page.locator('select[name="priority"]').selectOption("1");
+    // plannedStartAt/plannedEndAt left empty on purpose - optional per createChangeSchema, this
+    // exercises the null path (the pre-existing "crear un cambio" test above always fills both).
+    await page.getByRole("button", { name: "Crear cambio" }).click();
+
+    await expect(page.locator("p.text-red-600")).toHaveCount(0);
+    await expect(page.locator("li", { hasText: qaChangeTitle })).toBeVisible();
+
+    await page.getByRole("link", { name: qaChangeTitle }).click();
+    await expect(page).toHaveURL(/\/assistance\/changes\/[0-9a-f-]+$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(qaChangeTitle);
+    await expect(page.getByText(content)).toBeVisible();
+    await expect(page.getByText("Urgencia: 1 · Impacto: 2 · Prioridad: 1")).toBeVisible();
+    // change.tsx only renders the "Planificado:" line when either date is set - confirms the
+    // null path round-trips cleanly instead of e.g. rendering "Planificado: ? → ?".
+    await expect(page.getByText(/Planificado:/)).toHaveCount(0);
+
+    expectNoCriticalErrors(diagnostics);
+  });
+
+  test("texto no-fecha tecleado en 'Inicio planificado' es descartado por el widget datetime-local (queda vacío y sigue siendo válido por ser opcional)", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/assistance/changes");
+
+    const startInput = page.locator('input[name="plannedStartAt"]');
+    // Real user keystrokes (not .fill(), which Playwright itself rejects with "Malformed value"
+    // for a non-parseable datetime-local string - that guard doesn't reflect what a real user
+    // typing on the keyboard experiences). Verified manually: the segmented datetime-local widget
+    // has no digit keys to place from "not-a-date", so it silently discards all of it.
+    await startInput.pressSequentially("not-a-date");
+    expect(await startInput.inputValue()).toBe("");
+    expect(await startInput.evaluate((el: HTMLInputElement) => el.validity.valid)).toBe(true);
+
+    // Confirm the silent discard doesn't corrupt an otherwise-valid submission alongside it.
+    const title = qaUniqueTitle("CHANGE-BADDATE");
+    await page.locator('input[name="title"]').fill(title);
+    await page.locator('textarea[name="content"]').fill("Cambio QA para confirmar que una fecha basura descartada no bloquea ni corrompe el envío.");
+    await page.getByRole("button", { name: "Crear cambio" }).click();
+
+    await expect(page.locator("p.text-red-600")).toHaveCount(0);
+    await expect(page.locator("li", { hasText: title })).toBeVisible();
+    await page.getByRole("link", { name: title }).click();
+    await expect(page.getByText(/Planificado:/)).toHaveCount(0);
+
+    expectNoCriticalErrors(diagnostics);
+  });
+});
+
+test.describe.serial("QA - Recurring tickets: datos propios y comportamiento real de intervalMinutes", () => {
+  const qaRecurringName = qaUniqueTitle("RECURRING");
+
+  test("crear una recurrencia con datos propios la persiste y aparece en la lista", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/assistance/recurring-tickets");
+    await page.locator('input[name="name"]').fill(qaRecurringName);
+    await page.locator('input[name="titleTemplate"]').fill("Verificación mensual de licencias de software");
+    await page
+      .locator('textarea[name="contentTemplate"]')
+      .fill("Revisar asientos usados vs. contratados en el módulo de Activos > Software.");
+    await page.locator('select[name="requesterUserId"]').selectOption({ index: 0 });
+    await page.locator('input[name="intervalMinutes"]').fill("43200"); // ~30 días
+    await page.getByRole("button", { name: "Crear recurrencia" }).click();
+
+    await expect(page.locator("p.text-red-600")).toHaveCount(0);
+    const row = page.locator("li", { hasText: qaRecurringName });
+    await expect(row).toBeVisible();
+    await expect(row).toContainText("cada 43200 min");
+
+    expectNoCriticalErrors(diagnostics);
+  });
+
+  test("intervalMinutes: letras tecleadas no se registran, y 0/negativos son bloqueados por la restricción min=1 del input", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/assistance/recurring-tickets");
+
+    const intervalInput = page.locator('input[name="intervalMinutes"]');
+
+    // (b) wrong-type: a real user typing letters into a type=number input never gets them
+    // registered - Chromium filters non-numeric keystrokes at the keyboard-event level, verified
+    // manually. .pressSequentially() simulates real keystrokes (.fill() would throw outright).
+    await intervalInput.pressSequentially("abc");
+    expect(await intervalInput.inputValue()).toBe("");
+
+    // A syntactically-numeric but out-of-range value (min=1) IS accepted into the field's value,
+    // but fails constraint validation - the browser blocks submission via the same native
+    // mechanism as an empty required field.
+    await intervalInput.fill("0");
+    const zeroValidity = await intervalInput.evaluate((el: HTMLInputElement) => ({
+      valid: el.validity.valid,
+      rangeUnderflow: el.validity.rangeUnderflow,
+    }));
+    expect(zeroValidity).toEqual({ valid: false, rangeUnderflow: true });
+
+    // (a) confirm the blocked value never reaches the server: fill every other required field
+    // and attempt to submit with intervalMinutes=0 left in place.
+    const bogusName = qaUniqueTitle("RECURRING-SHOULD-NOT-EXIST");
+    await page.locator('input[name="name"]').fill(bogusName);
+    await page.locator('input[name="titleTemplate"]').fill("QA título");
+    await page.locator('textarea[name="contentTemplate"]').fill("QA contenido");
+    await page.locator('select[name="requesterUserId"]').selectOption({ index: 0 });
+    await page.getByRole("button", { name: "Crear recurrencia" }).click();
+
+    await expect(page).toHaveURL(/\/assistance\/recurring-tickets$/);
+    await expect(page.locator("li", { hasText: bogusName })).toHaveCount(0);
 
     expectNoCriticalErrors(diagnostics);
   });
