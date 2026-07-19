@@ -1,4 +1,5 @@
 import { requireAuthContext } from "@/lib/session";
+import { StatusBadge } from "@/components/status-badge";
 import { DROPDOWN_CATEGORY, getDropdownCategoryByKey, listChanges, listDropdownItems } from "@itsm/core";
 import Link from "next/link";
 import { ChangeForm } from "./change-form";
@@ -23,10 +24,11 @@ export default async function ChangesPage() {
           <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
           <ul className="space-y-1">
             {changes.map((c) => (
-              <li key={c.id}>
+              <li key={c.id} className="flex items-center gap-2">
                 <Link href={`/assistance/changes/${c.id}`} className="text-sm hover:underline">
-                  {c.title} <span className="opacity-40">({c.status})</span>
+                  {c.title}
                 </Link>
+                <StatusBadge status={c.status} />
               </li>
             ))}
             {changes.length === 0 ? <li className="text-sm opacity-50">Sin cambios todavía.</li> : null}

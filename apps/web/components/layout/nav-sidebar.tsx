@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 
 interface NavItem {
   href?: string;
@@ -60,21 +63,47 @@ const NAV: NavItem[] = [
   { href: "/setup/cron-jobs", labelKey: "cronJobs" },
 ];
 
-export async function NavSidebar() {
-  const t = await getTranslations("nav");
+/**
+ * Determines which NAV entry should be treated as "active" for a given
+ * pathname. Matches exact hrefs as well as nested detail routes (e.g.
+ * `/assistance/tickets/42` under `/assistance/tickets`), and resolves
+ * ambiguity between a parent and a more specific child href (e.g. `/assets`
+ * vs `/assets/computers`) by picking the longest matching href.
+ */
+function findActiveHref(pathname: string): string | undefined {
+  let activeHref: string | undefined;
+  for (const item of NAV) {
+    if (!item.href) continue;
+    const matches = pathname === item.href || pathname.startsWith(`${item.href}/`);
+    if (matches && (!activeHref || item.href.length > activeHref.length)) {
+      activeHref = item.href;
+    }
+  }
+  return activeHref;
+}
+
+export function NavSidebar() {
+  const t = useTranslations("nav");
+  const pathname = usePathname();
+  const activeHref = findActiveHref(pathname);
 
   return (
-    <nav className="flex w-56 shrink-0 flex-col gap-1 border-r border-black/10 p-4 dark:border-white/10">
+    <nav className="sticky top-0 flex h-screen w-56 shrink-0 flex-col gap-1 overflow-y-auto border-r border-black/10 p-4 dark:border-white/10">
       {NAV.map((item) =>
         item.section ? (
-          <div key={item.labelKey} className="mt-4 px-3 pb-1 text-xs font-medium uppercase tracking-wide opacity-50 first:mt-0">
+          <div key={item.labelKey} className="mt-4 px-3 pb-1 text-xs font-medium uppercase tracking-wide opacity-70 first:mt-0">
             {t(item.labelKey)}
           </div>
         ) : (
           <Link
             key={item.href}
             href={item.href!}
-            className="rounded-md px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
+            aria-current={item.href === activeHref ? "page" : undefined}
+            className={
+              item.href === activeHref
+                ? "rounded-md bg-black/5 px-3 py-2 text-sm font-semibold dark:bg-white/10"
+                : "rounded-md px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
+            }
           >
             {t(item.labelKey)}
           </Link>

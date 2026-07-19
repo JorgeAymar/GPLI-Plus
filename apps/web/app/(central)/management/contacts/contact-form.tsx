@@ -1,8 +1,9 @@
 "use client";
 
 import { createContactAction } from "@/actions/contacts.actions";
+import { useFormSuccessToast } from "@/components/toast";
 import type { Supplier } from "@itsm/db";
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 
 interface FormState {
   error?: string;
@@ -36,10 +37,12 @@ export function ContactForm({
   defaultSupplierId?: string;
 }) {
   const [state, formAction, isPending] = useActionState(makeAction(entityId), undefined);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFormSuccessToast(state, formRef, "Contacto creado.");
   const inputClass = "mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15";
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form ref={formRef} action={formAction} className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="contact-first-name" className="text-sm font-medium">Nombre</label>

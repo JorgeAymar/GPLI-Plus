@@ -1,7 +1,8 @@
 "use client";
 
 import { createSupplierAction } from "@/actions/suppliers.actions";
-import { useActionState } from "react";
+import { useFormSuccessToast } from "@/components/toast";
+import { useActionState, useRef } from "react";
 
 interface FormState {
   error?: string;
@@ -26,10 +27,12 @@ function makeAction(entityId: string) {
 
 export function SupplierForm({ entityId }: { entityId: string }) {
   const [state, formAction, isPending] = useActionState(makeAction(entityId), undefined);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFormSuccessToast(state, formRef, "Proveedor creado.");
   const inputClass = "mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15";
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form ref={formRef} action={formAction} className="space-y-3">
       <div>
         <label htmlFor="supplier-name" className="text-sm font-medium">Nombre</label>
         <input id="supplier-name" name="name" required className={inputClass} />

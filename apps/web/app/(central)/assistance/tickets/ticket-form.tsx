@@ -1,8 +1,9 @@
 "use client";
 
 import { createTicketAction } from "@/actions/tickets.actions";
+import { useFormSuccessToast } from "@/components/toast";
 import type { DropdownItem, TicketFieldDefinition } from "@itsm/db";
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 
 interface FormState {
   error?: string;
@@ -112,11 +113,13 @@ export function TicketForm({
 }) {
   const [ticketType, setTicketType] = useState<"incident" | "request">("incident");
   const [state, formAction, isPending] = useActionState(makeAction(entityId, fields), undefined);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFormSuccessToast(state, formRef, "Ticket creado.");
   const inputClass = "mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15";
   const visibleFields = fieldsForType(fields, ticketType);
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form ref={formRef} action={formAction} className="space-y-3">
       <div>
         <label htmlFor="ticket-type" className="text-sm font-medium">Tipo</label>
         <select

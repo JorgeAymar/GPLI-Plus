@@ -24,6 +24,7 @@ export function ContextSwitcher({
 
   return (
     <select
+      aria-label="Entidad y perfil activos"
       defaultValue={currentValue}
       disabled={isPending}
       onChange={(e) => {

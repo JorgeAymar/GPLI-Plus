@@ -1,8 +1,9 @@
 "use client";
 
 import { createComputerAction } from "@/actions/computers.actions";
+import { useFormSuccessToast } from "@/components/toast";
 import type { DropdownItem } from "@itsm/db";
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 
 interface FormState {
   error?: string;
@@ -29,10 +30,12 @@ function makeAction(entityId: string) {
 
 export function ComputerForm({ entityId, osOptions }: { entityId: string; osOptions: DropdownItem[] }) {
   const [state, formAction, isPending] = useActionState(makeAction(entityId), undefined);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFormSuccessToast(state, formRef, "Computadora creada.");
   const inputClass = "mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15";
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form ref={formRef} action={formAction} className="space-y-3">
       <div>
         <label htmlFor="computer-name" className="text-sm font-medium">Nombre</label>
         <input id="computer-name" name="name" required className={inputClass} />

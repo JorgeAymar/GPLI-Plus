@@ -1,4 +1,6 @@
+import { softDeleteAssetAction } from "@/actions/assets.actions";
 import { requireAuthContext } from "@/lib/session";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { getAssetDefinitionByKey, listAssetFieldDefinitions, listAssets, listDropdownItems } from "@itsm/core";
 import type { DropdownItem } from "@itsm/db";
 import type { Metadata } from "next";
@@ -42,8 +44,15 @@ export default async function AssetTypePage({ params }: { params: Promise<{ asse
           <h2 className="mb-2 text-sm font-medium opacity-70">Instancias existentes</h2>
           <ul className="space-y-1">
             {assets.map((a) => (
-              <li key={a.id} className="text-sm">
-                {a.name} {a.serialNumber ? <span className="opacity-40">({a.serialNumber})</span> : null}
+              <li key={a.id} className="flex items-center justify-between gap-2 text-sm">
+                <span>
+                  {a.name} {a.serialNumber ? <span className="opacity-40">({a.serialNumber})</span> : null}
+                </span>
+                <ConfirmDeleteButton
+                  id={a.id}
+                  action={softDeleteAssetAction}
+                  confirmMessage={`¿Eliminar "${a.name}"? Esta acción no se puede deshacer.`}
+                />
               </li>
             ))}
             {assets.length === 0 ? <li className="text-sm opacity-50">Sin instancias todavía.</li> : null}

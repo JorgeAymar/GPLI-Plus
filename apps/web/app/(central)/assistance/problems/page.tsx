@@ -1,4 +1,5 @@
 import { requireAuthContext } from "@/lib/session";
+import { StatusBadge } from "@/components/status-badge";
 import { DROPDOWN_CATEGORY, getDropdownCategoryByKey, listDropdownItems, listProblems } from "@itsm/core";
 import Link from "next/link";
 import { ProblemForm } from "./problem-form";
@@ -23,10 +24,11 @@ export default async function ProblemsPage() {
           <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
           <ul className="space-y-1">
             {problems.map((p) => (
-              <li key={p.id}>
+              <li key={p.id} className="flex items-center gap-2">
                 <Link href={`/assistance/problems/${p.id}`} className="text-sm hover:underline">
-                  {p.title} <span className="opacity-40">({p.status})</span>
+                  {p.title}
                 </Link>
+                <StatusBadge status={p.status} />
               </li>
             ))}
             {problems.length === 0 ? <li className="text-sm opacity-50">Sin problemas todavía.</li> : null}

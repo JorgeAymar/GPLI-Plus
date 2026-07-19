@@ -1,4 +1,5 @@
 import { requireAuthContext } from "@/lib/session";
+import { DataTable } from "@/components/data-table";
 import { listSoftware } from "@itsm/core";
 import Link from "next/link";
 import { SoftwareForm } from "./software-form";
@@ -30,18 +31,24 @@ export default async function SoftwarePage({ searchParams }: { searchParams: Pro
       </form>
 
       <div className="grid grid-cols-2 gap-8">
-        <div>
+        <div className="min-w-0">
           <h2 className="mb-2 text-sm font-medium opacity-70">Existente</h2>
-          <ul className="space-y-1">
-            {softwareList.map((s) => (
-              <li key={s.id}>
-                <Link href={`/assets/software/${s.id}`} className="text-sm hover:underline">
-                  {s.name}
-                </Link>
-              </li>
-            ))}
-            {softwareList.length === 0 ? <li className="text-sm opacity-50">Sin software todavía.</li> : null}
-          </ul>
+          <DataTable
+            columns={[
+              {
+                key: "name",
+                label: "Nombre",
+                render: (s) => (
+                  <Link href={`/assets/software/${s.id}`} className="hover:underline">
+                    {s.name}
+                  </Link>
+                ),
+              },
+            ]}
+            rows={softwareList}
+            rowKey={(s) => s.id}
+            emptyMessage="Sin software todavía."
+          />
         </div>
         <div>
           <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo software</h2>
