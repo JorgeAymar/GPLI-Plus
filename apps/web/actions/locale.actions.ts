@@ -11,5 +11,11 @@ import { cookies } from "next/headers";
 export async function setLocaleCookieAction(locale: string): Promise<void> {
   if (!isSupportedLocale(locale)) return;
   const cookieStore = await cookies();
-  cookieStore.set("locale", locale, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  cookieStore.set("locale", locale, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  });
 }
