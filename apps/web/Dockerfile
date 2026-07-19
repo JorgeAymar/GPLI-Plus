@@ -51,6 +51,18 @@ FROM base AS builder
 COPY --from=deps /app ./
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# `next build`'s "Collecting page data" step imports every route module,
+# including dynamic API routes that transitively import @itsm/db
+# (packages/db/src/client.ts throws synchronously if DATABASE_URL is unset -
+# it never needs to actually connect at build time, just be non-empty).
+# A Docker `ENV DATABASE_URL=...` is NOT enough: that step runs inside
+# Next's own build-worker subprocesses, which only pick up env vars from
+# Next's file-based .env loading, not inherited process env. This file is
+# local to the `builder` stage only - the `runner` stage below copies just
+# `.next/standalone`, `.next/static`, and `public/`, so this placeholder
+# never reaches the shipped image (verified: `docker run ... find /app
+# -iname ".env*"` on the built runner image finds nothing).
+RUN echo "DATABASE_URL=postgres://build:build@127.0.0.1:5432/build_placeholder" > apps/web/.env.production.local
 RUN pnpm exec turbo run build --filter=@itsm/web...
 
 # ---------------------------------------------------------------------------
@@ -75,8 +87,17 @@ FROM node:${NODE_VERSION} AS runner
 RUN apk add --no-cache libc6-compat
 ARG PNPM_VERSION
 # pnpm is needed at *runtime* too: the entrypoint shells out to
-# `pnpm --filter @itsm/db migrate` before starting the server.
-RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
+# `pnpm --filter @itsm/db migrate` before starting the server. That runs as
+# the non-root "nextjs" user (set below), whose $HOME differs from the root
+# user this RUN executes as - corepack's default cache path is under $HOME,
+# so without COREPACK_HOME pinned to a fixed, world-readable location, the
+# non-root user can't see what was just prepared here and silently
+# re-downloads pnpm from the npm registry on every single container start.
+# For an on-premise product that may run at client sites with no/limited
+# internet access, that's a live deploy-time dependency worth avoiding.
+ENV COREPACK_HOME=/opt/corepack
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate \
+  && chmod -R a+rX /opt/corepack
 
 WORKDIR /app
 

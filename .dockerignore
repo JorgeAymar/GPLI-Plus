@@ -26,9 +26,13 @@ npm-debug.log*
 pnpm-debug.log*
 
 # Env files - never bake secrets into an image; pass them at runtime instead
-# (.env.example is just a template and isn't needed to build or run the app)
-.env
-.env.*
+# (.env.example is just a template and isn't needed to build or run the app).
+# MUST be **/-prefixed: a bare ".env"/".env.*" pattern only matches at the
+# build-context root in .dockerignore syntax (unlike .gitignore, it is NOT
+# recursive by default) - a bare pattern here silently let apps/web/.env and
+# apps/worker/.env get copied straight into shipped image layers.
+**/.env
+**/.env.*
 
 # OS cruft
 .DS_Store
