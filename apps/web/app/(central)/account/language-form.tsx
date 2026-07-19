@@ -30,7 +30,11 @@ export function LanguageForm({
 
   return (
     <form action={formAction} className="flex items-center gap-3">
+      <label htmlFor="account-language" className="sr-only">
+        Idioma
+      </label>
       <select
+        id="account-language"
         name="language"
         defaultValue={currentLanguage}
         className="rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
