@@ -29,7 +29,10 @@ export const recurringTicketTemplates = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("recurring_ticket_templates_entity_idx").on(table.entityId)],
+  (table) => [
+    index("recurring_ticket_templates_entity_idx").on(table.entityId),
+    index("recurring_ticket_templates_requester_idx").on(table.requesterUserId),
+  ],
 );
 
 export type RecurringTicketTemplate = typeof recurringTicketTemplates.$inferSelect;

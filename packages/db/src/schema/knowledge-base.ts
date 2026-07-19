@@ -7,14 +7,18 @@ import { users } from "./users";
  * but are NOT entity-scoped: a KB category tree is shared globally, articles
  * themselves carry the entity scope (and thus the visibility boundary).
  */
-export const kbCategories = pgTable("kb_categories", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  parentId: uuid("parent_id").references((): AnyPgColumn => kbCategories.id),
-  name: text("name").notNull(),
-  comment: text("comment"),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-});
+export const kbCategories = pgTable(
+  "kb_categories",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    parentId: uuid("parent_id").references((): AnyPgColumn => kbCategories.id),
+    name: text("name").notNull(),
+    comment: text("comment"),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("kb_categories_parent_idx").on(table.parentId)],
+);
 
 /**
  * No dedicated revision-history table: every update() call writes a
@@ -44,7 +48,7 @@ export const kbArticles = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("kb_articles_entity_idx").on(table.entityId)],
+  (table) => [index("kb_articles_entity_idx").on(table.entityId), index("kb_articles_author_idx").on(table.authorUserId)],
 );
 
 /** Many-to-many pivot, same composite-PK pattern as contractAssets in contracts.ts. */
@@ -58,7 +62,10 @@ export const kbArticleCategories = pgTable(
       .notNull()
       .references(() => kbCategories.id, { onDelete: "cascade" }),
   },
-  (table) => [primaryKey({ columns: [table.articleId, table.categoryId] })],
+  (table) => [
+    primaryKey({ columns: [table.articleId, table.categoryId] }),
+    index("kb_article_categories_category_idx").on(table.categoryId),
+  ],
 );
 
 /** Flat storage, self-FK on parentCommentId for threaded replies - the UI nests them. */
@@ -76,7 +83,11 @@ export const kbArticleComments = pgTable(
     content: text("content").notNull(),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("kb_article_comments_article_idx").on(table.articleId)],
+  (table) => [
+    index("kb_article_comments_article_idx").on(table.articleId),
+    index("kb_article_comments_author_idx").on(table.authorUserId),
+    index("kb_article_comments_parent_idx").on(table.parentCommentId),
+  ],
 );
 
 export type KbCategory = typeof kbCategories.$inferSelect;

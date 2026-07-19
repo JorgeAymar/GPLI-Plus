@@ -1,4 +1,4 @@
-import { boolean, integer, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { dropdownCategories } from "./dropdowns";
 
 export const ticketFieldTypeEnum = pgEnum("ticket_field_type", ["text", "textarea", "number", "boolean", "date", "dropdown"]);
@@ -30,7 +30,10 @@ export const ticketFieldDefinitions = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [uniqueIndex("ticket_field_def_unique_key").on(table.ticketType, table.key)],
+  (table) => [
+    uniqueIndex("ticket_field_def_unique_key").on(table.ticketType, table.key),
+    index("ticket_field_definitions_dropdown_category_idx").on(table.dropdownCategoryId),
+  ],
 );
 
 export type TicketFieldDefinition = typeof ticketFieldDefinitions.$inferSelect;

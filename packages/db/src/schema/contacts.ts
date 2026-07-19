@@ -19,7 +19,7 @@ export const contacts = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("contacts_entity_idx").on(table.entityId)],
+  (table) => [index("contacts_entity_idx").on(table.entityId), index("contacts_supplier_idx").on(table.supplierId)],
 );
 
 export type Contact = typeof contacts.$inferSelect;

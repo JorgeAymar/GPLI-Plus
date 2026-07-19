@@ -2,21 +2,25 @@ import { boolean, index, integer, pgTable, text, timestamp, uuid } from "drizzle
 import { users } from "./users";
 
 /** Visibility is resource-based (resourceType="rss_feed") via resource_visibility_rules - see visibility-service.ts, not a column here. */
-export const rssFeeds = pgTable("rss_feeds", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-  ownerUserId: uuid("owner_user_id")
-    .notNull()
-    .references(() => users.id),
-  url: text("url").notNull(),
-  refreshRateMinutes: integer("refresh_rate_minutes").notNull().default(1440),
-  maxItems: integer("max_items").notNull().default(20),
-  isActive: boolean("is_active").notNull().default(true),
-  // Flipped by rss-feed-service.ts refreshRssFeed() on fetch/parse failure - surfaced in the list UI.
-  haveError: boolean("have_error").notNull().default(false),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-});
+export const rssFeeds = pgTable(
+  "rss_feeds",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    ownerUserId: uuid("owner_user_id")
+      .notNull()
+      .references(() => users.id),
+    url: text("url").notNull(),
+    refreshRateMinutes: integer("refresh_rate_minutes").notNull().default(1440),
+    maxItems: integer("max_items").notNull().default(20),
+    isActive: boolean("is_active").notNull().default(true),
+    // Flipped by rss-feed-service.ts refreshRssFeed() on fetch/parse failure - surfaced in the list UI.
+    haveError: boolean("have_error").notNull().default(false),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("rss_feeds_owner_idx").on(table.ownerUserId)],
+);
 
 /**
  * Simple wholesale-replace cache (no TTL/diffing, no Redis): refreshRssFeed()

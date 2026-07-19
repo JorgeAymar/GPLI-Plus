@@ -8,7 +8,7 @@ export const changes = pgTable(
     plannedStartAt: timestamp("planned_start_at", { mode: "date" }),
     plannedEndAt: timestamp("planned_end_at", { mode: "date" }),
   },
-  (table) => [index("changes_entity_idx").on(table.entityId)],
+  (table) => [index("changes_entity_idx").on(table.entityId), index("changes_category_dropdown_item_idx").on(table.categoryDropdownItemId)],
 );
 
 export type Change = typeof changes.$inferSelect;

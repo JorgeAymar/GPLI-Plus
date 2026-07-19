@@ -6,7 +6,7 @@ export const problems = pgTable(
   {
     ...itilBaseColumns(),
   },
-  (table) => [index("problems_entity_idx").on(table.entityId)],
+  (table) => [index("problems_entity_idx").on(table.entityId), index("problems_category_dropdown_item_idx").on(table.categoryDropdownItemId)],
 );
 
 export type Problem = typeof problems.$inferSelect;

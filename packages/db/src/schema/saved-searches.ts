@@ -40,22 +40,26 @@ export const savedSearches = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("saved_searches_entity_idx").on(table.entityId)],
+  (table) => [index("saved_searches_entity_idx").on(table.entityId), index("saved_searches_owner_idx").on(table.ownerUserId)],
 );
 
 /** One saved search can only ever have one alert config in v1 (1:1 in practice, modeled as 1:N for room to grow). */
-export const savedSearchAlerts = pgTable("saved_search_alerts", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  savedSearchId: uuid("saved_search_id")
-    .notNull()
-    .references(() => savedSearches.id, { onDelete: "cascade" }),
-  operator: savedSearchAlertOperatorEnum("operator").notNull(),
-  thresholdValue: integer("threshold_value").notNull(),
-  frequencyMinutes: integer("frequency_minutes").notNull().default(60),
-  isActive: boolean("is_active").notNull().default(true),
-  lastCheckedAt: timestamp("last_checked_at", { mode: "date" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-});
+export const savedSearchAlerts = pgTable(
+  "saved_search_alerts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    savedSearchId: uuid("saved_search_id")
+      .notNull()
+      .references(() => savedSearches.id, { onDelete: "cascade" }),
+    operator: savedSearchAlertOperatorEnum("operator").notNull(),
+    thresholdValue: integer("threshold_value").notNull(),
+    frequencyMinutes: integer("frequency_minutes").notNull().default(60),
+    isActive: boolean("is_active").notNull().default(true),
+    lastCheckedAt: timestamp("last_checked_at", { mode: "date" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("saved_search_alerts_saved_search_idx").on(table.savedSearchId)],
+);
 
 export type SavedSearch = typeof savedSearches.$inferSelect;
 export type NewSavedSearch = typeof savedSearches.$inferInsert;

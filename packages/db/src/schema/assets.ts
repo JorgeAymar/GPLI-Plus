@@ -44,6 +44,12 @@ export const assets = pgTable(
     uniqueIndex("assets_inventory_number_unique")
       .on(table.inventoryNumber)
       .where(sql`${table.inventoryNumber} IS NOT NULL`),
+    index("assets_status_dropdown_item_idx").on(table.statusDropdownItemId),
+    index("assets_manufacturer_dropdown_item_idx").on(table.manufacturerDropdownItemId),
+    index("assets_model_dropdown_item_idx").on(table.modelDropdownItemId),
+    index("assets_location_dropdown_item_idx").on(table.locationDropdownItemId),
+    index("assets_user_idx").on(table.userId),
+    index("assets_group_idx").on(table.groupId),
   ],
 );
 

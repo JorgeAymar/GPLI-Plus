@@ -24,7 +24,7 @@ export const inventoryAgents = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("inventory_agents_entity_idx").on(table.entityId)],
+  (table) => [index("inventory_agents_entity_idx").on(table.entityId), index("inventory_agents_asset_idx").on(table.assetId)],
 );
 
 /**

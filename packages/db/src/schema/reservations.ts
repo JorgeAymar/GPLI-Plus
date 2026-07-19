@@ -41,7 +41,10 @@ export const reservations = pgTable(
     seriesGroupId: uuid("series_group_id"),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("reservations_item_range_idx").on(table.reservationItemId, table.beginAt, table.endAt)],
+  (table) => [
+    index("reservations_item_range_idx").on(table.reservationItemId, table.beginAt, table.endAt),
+    index("reservations_requested_by_idx").on(table.requestedByUserId),
+  ],
 );
 
 export type ReservationItem = typeof reservationItems.$inferSelect;

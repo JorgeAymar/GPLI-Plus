@@ -24,7 +24,7 @@ export const entities = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("entities_path_gist_idx").using("gist", table.path)],
+  (table) => [index("entities_path_gist_idx").using("gist", table.path), index("entities_parent_idx").on(table.parentId)],
 );
 
 export type Entity = typeof entities.$inferSelect;
