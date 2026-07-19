@@ -3,6 +3,10 @@ import { listRssFeeds } from "@itsm/core";
 import Link from "next/link";
 import { RssFeedForm } from "./rss-feed-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Feeds RSS" };
+
 export default async function RssFeedsPage() {
   const context = await requireAuthContext();
   const feeds = await listRssFeeds(context);

@@ -2,6 +2,10 @@ import { requireAuthContext } from "@/lib/session";
 import { listRecurringTicketTemplates, listUsers } from "@itsm/core";
 import { RecurringTicketForm } from "./recurring-ticket-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Tickets recurrentes" };
+
 export default async function RecurringTicketsPage() {
   const context = await requireAuthContext();
   const [templates, users] = await Promise.all([

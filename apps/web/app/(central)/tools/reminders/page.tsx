@@ -3,6 +3,10 @@ import { listRemindersVisibleTo } from "@itsm/core";
 import { MarkReminderDoneButton } from "./mark-reminder-done-button";
 import { ReminderForm } from "./reminder-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Recordatorios" };
+
 export default async function RemindersPage() {
   const context = await requireAuthContext();
   const reminders = await listRemindersVisibleTo(context);

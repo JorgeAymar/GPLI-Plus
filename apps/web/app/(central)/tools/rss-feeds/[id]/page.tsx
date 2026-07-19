@@ -1,6 +1,13 @@
 import { requireAuthContext } from "@/lib/session";
 import { getRssFeed, listCachedItems } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const feed = await getRssFeed(id);
+  return { title: feed?.name ?? "Feed RSS" };
+}
 
 /**
  * Cached item descriptions are already sanitized server-side (sanitize-html,

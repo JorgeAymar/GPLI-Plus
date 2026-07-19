@@ -1,10 +1,17 @@
 import { requireAuthContext } from "@/lib/session";
 import { AVAILABLE_CARD_KEYS, getDashboard, listDashboardCards, resolveCardData } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CARD_KEY_LABEL } from "../card-key-labels";
 import { DashboardCardForm } from "./dashboard-card-form";
 import { DashboardCardView } from "./dashboard-card";
 import { RemoveDashboardCardButton } from "./remove-dashboard-card-button";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const dashboard = await getDashboard(id);
+  return { title: dashboard?.name ?? "Dashboard" };
+}
 
 /**
  * v1 layout recorte (documented per the task spec): cards sit on a plain

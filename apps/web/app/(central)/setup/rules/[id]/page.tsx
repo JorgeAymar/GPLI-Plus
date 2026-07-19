@@ -1,7 +1,14 @@
 import { getRule, listRuleActions, listRuleCriteria } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ActionForm } from "./action-form";
 import { CriteriaForm } from "./criteria-form";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const rule = await getRule(id);
+  return { title: rule?.name ?? "Regla" };
+}
 
 const OPERATOR_LABEL: Record<string, string> = {
   is: "es igual a",

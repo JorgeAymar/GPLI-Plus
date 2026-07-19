@@ -1,6 +1,10 @@
 import { requireAuthContext } from "@/lib/session";
 import { getReservationUsageReport, MODULE, requireRight, RIGHT } from "@itsm/core";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Uso de reservas" };
+
 export default async function ReservationsUsageReportPage() {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.TOOLS_RESERVATION, RIGHT.READ);

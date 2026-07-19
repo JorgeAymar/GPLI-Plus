@@ -7,6 +7,10 @@ function ticketTypeLabel(ticketType: string | null): string {
   return "Ambos";
 }
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Campos de ticket" };
+
 export default async function TicketFieldsPage() {
   const [fields, dropdownCategories] = await Promise.all([listTicketFieldDefinitions(), listDropdownCategories()]);
 

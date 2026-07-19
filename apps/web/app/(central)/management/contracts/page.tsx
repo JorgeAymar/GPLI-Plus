@@ -3,6 +3,10 @@ import { listContracts, listSuppliers } from "@itsm/core";
 import Link from "next/link";
 import { ContractForm } from "./contract-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Contratos" };
+
 export default async function ContractsPage() {
   const context = await requireAuthContext();
   const [contracts, suppliers] = await Promise.all([

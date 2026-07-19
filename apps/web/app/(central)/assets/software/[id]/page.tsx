@@ -1,8 +1,15 @@
 import { requireAuthContext } from "@/lib/session";
 import { countSeatsUsed, getSoftware, listSoftwareLicenses, listSoftwareVersions } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SoftwareLicenseForm } from "./software-license-form";
 import { SoftwareVersionForm } from "./software-version-form";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const softwareItem = await getSoftware(id);
+  return { title: softwareItem?.name ?? "Software" };
+}
 
 export default async function SoftwareDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

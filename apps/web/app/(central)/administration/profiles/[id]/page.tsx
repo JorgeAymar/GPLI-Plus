@@ -1,6 +1,13 @@
 import { getProfile, listModuleRightsForProfile, MODULE, RIGHT } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PermissionMatrix } from "./permission-matrix";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const profile = await getProfile(id);
+  return { title: profile?.name ?? "Perfil" };
+}
 
 export default async function ProfileDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

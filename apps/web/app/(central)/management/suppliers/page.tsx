@@ -3,6 +3,10 @@ import { listSuppliers } from "@itsm/core";
 import Link from "next/link";
 import { SupplierForm } from "./supplier-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Proveedores" };
+
 export default async function SuppliersPage() {
   const context = await requireAuthContext();
   const suppliers = await listSuppliers(context.activeEntity.id, { includeSubtree: true });

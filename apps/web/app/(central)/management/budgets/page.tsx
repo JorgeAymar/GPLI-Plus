@@ -2,6 +2,10 @@ import { requireAuthContext } from "@/lib/session";
 import { listBudgets } from "@itsm/core";
 import { BudgetForm } from "./budget-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Presupuestos" };
+
 export default async function BudgetsPage() {
   const context = await requireAuthContext();
   const budgets = await listBudgets(context.activeEntity.id, { includeSubtree: true });

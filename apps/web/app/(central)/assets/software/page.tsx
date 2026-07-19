@@ -3,6 +3,10 @@ import { listSoftware } from "@itsm/core";
 import Link from "next/link";
 import { SoftwareForm } from "./software-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Software" };
+
 export default async function SoftwarePage() {
   const context = await requireAuthContext();
   const softwareList = await listSoftware(context.activeEntity.id, { includeSubtree: true });

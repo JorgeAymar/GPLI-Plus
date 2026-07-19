@@ -3,6 +3,10 @@ import { getContractsExpiringReport, MODULE, requireRight, RIGHT } from "@itsm/c
 
 const DEFAULT_DAYS = 30;
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Contratos por vencer" };
+
 export default async function ContractsExpiringReportPage({ searchParams }: { searchParams: Promise<{ days?: string }> }) {
   const { days } = await searchParams;
   const parsedDays = Number(days);

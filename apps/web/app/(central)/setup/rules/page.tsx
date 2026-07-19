@@ -3,6 +3,10 @@ import { listRulesByEntity } from "@itsm/core";
 import Link from "next/link";
 import { RuleForm } from "./rule-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Reglas" };
+
 export default async function RulesPage() {
   const context = await requireAuthContext();
   const rules = await listRulesByEntity(context.activeEntity.id);

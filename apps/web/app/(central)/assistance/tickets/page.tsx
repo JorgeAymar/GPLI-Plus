@@ -1,5 +1,5 @@
 import { requireAuthContext } from "@/lib/session";
-import { getDropdownCategoryByKey, listDropdownItems, listTicketFieldDefinitions, listTickets } from "@itsm/core";
+import { DROPDOWN_CATEGORY, getDropdownCategoryByKey, listDropdownItems, listTicketFieldDefinitions, listTickets } from "@itsm/core";
 import type { DropdownItem } from "@itsm/db";
 import Link from "next/link";
 import { TicketForm } from "./ticket-form";
@@ -12,6 +12,10 @@ const STATUS_LABELS: Record<string, string> = {
   solved: "Resuelto",
   closed: "Cerrado",
 };
+
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Tickets" };
 
 export default async function TicketsPage() {
   const context = await requireAuthContext();
@@ -29,7 +33,7 @@ export default async function TicketsPage() {
   }
 
   // itil_category is the shared category dropdown for tickets/problems/changes (see seed.ts).
-  const categoryCategory = await getDropdownCategoryByKey("itil_category");
+  const categoryCategory = await getDropdownCategoryByKey(DROPDOWN_CATEGORY.ITIL_CATEGORY);
   const categoryOptions = categoryCategory ? await listDropdownItems(categoryCategory.id, context.activeEntity.id) : [];
 
   return (

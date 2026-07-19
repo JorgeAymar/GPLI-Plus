@@ -4,6 +4,10 @@ import { notFound } from "next/navigation";
 import { CancelReservationButton } from "./cancel-reservation-button";
 import { ReservationForm } from "./reservation-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Reservas del activo" };
+
 export default async function ReservationItemDetailPage({ params }: { params: Promise<{ itemId: string }> }) {
   const { itemId } = await params;
   await requireAuthContext();

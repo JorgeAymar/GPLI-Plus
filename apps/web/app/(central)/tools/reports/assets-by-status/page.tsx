@@ -1,6 +1,10 @@
 import { requireAuthContext } from "@/lib/session";
 import { getAssetCountsByStatus, MODULE, requireRight, RIGHT } from "@itsm/core";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Activos por estado" };
+
 export default async function AssetsByStatusReportPage() {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ASSETS_GENERIC, RIGHT.READ);

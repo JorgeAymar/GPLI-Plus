@@ -3,6 +3,10 @@ import Link from "next/link";
 import { AssignForm } from "./assign-form";
 import { ProfileForm } from "./profile-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Perfiles" };
+
 export default async function ProfilesPage() {
   const [profiles, users, entities] = await Promise.all([listProfiles(), listUsers(), listAllEntities()]);
 

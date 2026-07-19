@@ -8,6 +8,10 @@ const CERTIFICATE_TYPE_LABEL: Record<string, string> = {
   other: "Otro",
 };
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Certificados" };
+
 export default async function CertificatesPage() {
   const context = await requireAuthContext();
   const [certificates, assets] = await Promise.all([

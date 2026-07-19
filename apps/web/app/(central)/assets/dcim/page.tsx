@@ -1,10 +1,14 @@
 import { requireAuthContext } from "@/lib/session";
-import { getAssetDefinitionByKey, listAssets } from "@itsm/core";
+import { ASSET_DEFINITION_KEY, getAssetDefinitionByKey, listAssets } from "@itsm/core";
 import Link from "next/link";
+
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "DCIM" };
 
 export default async function DcimIndexPage() {
   const context = await requireAuthContext();
-  const rackDefinition = await getAssetDefinitionByKey("rack");
+  const rackDefinition = await getAssetDefinitionByKey(ASSET_DEFINITION_KEY.RACK);
   const racks = rackDefinition
     ? await listAssets(context.activeEntity.id, { assetDefinitionId: rackDefinition.id, includeSubtree: true })
     : [];

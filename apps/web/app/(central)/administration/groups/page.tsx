@@ -3,6 +3,10 @@ import { listGroups } from "@itsm/core";
 import Link from "next/link";
 import { GroupForm } from "./group-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Grupos" };
+
 export default async function GroupsPage() {
   const context = await requireAuthContext();
   const groups = await listGroups(context.activeEntity.id, { includeSubtree: true });

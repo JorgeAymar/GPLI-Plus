@@ -13,6 +13,10 @@ function assetTypeHref(key: string): string {
   return DEDICATED_ROUTES[key] ?? `/assets/${key}`;
 }
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Todos los activos" };
+
 export default async function AssetsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams;
   const context = await requireAuthContext();

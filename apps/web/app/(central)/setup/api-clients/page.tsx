@@ -3,6 +3,10 @@ import { listApiClients, MODULE } from "@itsm/core";
 import { ApiClientForm } from "./api-client-form";
 import { RevokeApiClientButton } from "./revoke-api-client-button";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Clientes API" };
+
 export default async function ApiClientsPage() {
   const context = await requireAuthContext();
   const clients = await listApiClients(context.activeEntity.id);

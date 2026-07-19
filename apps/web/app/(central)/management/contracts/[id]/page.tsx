@@ -1,7 +1,14 @@
 import { requireAuthContext } from "@/lib/session";
 import { getContract, listAssets, listAssetsForContract } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LinkAssetForm } from "./link-asset-form";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const contract = await getContract(id);
+  return { title: contract?.name ?? "Contrato" };
+}
 
 export default async function ContractDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

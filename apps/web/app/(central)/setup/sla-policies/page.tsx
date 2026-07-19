@@ -2,6 +2,10 @@ import { requireAuthContext } from "@/lib/session";
 import { listSlaPolicies } from "@itsm/core";
 import { SlaPolicyForm } from "./sla-policy-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Políticas SLA" };
+
 export default async function SlaPoliciesPage() {
   const context = await requireAuthContext();
   const policies = await listSlaPolicies(context.activeEntity.id, { includeSubtree: true });

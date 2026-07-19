@@ -1,5 +1,6 @@
 import { requireAuthContext } from "@/lib/session";
 import {
+  DROPDOWN_CATEGORY,
   getDropdownCategoryByKey,
   getProject,
   listDropdownItems,
@@ -9,10 +10,17 @@ import {
   listUsers,
 } from "@itsm/core";
 import type { ProjectTask } from "@itsm/db";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProjectCostForm } from "./project-cost-form";
 import { ProjectTaskForm } from "./project-task-form";
 import { ProjectTeamForm } from "./project-team-form";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const project = await getProject(id);
+  return { title: project?.name ?? "Proyecto" };
+}
 
 /** Flattens the parentTaskId tree into ordered rows with a depth, so the list can indent by CSS instead of nested JSX. */
 function buildTaskRows(tasks: ProjectTask[]): { task: ProjectTask; depth: number }[] {
@@ -51,7 +59,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     listProjectTeamMembers(id),
     listProjectCosts(id),
     listUsers(),
-    getDropdownCategoryByKey("project_task_state"),
+    getDropdownCategoryByKey(DROPDOWN_CATEGORY.PROJECT_TASK_STATE),
   ]);
 
   const taskStateItems = taskStateCategory ? await listDropdownItems(taskStateCategory.id, context.activeEntity.id) : [];

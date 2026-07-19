@@ -1,4 +1,5 @@
 import { getWebhook, listQueuedWebhooksForWebhook } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 const STATUS_CLASS: Record<string, string> = {
@@ -6,6 +7,12 @@ const STATUS_CLASS: Record<string, string> = {
   failed: "text-red-600",
   pending: "opacity-70",
 };
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const webhook = await getWebhook(id);
+  return { title: webhook?.name ?? "Webhook" };
+}
 
 export default async function WebhookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

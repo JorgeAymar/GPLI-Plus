@@ -2,6 +2,10 @@ import Link from "next/link";
 import { listAssetDefinitions } from "@itsm/core";
 import { AssetDefinitionForm } from "./asset-definition-form";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Tipos de activo" };
+
 export default async function AssetDefinitionsPage() {
   const definitions = await listAssetDefinitions();
 

@@ -11,6 +11,10 @@ const STATUS_LABELS: Record<string, string> = {
   closed: "Cerrado",
 };
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Tickets por estado" };
+
 export default async function TicketsByStatusReportPage() {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ASSISTANCE_TICKET, RIGHT.READ);

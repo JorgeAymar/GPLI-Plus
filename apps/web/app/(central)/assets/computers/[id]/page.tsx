@@ -7,9 +7,16 @@ import {
   listSoftware,
   listSoftwareVersions,
 } from "@itsm/core";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ComponentForm } from "./component-form";
 import { InstallSoftwareForm } from "./install-software-form";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const result = await getComputerWithAsset(id);
+  return { title: result?.asset.name ?? "Computadora" };
+}
 
 export default async function ComputerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

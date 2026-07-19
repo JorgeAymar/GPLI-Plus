@@ -27,6 +27,10 @@ function buildUseHref(itemType: string, queryJson: unknown): string {
   return search ? `${basePath}?q=${encodeURIComponent(search)}` : basePath;
 }
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Búsquedas guardadas" };
+
 export default async function SavedSearchesPage() {
   const context = await requireAuthContext();
   const savedSearchList = await listSavedSearches(context.user.id);
