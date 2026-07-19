@@ -6,8 +6,10 @@ import {
   RIGHT,
   createChange,
   createChangeSchema,
+  getChange,
   itilStatusSchema,
   requireRight,
+  requireRightOnEntity,
   updateChange,
   updateChangeSchema,
   updateChangeStatus,
@@ -23,9 +25,17 @@ export async function createChangeAction(input: unknown) {
   return change;
 }
 
-export async function updateChangeAction(id: string, input: unknown) {
+/** See requireTicketRight in tickets.actions.ts for why this checks the change's own entity. */
+async function requireChangeRight(id: string, required: number) {
   const context = await requireAuthContext();
-  await requireRight(context, MODULE.ASSISTANCE_CHANGE, RIGHT.UPDATE);
+  const change = await getChange(id);
+  if (!change) throw new Error(`Change ${id} not found`);
+  await requireRightOnEntity(context, MODULE.ASSISTANCE_CHANGE, required, change.entityId);
+  return context;
+}
+
+export async function updateChangeAction(id: string, input: unknown) {
+  const context = await requireChangeRight(id, RIGHT.UPDATE);
   const parsed = updateChangeSchema.parse(input);
   const change = await updateChange(id, parsed, context.user.id);
   revalidatePath(`/assistance/changes/${id}`);
@@ -33,8 +43,7 @@ export async function updateChangeAction(id: string, input: unknown) {
 }
 
 export async function updateChangeStatusAction(id: string, status: unknown) {
-  const context = await requireAuthContext();
-  await requireRight(context, MODULE.ASSISTANCE_CHANGE, RIGHT.UPDATE);
+  const context = await requireChangeRight(id, RIGHT.UPDATE);
   const parsedStatus = itilStatusSchema.parse(status);
   const change = await updateChangeStatus(id, parsedStatus, context.user.id);
   revalidatePath(`/assistance/changes/${id}`);

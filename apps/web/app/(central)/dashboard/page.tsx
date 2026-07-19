@@ -11,6 +11,7 @@ import {
   RIGHT,
 } from "@itsm/core";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -83,6 +84,9 @@ export default async function DashboardPage() {
               value={`${(slaCompliance.complianceRate * 100).toFixed(1)}%`}
               href="/tools/reports/sla-compliance"
               cta={t("viewReport")}
+              variant={
+                slaCompliance.complianceRate >= 0.95 ? "success" : slaCompliance.complianceRate < 0.8 ? "danger" : "neutral"
+              }
             />
           ) : null}
 
@@ -105,14 +109,9 @@ export default async function DashboardPage() {
         <div className="rounded-md border border-black/10 p-4 dark:border-white/10">
           <h2 className="text-sm font-medium opacity-70">{t("assistantHeading")}</h2>
           <p className="mt-1 text-sm opacity-70">{t("assistantDescription")}</p>
-          <a
-            href={process.env.AI_ASSISTANT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-block rounded-md border border-black/15 px-3 py-2 text-sm hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/5"
-          >
+          <Link href="/assistant" className="mt-3 inline-block rounded-md bg-accent px-3 py-2 text-sm text-white hover:bg-accent-hover">
             {t("assistantCta")}
-          </a>
+          </Link>
         </div>
       ) : null}
     </div>

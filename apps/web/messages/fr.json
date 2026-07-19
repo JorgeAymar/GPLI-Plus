@@ -4,6 +4,7 @@
     "note": "Primer borrador generado por IA a partir de es.json. No revisado por un hablante nativo todavía - ver docs/superpowers/specs/2026-07-19-i18n-engine-design.md, sección 'Fuera de alcance'."
   },
   "nav": {
+    "aiAssistant": "Assistant IA",
     "dashboard": "Tableau de bord",
     "account": "Mon compte",
     "sectionAsistencia": "Assistance",
@@ -64,9 +65,33 @@
     "totalAssets": "Actifs enregistrés",
     "contractsExpiring": "Contrats arrivant à échéance (30 jours)",
     "viewReport": "Voir le rapport complet",
-    "assistantHeading": "Assistant externe",
-    "assistantDescription": "Accédez à l'assistant d'intelligence artificielle pour résoudre des questions et accélérer des tâches en dehors de GLPI-Plus.",
-    "assistantCta": "Ouvrir l'assistant externe"
+    "assistantHeading": "Assistant IA",
+    "assistantDescription": "Accédez à l'assistant d'intelligence artificielle avec accès aux données réelles de GLPI-Plus.",
+    "assistantCta": "Ouvrir l'assistant"
+  },
+  "assistant": {
+    "title": "Assistant IA",
+    "subtitle": "Répond aux questions sur les données et processus de GLPI-Plus.",
+    "placeholder": "Tapez votre question...",
+    "send": "Envoyer",
+    "sending": "Envoi...",
+    "emptyState": "Posez une question sur les tickets, actifs, problèmes ou changements dans GLPI-Plus.",
+    "newConversation": "Nouvelle conversation",
+    "errorPrefix": "Erreur :",
+    "notConfigured": "L'assistant n'est pas configuré dans cet environnement.",
+    "history": "Conversations",
+    "noConversations": "Aucune conversation pour l'instant.",
+    "loadingHistory": "Chargement...",
+    "deleteConversation": "Supprimer la conversation",
+    "suggestionsHeading": "Vous pouvez demander des choses comme :",
+    "suggestions": [
+      "Combien de tickets ouverts y a-t-il ?",
+      "Quels ordinateurs sont enregistrés ?",
+      "Y a-t-il des problèmes non résolus ?",
+      "Quels changements sont en cours ?",
+      "Quels actifs génériques existent dans mon entité ?",
+      "Comment fonctionne l'analyse d'impact ?"
+    ]
   },
   "account": {
     "title": "Mon compte",

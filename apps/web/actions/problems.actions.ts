@@ -6,8 +6,10 @@ import {
   RIGHT,
   createProblem,
   createProblemSchema,
+  getProblem,
   itilStatusSchema,
   requireRight,
+  requireRightOnEntity,
   updateProblem,
   updateProblemSchema,
   updateProblemStatus,
@@ -23,9 +25,17 @@ export async function createProblemAction(input: unknown) {
   return problem;
 }
 
-export async function updateProblemAction(id: string, input: unknown) {
+/** See requireTicketRight in tickets.actions.ts for why this checks the problem's own entity. */
+async function requireProblemRight(id: string, required: number) {
   const context = await requireAuthContext();
-  await requireRight(context, MODULE.ASSISTANCE_PROBLEM, RIGHT.UPDATE);
+  const problem = await getProblem(id);
+  if (!problem) throw new Error(`Problem ${id} not found`);
+  await requireRightOnEntity(context, MODULE.ASSISTANCE_PROBLEM, required, problem.entityId);
+  return context;
+}
+
+export async function updateProblemAction(id: string, input: unknown) {
+  const context = await requireProblemRight(id, RIGHT.UPDATE);
   const parsed = updateProblemSchema.parse(input);
   const problem = await updateProblem(id, parsed, context.user.id);
   revalidatePath(`/assistance/problems/${id}`);
@@ -33,8 +43,7 @@ export async function updateProblemAction(id: string, input: unknown) {
 }
 
 export async function updateProblemStatusAction(id: string, status: unknown) {
-  const context = await requireAuthContext();
-  await requireRight(context, MODULE.ASSISTANCE_PROBLEM, RIGHT.UPDATE);
+  const context = await requireProblemRight(id, RIGHT.UPDATE);
   const parsedStatus = itilStatusSchema.parse(status);
   const problem = await updateProblemStatus(id, parsedStatus, context.user.id);
   revalidatePath(`/assistance/problems/${id}`);

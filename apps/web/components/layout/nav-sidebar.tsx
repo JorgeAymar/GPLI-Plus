@@ -82,13 +82,26 @@ function findActiveHref(pathname: string): string | undefined {
   return activeHref;
 }
 
-export function NavSidebar() {
+export function NavSidebar({ aiAssistantEnabled }: { aiAssistantEnabled?: boolean }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const activeHref = findActiveHref(pathname);
 
   return (
     <nav className="sticky top-0 flex h-screen w-56 shrink-0 flex-col gap-1 overflow-y-auto border-r border-black/10 p-4 dark:border-white/10">
+      {aiAssistantEnabled ? (
+        <Link
+          href="/assistant"
+          aria-current={pathname === "/assistant" ? "page" : undefined}
+          className={
+            pathname === "/assistant"
+              ? "rounded-md bg-accent/10 px-3 py-2 text-sm font-semibold text-accent"
+              : "rounded-md px-3 py-2 text-sm font-semibold hover:bg-black/5 dark:hover:bg-white/5"
+          }
+        >
+          {t("aiAssistant")}
+        </Link>
+      ) : null}
       {NAV.map((item) =>
         item.section ? (
           <div key={item.labelKey} className="mt-4 px-3 pb-1 text-xs font-medium uppercase tracking-wide opacity-70 first:mt-0">
@@ -101,7 +114,7 @@ export function NavSidebar() {
             aria-current={item.href === activeHref ? "page" : undefined}
             className={
               item.href === activeHref
-                ? "rounded-md bg-black/5 px-3 py-2 text-sm font-semibold dark:bg-white/10"
+                ? "rounded-md bg-accent/10 px-3 py-2 text-sm font-semibold text-accent"
                 : "rounded-md px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
             }
           >

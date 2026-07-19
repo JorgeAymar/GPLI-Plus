@@ -12,6 +12,7 @@ import {
   moduleKeyForAssetDefinition,
   purgeAsset,
   requireRight,
+  requireRightOnEntity,
   restoreAsset,
   softDeleteAsset,
   updateAsset,
@@ -28,10 +29,20 @@ async function requireRightForAssetDefinition(assetDefinitionId: string, require
   return context;
 }
 
+/**
+ * Unlike requireRightForAssetDefinition (used only for CREATE, where the asset doesn't exist
+ * yet), this checks the right against the EXISTING asset's own entity rather than the
+ * caller's active entity - see requireTicketRight in tickets.actions.ts for why. Used for
+ * every action on an already-existing asset (update/assign/delete/restore/purge).
+ */
 async function requireRightForAsset(assetId: string, required: number): Promise<AuthContext> {
+  const context = await requireAuthContext();
   const asset = await getAsset(assetId);
   if (!asset) throw new Error(`Asset ${assetId} not found`);
-  return requireRightForAssetDefinition(asset.assetDefinitionId, required);
+  const definition = await getAssetDefinition(asset.assetDefinitionId);
+  if (!definition) throw new Error(`Asset definition ${asset.assetDefinitionId} not found`);
+  await requireRightOnEntity(context, moduleKeyForAssetDefinition(definition), required, asset.entityId);
+  return context;
 }
 
 export async function createAssetAction(input: unknown) {

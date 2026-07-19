@@ -32,7 +32,7 @@ export function KbCommentForm({ articleId }: { articleId: string }) {
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background disabled:opacity-50"
+        className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-50"
       >
         {isPending ? "Enviando..." : "Comentar"}
       </button>

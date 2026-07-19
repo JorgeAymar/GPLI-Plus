@@ -41,7 +41,7 @@ export function UseConsumableForm({ consumableId, assets }: { consumableId: stri
       <button
         type="submit"
         disabled={isPending || assets.length === 0}
-        className="rounded-md bg-foreground px-2 py-1 text-xs font-medium text-background disabled:opacity-50"
+        className="rounded-md bg-accent px-2 py-1 text-xs font-medium text-white hover:bg-accent-hover disabled:opacity-50"
       >
         {isPending ? "..." : "Usar"}
       </button>

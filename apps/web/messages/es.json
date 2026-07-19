@@ -1,5 +1,6 @@
 {
   "nav": {
+    "aiAssistant": "Asistente IA",
     "dashboard": "Dashboard",
     "account": "Mi cuenta",
     "sectionAsistencia": "Asistencia",
@@ -60,9 +61,33 @@
     "totalAssets": "Activos registrados",
     "contractsExpiring": "Contratos por vencer (30 días)",
     "viewReport": "Ver reporte completo",
-    "assistantHeading": "Asistente externo",
-    "assistantDescription": "Accede al asistente de inteligencia artificial para resolver consultas y agilizar tareas fuera de GLPI-Plus.",
-    "assistantCta": "Abrir asistente externo"
+    "assistantHeading": "Asistente IA",
+    "assistantDescription": "Accedé al asistente de inteligencia artificial con acceso a los datos reales de GLPI-Plus.",
+    "assistantCta": "Abrir asistente"
+  },
+  "assistant": {
+    "title": "Asistente IA",
+    "subtitle": "Responde consultas sobre los datos y procesos de GLPI-Plus.",
+    "placeholder": "Escribí tu consulta...",
+    "send": "Enviar",
+    "sending": "Enviando...",
+    "emptyState": "Preguntá sobre tickets, activos, problemas o cambios en GLPI-Plus.",
+    "newConversation": "Nueva conversación",
+    "errorPrefix": "Error:",
+    "notConfigured": "El asistente no está configurado en este entorno.",
+    "history": "Conversaciones",
+    "noConversations": "Todavía no hay conversaciones.",
+    "loadingHistory": "Cargando...",
+    "deleteConversation": "Eliminar conversación",
+    "suggestionsHeading": "Podés preguntar cosas como:",
+    "suggestions": [
+      "¿Cuántos tickets abiertos hay?",
+      "¿Qué computadoras están registradas?",
+      "¿Hay problemas sin resolver?",
+      "¿Qué cambios están en curso?",
+      "¿Qué activos genéricos existen en mi entidad?",
+      "¿Cómo funciona el análisis de impacto?"
+    ]
   },
   "account": {
     "title": "Mi cuenta",

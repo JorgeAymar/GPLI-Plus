@@ -4,6 +4,7 @@
     "note": "Primer borrador generado por IA a partir de es.json. No revisado por un hablante nativo todavía - ver docs/superpowers/specs/2026-07-19-i18n-engine-design.md, sección 'Fuera de alcance'."
   },
   "nav": {
+    "aiAssistant": "AI Assistant",
     "dashboard": "Dashboard",
     "account": "My account",
     "sectionAsistencia": "Service Desk",
@@ -64,9 +65,33 @@
     "totalAssets": "Registered assets",
     "contractsExpiring": "Contracts expiring (30 days)",
     "viewReport": "View full report",
-    "assistantHeading": "External Assistant",
-    "assistantDescription": "Open the AI assistant to resolve queries and speed up tasks outside GLPI-Plus.",
-    "assistantCta": "Open external assistant"
+    "assistantHeading": "AI Assistant",
+    "assistantDescription": "Open the AI assistant with access to real GLPI-Plus data.",
+    "assistantCta": "Open assistant"
+  },
+  "assistant": {
+    "title": "AI Assistant",
+    "subtitle": "Answers questions about GLPI-Plus data and processes.",
+    "placeholder": "Type your question...",
+    "send": "Send",
+    "sending": "Sending...",
+    "emptyState": "Ask about tickets, assets, problems, or changes in GLPI-Plus.",
+    "newConversation": "New conversation",
+    "errorPrefix": "Error:",
+    "notConfigured": "The assistant is not configured in this environment.",
+    "history": "Conversations",
+    "noConversations": "No conversations yet.",
+    "loadingHistory": "Loading...",
+    "deleteConversation": "Delete conversation",
+    "suggestionsHeading": "You can ask things like:",
+    "suggestions": [
+      "How many open tickets are there?",
+      "Which computers are registered?",
+      "Are there any unresolved problems?",
+      "What changes are in progress?",
+      "What generic assets exist in my entity?",
+      "How does impact analysis work?"
+    ]
   },
   "account": {
     "title": "My account",
