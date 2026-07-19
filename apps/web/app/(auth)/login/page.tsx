@@ -17,8 +17,11 @@ export default async function LoginPage({
 
   return (
     <div className="relative flex min-h-screen items-center justify-center">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 text-right">
         <LoginLanguageSwitcher currentLocale={locale} options={SUPPORTED_LANGUAGES} />
+        <p className="mt-1 max-w-[16rem] text-xs opacity-50">
+          Esto solo guarda tu preferencia. Todavía no cambia el idioma de la interfaz.
+        </p>
       </div>
       <LoginForm callbackUrl={callbackUrl ?? "/"} />
     </div>
