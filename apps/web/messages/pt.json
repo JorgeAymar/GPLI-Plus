@@ -58,7 +58,10 @@
   "dashboard": {
     "title": "Dashboard",
     "activeEntity": "Entidade ativa",
-    "activeProfile": "Perfil ativo"
+    "activeProfile": "Perfil ativo",
+    "assistantHeading": "Assistente de IA",
+    "assistantDescription": "Acesse o assistente de inteligência artificial para resolver dúvidas e agilizar tarefas fora do GLPI-Plus.",
+    "assistantCta": "Abrir assistente"
   },
   "account": {
     "title": "Minha conta",
