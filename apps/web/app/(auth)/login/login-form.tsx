@@ -12,7 +12,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
       className="w-full max-w-sm space-y-4 rounded-lg border border-black/10 p-8 shadow-sm dark:border-white/10"
     >
       <div>
-        <h1 className="text-xl font-semibold">Iniciar sesión</h1>
+        <h1 className="text-2xl font-semibold">Iniciar sesión</h1>
         <p className="text-sm opacity-60">Plataforma ITSM</p>
       </div>
 

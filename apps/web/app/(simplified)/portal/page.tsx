@@ -25,7 +25,7 @@ export default async function PortalPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-semibold">¿En qué te podemos ayudar?</h1>
+        <h1 className="text-2xl font-semibold">¿En qué te podemos ayudar?</h1>
 
         <div className="mt-4">
           <h2 className="mb-2 text-sm font-medium opacity-70">Catálogo de servicios</h2>
