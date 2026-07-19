@@ -303,7 +303,9 @@ test.describe.serial("Gestión - flujo E2E: Contrato", () => {
     const diag = attachDiagnostics(page);
     await page.goto(`/management/contracts/${contractId}`);
 
-    const assetSelect = page.getByLabel("Activo");
+    // exact: true - "Activo" is otherwise a substring match of the shared layout's entity/profile
+    // selector, which carries aria-label="Entidad y perfil activos" (added for accessibility).
+    const assetSelect = page.getByLabel("Activo", { exact: true });
     const optionCount = await assetSelect.locator("option").count();
     test.skip(optionCount === 0, "No hay activos disponibles en el entorno para vincular al contrato");
 
