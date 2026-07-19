@@ -39,6 +39,14 @@ export async function attachDocumentToItem(documentId: string, itemType: string,
   await db.insert(documentItems).values({ documentId, itemType, itemId });
 }
 
+/** The reverse of listDocumentsForItem - what item(s) is this document attached to. A document can be attached to more than one item. */
+export async function listItemAttachmentsForDocument(documentId: string): Promise<{ itemType: string; itemId: string }[]> {
+  return db
+    .select({ itemType: documentItems.itemType, itemId: documentItems.itemId })
+    .from(documentItems)
+    .where(eq(documentItems.documentId, documentId));
+}
+
 export async function listDocumentsForItem(itemType: string, itemId: string): Promise<Document[]> {
   const rows = await db
     .select({ document: documents })
@@ -60,12 +68,14 @@ export async function getDocument(id: string): Promise<Document | undefined> {
   return document;
 }
 
-export async function readDocumentContent(id: string): Promise<{ buffer: Buffer; mimeType: string; filename: string } | undefined> {
+export async function readDocumentContent(
+  id: string,
+): Promise<{ buffer: Buffer; mimeType: string; filename: string; entityId: string } | undefined> {
   const document = await getDocument(id);
   if (!document) return undefined;
   const adapter = createStorageAdapter();
   const buffer = await adapter.read(document.storageKey);
-  return { buffer, mimeType: document.mimeType, filename: document.filename };
+  return { buffer, mimeType: document.mimeType, filename: document.filename, entityId: document.entityId };
 }
 
 /** Hard-deletes the document (file + row) - cascades document_items via FK. */

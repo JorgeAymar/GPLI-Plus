@@ -14,7 +14,9 @@ import {
   createProjectTaskLinkSchema,
   createProjectTaskSchema,
   createProjectTeamMemberSchema,
+  getProject,
   requireRight,
+  requireRightOnEntity,
   updateProject,
   updateProjectSchema,
 } from "@itsm/core";
@@ -29,9 +31,21 @@ export async function createProjectAction(input: unknown) {
   return project;
 }
 
-export async function updateProjectAction(id: string, input: unknown) {
+/**
+ * See requireTicketRight in tickets.actions.ts for why this checks the project's own entity
+ * rather than the caller's active entity - used both for editing the project itself and for
+ * adding tasks/team members/costs to it, since all of those act on an existing project.
+ */
+async function requireProjectRight(projectId: string, required: number) {
   const context = await requireAuthContext();
-  await requireRight(context, MODULE.TOOLS_PROJECT, RIGHT.UPDATE);
+  const project = await getProject(projectId);
+  if (!project) throw new Error(`Project ${projectId} not found`);
+  await requireRightOnEntity(context, MODULE.TOOLS_PROJECT, required, project.entityId);
+  return context;
+}
+
+export async function updateProjectAction(id: string, input: unknown) {
+  const context = await requireProjectRight(id, RIGHT.UPDATE);
   const parsed = updateProjectSchema.parse(input);
   const project = await updateProject(id, parsed);
   revalidatePath("/tools/projects");
@@ -43,18 +57,16 @@ export async function updateProjectAction(id: string, input: unknown) {
 // data, so - like linkContractAssetAction in contracts.actions.ts - these
 // require UPDATE on the project module rather than CREATE.
 export async function createProjectTaskAction(input: unknown) {
-  const context = await requireAuthContext();
-  await requireRight(context, MODULE.TOOLS_PROJECT, RIGHT.UPDATE);
   const parsed = createProjectTaskSchema.parse(input);
+  await requireProjectRight(parsed.projectId, RIGHT.UPDATE);
   const task = await createProjectTask(parsed);
   revalidatePath(`/tools/projects/${parsed.projectId}`);
   return task;
 }
 
 export async function addProjectTeamMemberAction(input: unknown) {
-  const context = await requireAuthContext();
-  await requireRight(context, MODULE.TOOLS_PROJECT, RIGHT.UPDATE);
   const parsed = createProjectTeamMemberSchema.parse(input);
+  await requireProjectRight(parsed.projectId, RIGHT.UPDATE);
   const member = await addProjectTeamMember(parsed);
   revalidatePath(`/tools/projects/${parsed.projectId}`);
   return member;
@@ -64,8 +76,7 @@ export async function addProjectTeamMemberAction(input: unknown) {
 // ids), so the caller passes it separately purely to know which detail page
 // to revalidate.
 export async function addProjectTaskLinkAction(input: unknown, projectId: string) {
-  const context = await requireAuthContext();
-  await requireRight(context, MODULE.TOOLS_PROJECT, RIGHT.UPDATE);
+  await requireProjectRight(projectId, RIGHT.UPDATE);
   const parsed = createProjectTaskLinkSchema.parse(input);
   const link = await addProjectTaskLink(parsed);
   revalidatePath(`/tools/projects/${projectId}`);
@@ -73,9 +84,8 @@ export async function addProjectTaskLinkAction(input: unknown, projectId: string
 }
 
 export async function addProjectCostAction(input: unknown) {
-  const context = await requireAuthContext();
-  await requireRight(context, MODULE.TOOLS_PROJECT, RIGHT.UPDATE);
   const parsed = createProjectCostSchema.parse(input);
+  await requireProjectRight(parsed.projectId, RIGHT.UPDATE);
   const cost = await addProjectCost(parsed);
   revalidatePath(`/tools/projects/${parsed.projectId}`);
   return cost;

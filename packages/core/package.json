@@ -16,6 +16,7 @@
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "ldapjs": "^3.0.7",
+    "nodemailer": "^9.0.3",
     "rss-parser": "^3.13.0",
     "sanitize-html": "^2.17.6",
     "zod": "^3.24.0"
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/ldapjs": "^3.0.6",
+    "@types/nodemailer": "^8.0.1",
     "@types/sanitize-html": "^2.16.1",
     "tsx": "^4.23.0",
     "typescript": "^5.7.0",

@@ -4,6 +4,7 @@
     "note": "Primer borrador generado por IA a partir de es.json. No revisado por un hablante nativo todavía - ver docs/superpowers/specs/2026-07-19-i18n-engine-design.md, sección 'Fuera de alcance'."
   },
   "nav": {
+    "aiAssistant": "KI-Assistent",
     "dashboard": "Dashboard",
     "account": "Mein Konto",
     "sectionAsistencia": "Support",
@@ -64,9 +65,33 @@
     "totalAssets": "Erfasste Assets",
     "contractsExpiring": "Auslaufende Verträge (30 Tage)",
     "viewReport": "Vollständigen Bericht anzeigen",
-    "assistantHeading": "Externer Assistent",
-    "assistantDescription": "Öffnen Sie den KI-Assistenten, um Fragen zu klären und Aufgaben außerhalb von GLPI-Plus zu beschleunigen.",
-    "assistantCta": "Externen Assistenten öffnen"
+    "assistantHeading": "KI-Assistent",
+    "assistantDescription": "Öffnen Sie den KI-Assistenten mit Zugriff auf echte GLPI-Plus-Daten.",
+    "assistantCta": "Assistenten öffnen"
+  },
+  "assistant": {
+    "title": "KI-Assistent",
+    "subtitle": "Beantwortet Fragen zu Daten und Prozessen in GLPI-Plus.",
+    "placeholder": "Geben Sie Ihre Frage ein...",
+    "send": "Senden",
+    "sending": "Senden...",
+    "emptyState": "Fragen Sie nach Tickets, Assets, Problemen oder Änderungen in GLPI-Plus.",
+    "newConversation": "Neue Unterhaltung",
+    "errorPrefix": "Fehler:",
+    "notConfigured": "Der Assistent ist in dieser Umgebung nicht konfiguriert.",
+    "history": "Unterhaltungen",
+    "noConversations": "Noch keine Unterhaltungen.",
+    "loadingHistory": "Wird geladen...",
+    "deleteConversation": "Unterhaltung löschen",
+    "suggestionsHeading": "Sie können zum Beispiel fragen:",
+    "suggestions": [
+      "Wie viele offene Tickets gibt es?",
+      "Welche Computer sind registriert?",
+      "Gibt es ungelöste Probleme?",
+      "Welche Änderungen sind in Bearbeitung?",
+      "Welche generischen Assets gibt es in meiner Entität?",
+      "Wie funktioniert die Auswirkungsanalyse?"
+    ]
   },
   "account": {
     "title": "Mein Konto",

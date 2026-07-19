@@ -9,7 +9,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   return (
     <form
       action={formAction}
-      className="w-full max-w-sm space-y-4 rounded-lg border border-black/10 p-8 shadow-sm dark:border-white/10"
+      className="w-full max-w-sm space-y-4 rounded-md border border-black/10 p-8 dark:border-white/10"
     >
       <div>
         <h1 className="text-2xl font-semibold">Iniciar sesión</h1>
@@ -51,7 +51,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background disabled:opacity-50"
+        className="w-full rounded-md bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-50"
       >
         {isPending ? "Ingresando..." : "Ingresar"}
       </button>

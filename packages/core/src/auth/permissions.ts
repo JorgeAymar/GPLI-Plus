@@ -32,3 +32,19 @@ export async function requireRight(context: AuthContext, moduleKey: string, requ
     throw new ForbiddenError(moduleKey, required);
   }
 }
+
+/**
+ * Like `requireRight`, but checks `entityId` (e.g. an existing record's own entity) instead
+ * of the caller's currently-active entity. `requireRight` alone only proves the caller has
+ * `required` *wherever they're currently standing* (`context.activeEntity.id`) - for an
+ * update/delete/assign on a specific existing record, that's the wrong entity to check: a
+ * caller with UPDATE in their own entity could otherwise write to a record that lives in a
+ * different entity they were never assigned to. Use this whenever the acting right needs to
+ * cover a specific record, not the caller's current context.
+ */
+export async function requireRightOnEntity(context: AuthContext, moduleKey: string, required: number, entityId: string): Promise<void> {
+  const rights = await getEffectiveRights(context.user.id, entityId, moduleKey);
+  if (!hasRight(rights, required)) {
+    throw new ForbiddenError(moduleKey, required);
+  }
+}

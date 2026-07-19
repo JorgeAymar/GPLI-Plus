@@ -4,6 +4,7 @@
     "note": "Primer borrador generado por IA a partir de es.json. No revisado por un hablante nativo todavía - ver docs/superpowers/specs/2026-07-19-i18n-engine-design.md, sección 'Fuera de alcance'."
   },
   "nav": {
+    "aiAssistant": "Assistente IA",
     "dashboard": "Dashboard",
     "account": "Il mio account",
     "sectionAsistencia": "Assistenza",
@@ -64,9 +65,33 @@
     "totalAssets": "Asset registrati",
     "contractsExpiring": "Contratti in scadenza (30 giorni)",
     "viewReport": "Vedi report completo",
-    "assistantHeading": "Assistente esterno",
-    "assistantDescription": "Accedi all'assistente di intelligenza artificiale per risolvere dubbi e velocizzare attività al di fuori di GLPI-Plus.",
-    "assistantCta": "Apri assistente esterno"
+    "assistantHeading": "Assistente IA",
+    "assistantDescription": "Accedi all'assistente di intelligenza artificiale con accesso ai dati reali di GLPI-Plus.",
+    "assistantCta": "Apri assistente"
+  },
+  "assistant": {
+    "title": "Assistente IA",
+    "subtitle": "Risponde a domande sui dati e processi di GLPI-Plus.",
+    "placeholder": "Scrivi la tua domanda...",
+    "send": "Invia",
+    "sending": "Invio...",
+    "emptyState": "Chiedi informazioni su ticket, asset, problemi o cambiamenti in GLPI-Plus.",
+    "newConversation": "Nuova conversazione",
+    "errorPrefix": "Errore:",
+    "notConfigured": "L'assistente non è configurato in questo ambiente.",
+    "history": "Conversazioni",
+    "noConversations": "Ancora nessuna conversazione.",
+    "loadingHistory": "Caricamento...",
+    "deleteConversation": "Elimina conversazione",
+    "suggestionsHeading": "Puoi chiedere cose come:",
+    "suggestions": [
+      "Quanti ticket aperti ci sono?",
+      "Quali computer sono registrati?",
+      "Ci sono problemi non risolti?",
+      "Quali cambiamenti sono in corso?",
+      "Quali asset generici esistono nella mia entità?",
+      "Come funziona l'analisi dell'impatto?"
+    ]
   },
   "account": {
     "title": "Il mio account",

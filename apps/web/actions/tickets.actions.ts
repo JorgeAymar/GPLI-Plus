@@ -6,8 +6,10 @@ import {
   RIGHT,
   createTicket,
   createTicketSchema,
+  getTicket,
   itilStatusSchema,
   requireRight,
+  requireRightOnEntity,
   updateTicket,
   updateTicketSchema,
   updateTicketStatus,
@@ -44,9 +46,23 @@ export async function createTicketAction(input: unknown) {
   return ticket;
 }
 
-export async function updateTicketAction(id: string, input: unknown) {
+/**
+ * `requireRight` alone only proves the caller has UPDATE *wherever they're currently
+ * standing* (their active entity) - for a specific existing ticket, that's the wrong entity
+ * to check. Fetch the ticket first and check the right against its own entity instead, so a
+ * caller with UPDATE in their own entity can't write to a ticket that lives in a different
+ * entity they were never assigned to.
+ */
+async function requireTicketRight(id: string, required: number) {
   const context = await requireAuthContext();
-  await requireRight(context, MODULE.ASSISTANCE_TICKET, RIGHT.UPDATE);
+  const ticket = await getTicket(id);
+  if (!ticket) throw new Error(`Ticket ${id} not found`);
+  await requireRightOnEntity(context, MODULE.ASSISTANCE_TICKET, required, ticket.entityId);
+  return context;
+}
+
+export async function updateTicketAction(id: string, input: unknown) {
+  const context = await requireTicketRight(id, RIGHT.UPDATE);
   const parsed = parseInput(updateTicketSchema, input);
   const ticket = await updateTicket(id, parsed, context.user.id);
   revalidatePath(`/assistance/tickets/${id}`);
@@ -54,8 +70,7 @@ export async function updateTicketAction(id: string, input: unknown) {
 }
 
 export async function updateTicketStatusAction(id: string, status: unknown) {
-  const context = await requireAuthContext();
-  await requireRight(context, MODULE.ASSISTANCE_TICKET, RIGHT.UPDATE);
+  const context = await requireTicketRight(id, RIGHT.UPDATE);
   const parsedStatus = parseInput(itilStatusSchema, status);
   const ticket = await updateTicketStatus(id, parsedStatus, context.user.id);
   revalidatePath(`/assistance/tickets/${id}`);

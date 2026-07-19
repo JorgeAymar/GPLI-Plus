@@ -79,25 +79,50 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         className="pointer-events-none fixed inset-x-0 top-4 z-50 flex flex-col items-center gap-2 px-4 outline-none sm:items-end"
       >
         {toasts.map((t) => (
-          <div
-            key={t.id}
-            className={`pointer-events-auto flex max-w-sm items-center gap-3 rounded-md px-4 py-3 text-sm font-medium shadow-lg ${
-              t.variant === "error" ? "bg-red-600 text-white" : "bg-foreground text-background"
-            }`}
-          >
-            <span>{t.message}</span>
-            <button
-              type="button"
-              onClick={() => dismiss(t.id)}
-              className="shrink-0 text-xs underline opacity-80 hover:opacity-100"
-              aria-label="Cerrar notificación"
-            >
-              Cerrar
-            </button>
-          </div>
+          <ToastItem key={t.id} toast={t} onDismiss={dismiss} />
         ))}
       </div>
     </ToastContext.Provider>
+  );
+}
+
+/**
+ * Renders a single toast with a subtle slide-up + fade entrance (~200ms
+ * ease-out). Starts hidden/offset and flips to its resting state on the
+ * next frame after mount, so the transition actually animates instead of
+ * jumping straight to its final state. Respects `prefers-reduced-motion`
+ * via Tailwind's `motion-reduce:` variant.
+ */
+function ToastItem({
+  toast,
+  onDismiss,
+}: {
+  toast: ToastMessage;
+  onDismiss: (id: number) => void;
+}) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return (
+    <div
+      className={`pointer-events-auto flex max-w-sm items-center gap-3 rounded-md border px-4 py-3 text-sm font-medium transition-all duration-200 ease-out motion-reduce:transition-none motion-reduce:transform-none ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
+      } ${toast.variant === "error" ? "border-red-700 bg-red-600 text-white" : "border-accent-hover bg-accent text-white"}`}
+    >
+      <span>{toast.message}</span>
+      <button
+        type="button"
+        onClick={() => onDismiss(toast.id)}
+        className="shrink-0 text-xs underline opacity-80 hover:opacity-100"
+        aria-label="Cerrar notificación"
+      >
+        Cerrar
+      </button>
+    </div>
   );
 }
 

@@ -4,6 +4,7 @@
     "note": "Primer borrador generado por IA a partir de es.json. No revisado por un hablante nativo todavía - ver docs/superpowers/specs/2026-07-19-i18n-engine-design.md, sección 'Fuera de alcance'."
   },
   "nav": {
+    "aiAssistant": "Assistente de IA",
     "dashboard": "Dashboard",
     "account": "Minha conta",
     "sectionAsistencia": "Atendimento",
@@ -64,9 +65,33 @@
     "totalAssets": "Ativos cadastrados",
     "contractsExpiring": "Contratos a vencer (30 dias)",
     "viewReport": "Ver relatório completo",
-    "assistantHeading": "Assistente externo",
-    "assistantDescription": "Acesse o assistente de inteligência artificial para resolver dúvidas e agilizar tarefas fora do GLPI-Plus.",
-    "assistantCta": "Abrir assistente externo"
+    "assistantHeading": "Assistente de IA",
+    "assistantDescription": "Acesse o assistente de inteligência artificial com acesso aos dados reais do GLPI-Plus.",
+    "assistantCta": "Abrir assistente"
+  },
+  "assistant": {
+    "title": "Assistente de IA",
+    "subtitle": "Responde perguntas sobre os dados e processos do GLPI-Plus.",
+    "placeholder": "Digite sua pergunta...",
+    "send": "Enviar",
+    "sending": "Enviando...",
+    "emptyState": "Pergunte sobre chamados, ativos, problemas ou mudanças no GLPI-Plus.",
+    "newConversation": "Nova conversa",
+    "errorPrefix": "Erro:",
+    "notConfigured": "O assistente não está configurado neste ambiente.",
+    "history": "Conversas",
+    "noConversations": "Ainda não há conversas.",
+    "loadingHistory": "Carregando...",
+    "deleteConversation": "Excluir conversa",
+    "suggestionsHeading": "Você pode perguntar coisas como:",
+    "suggestions": [
+      "Quantos chamados abertos existem?",
+      "Quais computadores estão registrados?",
+      "Há problemas não resolvidos?",
+      "Quais mudanças estão em andamento?",
+      "Quais ativos genéricos existem na minha entidade?",
+      "Como funciona a análise de impacto?"
+    ]
   },
   "account": {
     "title": "Minha conta",
