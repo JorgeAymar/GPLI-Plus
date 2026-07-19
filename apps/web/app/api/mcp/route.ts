@@ -19,11 +19,23 @@ import { z } from "zod";
  * caller's AuthContext fresh (matching how a page render or Server Action
  * already does) - there is no server-held state to preserve between calls.
  *
- * Known limitation inherited from /api/v1/[itemtype]/[id]/route.ts: `get_<key>`
- * looks up by id without verifying the item's entity is within the caller's
- * entity subtree (the registry's `get?(id)` signature has no entityId
- * parameter to check against). Same gap as the existing public REST API,
- * not introduced here - flagged so a future fix covers both call sites.
+ * KNOWN LIMITATION, HIGH PRIORITY - not introduced here, but worse here than
+ * at its origin: `get_<key>` looks up by id without verifying the item's
+ * entity is within the caller's entity subtree (inherited from
+ * /api/v1/[itemtype]/[id]/route.ts - the registry's `get?(id)` signature has
+ * no entityId parameter to check against, and this gap actually exists
+ * end-to-end across the app: the human-facing detail pages, e.g.
+ * apps/web/app/(central)/assistance/tickets/[id]/page.tsx, call the same
+ * unscoped getters directly). Under a human-driven REST call this needs a
+ * deliberately crafted foreign UUID; under MCP an LLM agent will routinely
+ * follow cross-referenced UUIDs it encounters in ITSM data (linked tickets,
+ * related changes/problems) as ordinary "get more context" behavior, with or
+ * without adversarial intent - so the exposure is meaningfully higher here.
+ * The tool descriptions below say so explicitly so a calling agent has that
+ * signal. Closing this properly means changing 5 getter signatures across
+ * 5 service files plus every direct caller (~15 files: services, the 2
+ * detail pages, the 2 API routes) - deliberately out of scope for this
+ * feature; needs its own design pass, not a rushed patch here.
  */
 
 function buildServer(userId: string): McpServer {
@@ -49,7 +61,7 @@ function buildServer(userId: string): McpServer {
       server.registerTool(
         `get_${key}`,
         {
-          description: `Obtiene un "${key.replace(/s$/, "")}" por id.`,
+          description: `Obtiene un "${key.replace(/s$/, "")}" por id. ADVERTENCIA: no verifica que el registro pertenezca a tu entidad activa - un id de otra entidad también se devuelve si existe. No asumas que el resultado es de tu organización sin confirmarlo por otro medio.`,
           inputSchema: { id: z.string().uuid() },
         },
         async ({ id }) => {
