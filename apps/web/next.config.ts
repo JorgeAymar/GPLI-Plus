@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
   // Emit a self-contained `.next/standalone` build (with a minimal server.js
@@ -16,4 +19,4 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@itsm/db", "@itsm/core"],
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
