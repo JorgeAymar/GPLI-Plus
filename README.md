@@ -32,6 +32,7 @@ Dentro de `apps/web`:
 ```
 app/(auth)/            Login (sin sidebar)
 app/(central)/          Shell principal: sidebar, entity/profile switcher
+  account/               Mi cuenta: tokens de acceso personales (MCP) + preferencia de idioma
   administration/       Entidades, Usuarios, Grupos, Perfiles (RBAC + matriz de permisos)
   assets/                Activos (genéricos + por tipo), DCIM (racks/cables), impacto
   assistance/            Tickets, Problemas, Cambios (ITIL), tickets recurrentes
@@ -39,7 +40,8 @@ app/(central)/          Shell principal: sidebar, entity/profile switcher
   tools/                 Knowledge Base, Reservas, Proyectos, Reportes, Dashboards, Búsquedas guardadas, Feeds RSS
   setup/                 Tipos de activo, dropdowns, SLA, notificaciones, reglas, agentes de inventario, clientes API, webhooks, fuentes LDAP/OIDC
 app/(simplified)/portal  Portal de autoservicio: crear ticket simplificado + "Mis solicitudes"
-app/api/v1/[itemtype]    API REST pública (bearer token, no sesión JWT)
+app/api/v1/[itemtype]    API REST pública (bearer token de entidad, no sesión JWT)
+app/api/mcp              Servidor MCP (bearer token personal) — expone list_*/get_* como tools para Claude/clientes MCP
 app/api/documents/[id]   Descarga de adjuntos
 actions/                 Server Actions (una por dominio, "use server")
 components/itil/        Componentes ITIL compartidos (actores/timeline/aprobaciones/costos/SLA) — reusados por Ticket/Problem/Change
@@ -77,13 +79,14 @@ Login de prueba: **admin@itsm.local** / **ChangeMe123!** (cambiar via `SEED_ADMI
 
 | Fase | Contenido | Estado |
 |---|---|---|
-| 0 — Scaffold | Monorepo, Next.js, Docker, CI | ✅ Completa |
+| 0 — Scaffold | Monorepo, Next.js, Docker | ✅ Completa (CI se agregó y luego se removió a pedido explícito — sin pipeline automático hoy) |
 | 1 — Foundation | Entidades, Usuarios, RBAC, switch entidad/perfil | ✅ Completa |
 | 2 — Asset Management | Tipos de activo (core + custom), Computer/Network Equipment, Software/Licencias | ✅ Completa (2a+2b+2c) |
 | 3 — Helpdesk/ITIL | Ticket/Problem/Change, SLA, notificaciones, portal, recurrencias | ✅ Completa |
 | 4 — Management | Proveedores/Contactos, Presupuestos/Contratos, Certificados, Datacenter/Dominio/Línea/BD | ✅ Completa (4a+4b+4c) |
 | 5 — Tools | Knowledge Base, Reservas, Proyectos, Reportes, Dashboards, Búsquedas guardadas, Feeds RSS | ✅ Completa (5a-5f) |
 | 6 — Advanced/Parity | Rule engine, Inventory, DCIM, Impact Analysis, API pública (bearer token), Webhooks, LDAP+OIDC — SAML diferido, sin sistema de plugins (decisiones documentadas) | ✅ Completa (6a-6g; 6h=doc) |
+| Post-roadmap — Tokens personales + MCP | `/account` (tokens MCP personales + preferencia de idioma), servidor MCP real en `/api/mcp` (10 tools sobre `ITEMTYPE_REGISTRY`), fix de un bug real de producción (loop de redirect con sesión huérfana) | ✅ Completa (detalle en `architecture-plan.md`, "Tercera ronda") |
 
 **Post-roadmap**: cerrados **los 13 gaps no bloqueantes** detectados tras completar el roadmap original:
 - Redirect `/` según perfil Central/Simplified, matriz de permisos perfil×módulo (`/administration/profiles/[id]`), adjuntos polimórficos (`documents`/`document_items` + storage adapter local, en Tickets y Computers), Grupos (`/administration/groups`).
@@ -91,7 +94,7 @@ Login de prueba: **admin@itsm.local** / **ChangeMe123!** (cambiar via `SEED_ADMI
 
 Quedan solo por decisión explícita (no son bugs, no se revierten): SAML, sistema de plugins de terceros, OAuth2 completo (quedó bearer token) — riesgo de seguridad desproporcionado para el modelo de negocio.
 
-**Testing**: 672 tests unitarios/integración (Vitest, `packages/core` contra Postgres real) + 149 tests E2E (Playwright/Chromium, `e2e/specs/`, uno por sección del sidebar con login real) — **100% verdes**. Este pase de testing encontró y corrigió bugs reales: coerción de booleanos en campos dinámicos (Assets y Form Builder de Tickets), una tarjeta de dashboard que nunca mostraba datos por mismatch de forma, todo el módulo de Configuración mostrando errores de validación como JSON crudo, Administración sin escribir al audit log, `cron-service.ts` devolviendo timestamps como string en vez de `Date`, y 36 índices de base de datos faltantes (incluyendo el lookup RBAC más caliente de la app, `user_profiles.user_id`, sin índice). Ver `pnpm test` / `pnpm e2e` / `pnpm e2e:report`.
+**Testing**: 690 tests unitarios/integración (Vitest, `packages/core` contra Postgres real) + 152 tests E2E (Playwright/Chromium, `e2e/specs/`, uno por sección del sidebar con login real) — **100% verdes**. Este pase de testing encontró y corrigió bugs reales: coerción de booleanos en campos dinámicos (Assets y Form Builder de Tickets), una tarjeta de dashboard que nunca mostraba datos por mismatch de forma, todo el módulo de Configuración mostrando errores de validación como JSON crudo, Administración sin escribir al audit log, `cron-service.ts` devolviendo timestamps como string en vez de `Date`, y 36 índices de base de datos faltantes (incluyendo el lookup RBAC más caliente de la app, `user_profiles.user_id`, sin índice). Ver `pnpm test` / `pnpm e2e` / `pnpm e2e:report`. Hay además un test de integración MCP real (`apps/web/app/api/mcp/mcp-route.integration.test.ts`, corre aparte vía `pnpm --filter @itsm/web test:mcp-integration` porque requiere un `npm run dev` levantado — deliberadamente excluido del `pnpm test` por defecto para que ese comando siga siendo determinístico).
 
 Detalle completo de cada fase (incluyendo decisiones tomadas sobre la marcha y correcciones a bugs reales de Auth.js/Next.js 16) en [`docs/architecture-plan.md`](docs/architecture-plan.md). Guía funcional completa en [`docs/app-guide.md`](docs/app-guide.md); comparación detallada con GLPI original en [`docs/comparison-vs-glpi.md`](docs/comparison-vs-glpi.md).
 
@@ -108,4 +111,4 @@ docker run -p 3000:3000 \
   itsm-web
 ```
 
-CI (`.github/workflows/ci.yml`) corre lint/typecheck/test/build en cada push y PR contra un servicio Postgres efímero.
+No hay CI configurado en GitHub Actions (se agregó un workflow en un momento del proyecto y se removió a pedido explícito del usuario) — el repo no corre un pipeline automático en cada push. `pnpm lint`/`typecheck`/`test`/`build` deben correrse a mano antes de mergear.

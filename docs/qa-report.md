@@ -2,7 +2,9 @@
 
 Resultado del pase de QA solicitado: exploración completa de la app, construcción de una suite de tests real (antes inexistente), auditoría de librerías desactualizadas, auditoría de valores hardcodeados, y auditoría de índices de base de datos — con cada bug real encontrado corregido en el momento, no solo documentado.
 
-**Estado final: 679/679 tests unitarios (Vitest) + 149/149 tests E2E (Playwright) pasando, en corrida aislada.** Pipeline completo (`lint`+`typecheck`+`test`+`build`) verde en los 4 paquetes. Todo commiteado y pusheado a [github.com/JorgeAymar/GPLI-Plus](https://github.com/JorgeAymar/GPLI-Plus).
+**Estado final de esta ronda: 679/679 tests unitarios (Vitest) + 149/149 tests E2E (Playwright) pasando, en corrida aislada.** Pipeline completo (`lint`+`typecheck`+`test`+`build`) verde en los 4 paquetes. Todo commiteado y pusheado a [github.com/JorgeAymar/GPLI-Plus](https://github.com/JorgeAymar/GPLI-Plus).
+
+> Nota: este reporte es un snapshot de esa ronda específica de QA, no se reescribe con cada cambio posterior. Una ronda posterior (fix de un bug real de redirect-loop + la feature de tokens MCP personales) subió el total a 690 tests unitarios + 152 E2E — ver `architecture-plan.md`, sección "Tercera ronda", para el detalle actualizado.
 
 ---
 
