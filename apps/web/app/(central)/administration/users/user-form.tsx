@@ -1,19 +1,26 @@
 "use client";
 
 import { createUserAction } from "@/actions/users.actions";
+import { useFormSuccessToast } from "@/components/toast";
 import type { Entity } from "@itsm/db";
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 
 interface FormState {
   error?: string;
 }
 
 async function action(_prev: FormState | undefined, formData: FormData): Promise<FormState> {
+  const password = formData.get("password") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
+  if (password !== confirmPassword) {
+    return { error: "Las contraseñas no coinciden." };
+  }
+
   try {
     await createUserAction({
       email: formData.get("email") as string,
       username: formData.get("username") as string,
-      password: formData.get("password") as string,
+      password,
       displayName: formData.get("displayName") as string,
       defaultEntityId: (formData.get("defaultEntityId") as string) || null,
     });
@@ -25,9 +32,11 @@ async function action(_prev: FormState | undefined, formData: FormData): Promise
 
 export function UserForm({ entities }: { entities: Entity[] }) {
   const [state, formAction, isPending] = useActionState(action, undefined);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFormSuccessToast(state, formRef, "Usuario creado.");
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form ref={formRef} action={formAction} className="space-y-3">
       <div>
         <label htmlFor="user-displayName" className="text-sm font-medium">
           Nombre para mostrar
@@ -69,6 +78,20 @@ export function UserForm({ entities }: { entities: Entity[] }) {
         <input
           id="user-password"
           name="password"
+          type="password"
+          required
+          minLength={8}
+          className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
+        />
+        <p className="mt-1 text-xs opacity-50">Mínimo 8 caracteres.</p>
+      </div>
+      <div>
+        <label htmlFor="user-confirmPassword" className="text-sm font-medium">
+          Confirmar contraseña
+        </label>
+        <input
+          id="user-confirmPassword"
+          name="confirmPassword"
           type="password"
           required
           minLength={8}
