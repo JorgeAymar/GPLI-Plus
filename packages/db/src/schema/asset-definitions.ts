@@ -1,4 +1,4 @@
-import { boolean, integer, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { dropdownCategories } from "./dropdowns";
 
 export const assetFieldTypeEnum = pgEnum("asset_field_type", ["text", "textarea", "number", "boolean", "date", "dropdown"]);
@@ -35,7 +35,10 @@ export const assetFieldDefinitions = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [uniqueIndex("asset_field_def_unique_key").on(table.assetDefinitionId, table.key)],
+  (table) => [
+    uniqueIndex("asset_field_def_unique_key").on(table.assetDefinitionId, table.key),
+    index("asset_field_definitions_dropdown_category_idx").on(table.dropdownCategoryId),
+  ],
 );
 
 export type AssetDefinition = typeof assetDefinitions.$inferSelect;

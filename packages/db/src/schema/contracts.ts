@@ -28,7 +28,7 @@ export const contracts = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("contracts_entity_idx").on(table.entityId)],
+  (table) => [index("contracts_entity_idx").on(table.entityId), index("contracts_supplier_idx").on(table.supplierId)],
 );
 
 /** Which assets a contract covers (e.g. a maintenance contract covering 10 computers). */
@@ -42,7 +42,7 @@ export const contractAssets = pgTable(
       .notNull()
       .references(() => assets.id, { onDelete: "cascade" }),
   },
-  (table) => [primaryKey({ columns: [table.contractId, table.assetId] })],
+  (table) => [primaryKey({ columns: [table.contractId, table.assetId] }), index("contract_assets_asset_idx").on(table.assetId)],
 );
 
 export type Contract = typeof contracts.$inferSelect;

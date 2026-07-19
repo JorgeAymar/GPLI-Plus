@@ -12,7 +12,7 @@ export const tickets = pgTable(
     // Admin-defined custom fields (see ticket-field-definitions.ts), validated dynamically per ticketType.
     customFields: jsonb("custom_fields").notNull().default({}),
   },
-  (table) => [index("tickets_entity_idx").on(table.entityId)],
+  (table) => [index("tickets_entity_idx").on(table.entityId), index("tickets_category_dropdown_item_idx").on(table.categoryDropdownItemId)],
 );
 
 export type Ticket = typeof tickets.$inferSelect;

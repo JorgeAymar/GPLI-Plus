@@ -25,7 +25,10 @@ export const serviceCatalogItems = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("service_catalog_items_entity_idx").on(table.entityId)],
+  (table) => [
+    index("service_catalog_items_entity_idx").on(table.entityId),
+    index("service_catalog_items_category_dropdown_item_idx").on(table.categoryDropdownItemId),
+  ],
 );
 
 export type ServiceCatalogItem = typeof serviceCatalogItems.$inferSelect;

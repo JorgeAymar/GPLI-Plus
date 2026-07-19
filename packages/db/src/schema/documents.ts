@@ -24,7 +24,7 @@ export const documents = pgTable(
       .references(() => users.id),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("documents_entity_idx").on(table.entityId)],
+  (table) => [index("documents_entity_idx").on(table.entityId), index("documents_uploaded_by_idx").on(table.uploadedByUserId)],
 );
 
 /**
@@ -43,7 +43,10 @@ export const documentItems = pgTable(
     itemId: uuid("item_id").notNull(),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("document_items_lookup_idx").on(table.itemType, table.itemId)],
+  (table) => [
+    index("document_items_lookup_idx").on(table.itemType, table.itemId),
+    index("document_items_document_idx").on(table.documentId),
+  ],
 );
 
 export type Document = typeof documents.$inferSelect;

@@ -48,6 +48,7 @@ export const itilSlaAssignments = pgTable(
   (table) => [
     index("itil_sla_assignments_lookup_idx").on(table.itilType, table.itilId),
     index("itil_sla_assignments_sweep_idx").on(table.isBreached, table.dueAt),
+    index("itil_sla_assignments_sla_policy_idx").on(table.slaPolicyId),
   ],
 );
 

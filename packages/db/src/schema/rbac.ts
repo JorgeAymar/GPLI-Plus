@@ -82,7 +82,11 @@ export const userProfiles = pgTable(
   },
   // userId is filtered on every single requireRight()/getEffectiveRights() call - the hottest
   // lookup in the whole app. profileId backs the reverse "which users have profile X" lookup.
-  (table) => [index("user_profiles_user_idx").on(table.userId), index("user_profiles_profile_idx").on(table.profileId)],
+  (table) => [
+    index("user_profiles_user_idx").on(table.userId),
+    index("user_profiles_profile_idx").on(table.profileId),
+    index("user_profiles_entity_idx").on(table.entityId),
+  ],
 );
 
 export type Group = typeof groups.$inferSelect;

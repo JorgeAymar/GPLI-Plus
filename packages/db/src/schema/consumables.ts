@@ -28,7 +28,7 @@ export const consumableItems = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("consumable_items_entity_idx").on(table.entityId)],
+  (table) => [index("consumable_items_entity_idx").on(table.entityId), index("consumable_items_supplier_idx").on(table.supplierId)],
 );
 
 export type ConsumableItem = typeof consumableItems.$inferSelect;

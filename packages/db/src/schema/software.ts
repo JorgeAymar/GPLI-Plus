@@ -21,7 +21,11 @@ export const software = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("software_entity_idx").on(table.entityId)],
+  (table) => [
+    index("software_entity_idx").on(table.entityId),
+    index("software_manufacturer_dropdown_item_idx").on(table.manufacturerDropdownItemId),
+    index("software_category_dropdown_item_idx").on(table.categoryDropdownItemId),
+  ],
 );
 
 export const softwareVersions = pgTable(
@@ -35,7 +39,10 @@ export const softwareVersions = pgTable(
     osDropdownItemId: uuid("os_dropdown_item_id").references(() => dropdownItems.id),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [uniqueIndex("software_versions_unique").on(table.softwareId, table.name)],
+  (table) => [
+    uniqueIndex("software_versions_unique").on(table.softwareId, table.name),
+    index("software_versions_os_dropdown_item_idx").on(table.osDropdownItemId),
+  ],
 );
 
 /** No countSeatsUsed denormalized counter - it's a cheap COUNT(*) over asset_software_installations (see software-service.ts). */
@@ -61,7 +68,11 @@ export const softwareLicenses = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("software_licenses_entity_idx").on(table.entityId), index("software_licenses_software_idx").on(table.softwareId)],
+  (table) => [
+    index("software_licenses_entity_idx").on(table.entityId),
+    index("software_licenses_software_idx").on(table.softwareId),
+    index("software_licenses_software_version_idx").on(table.softwareVersionId),
+  ],
 );
 
 export const assetSoftwareInstallations = pgTable(
@@ -78,7 +89,11 @@ export const assetSoftwareInstallations = pgTable(
     installDate: timestamp("install_date", { mode: "date" }),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [uniqueIndex("installations_unique").on(table.assetId, table.softwareVersionId)],
+  (table) => [
+    uniqueIndex("installations_unique").on(table.assetId, table.softwareVersionId),
+    index("asset_software_installations_software_version_idx").on(table.softwareVersionId),
+    index("asset_software_installations_software_license_idx").on(table.softwareLicenseId),
+  ],
 );
 
 export type Software = typeof software.$inferSelect;

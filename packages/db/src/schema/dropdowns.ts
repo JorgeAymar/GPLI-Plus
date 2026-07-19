@@ -37,6 +37,7 @@ export const dropdownItems = pgTable(
   (table) => [
     index("dropdown_items_category_entity_idx").on(table.categoryId, table.entityId),
     index("dropdown_items_entity_idx").on(table.entityId),
+    index("dropdown_items_parent_idx").on(table.parentId),
   ],
 );
 

@@ -45,7 +45,14 @@ export const projects = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("projects_entity_idx").on(table.entityId)],
+  (table) => [
+    index("projects_entity_idx").on(table.entityId),
+    index("projects_parent_project_idx").on(table.parentProjectId),
+    index("projects_project_state_dropdown_item_idx").on(table.projectStateDropdownItemId),
+    index("projects_project_type_dropdown_item_idx").on(table.projectTypeDropdownItemId),
+    index("projects_manager_idx").on(table.managerUserId),
+    index("projects_group_idx").on(table.groupId),
+  ],
 );
 
 export const projectTasks = pgTable(
@@ -68,7 +75,11 @@ export const projectTasks = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("project_tasks_project_idx").on(table.projectId)],
+  (table) => [
+    index("project_tasks_project_idx").on(table.projectId),
+    index("project_tasks_parent_task_idx").on(table.parentTaskId),
+    index("project_tasks_project_task_state_dropdown_item_idx").on(table.projectTaskStateDropdownItemId),
+  ],
 );
 
 export const projectTaskLinks = pgTable(
@@ -117,7 +128,7 @@ export const projectCosts = pgTable(
     comment: text("comment"),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("project_costs_project_idx").on(table.projectId)],
+  (table) => [index("project_costs_project_idx").on(table.projectId), index("project_costs_budget_idx").on(table.budgetId)],
 );
 
 export type Project = typeof projects.$inferSelect;

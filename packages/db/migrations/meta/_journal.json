@@ -127,6 +127,13 @@
       "when": 1784408939556,
       "tag": "0017_greedy_marvex",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1784440554393,
+      "tag": "0018_short_revanche",
+      "breakpoints": true
     }
   ]
 }

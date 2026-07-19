@@ -32,7 +32,10 @@ export const queuedNotifications = pgTable(
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     sentAt: timestamp("sent_at", { mode: "date" }),
   },
-  (table) => [index("queued_notifications_recipient_idx").on(table.recipientUserId)],
+  (table) => [
+    index("queued_notifications_recipient_idx").on(table.recipientUserId),
+    index("queued_notifications_template_key_idx").on(table.templateKey),
+  ],
 );
 
 export type NotificationTemplate = typeof notificationTemplates.$inferSelect;

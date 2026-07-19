@@ -78,7 +78,10 @@ export const itilTimelineItems = pgTable(
     timeSpentMinutes: integer("time_spent_minutes"),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("itil_timeline_lookup_idx").on(table.itilType, table.itilId)],
+  (table) => [
+    index("itil_timeline_lookup_idx").on(table.itilType, table.itilId),
+    index("itil_timeline_items_created_by_idx").on(table.createdBy),
+  ],
 );
 
 export const itilValidatorKindEnum = pgEnum("itil_validator_kind", ["user", "group"]);
@@ -114,7 +117,10 @@ export const itilCosts = pgTable(
     comment: text("comment"),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [index("itil_costs_lookup_idx").on(table.itilType, table.itilId)],
+  (table) => [
+    index("itil_costs_lookup_idx").on(table.itilType, table.itilId),
+    index("itil_costs_budget_idx").on(table.budgetId),
+  ],
 );
 
 export type ItilActor = typeof itilActors.$inferSelect;
