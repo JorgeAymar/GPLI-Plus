@@ -19,6 +19,7 @@ import {
 } from "@itsm/core";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { TicketEditForm } from "./ticket-edit-form";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -49,10 +50,11 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
         <h1 className="text-2xl font-semibold">{ticket.title}</h1>
         <StatusSelect id={ticket.id} currentStatus={ticket.status} updateStatusAction={updateTicketStatusAction} />
       </div>
-      <p className="whitespace-pre-wrap text-sm opacity-80">{ticket.content}</p>
-      <p className="text-sm opacity-60">
-        Urgencia: {ticket.urgency} · Impacto: {ticket.impact} · Prioridad: {ticket.priority}
-      </p>
+
+      <div>
+        <h2 className="mb-2 text-sm font-medium opacity-70">Editar ticket</h2>
+        <TicketEditForm ticket={ticket} />
+      </div>
 
       <div className="grid grid-cols-2 gap-8">
         <ActorsSection itilType="ticket" itilId={id} actors={actors} users={users} />

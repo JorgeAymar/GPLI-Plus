@@ -9,6 +9,7 @@ import {
 } from "@itsm/core";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { AssetEditForm } from "./asset-edit-form";
 import { ComponentForm } from "./component-form";
 import { InstallSoftwareForm } from "./install-software-form";
 
@@ -48,12 +49,22 @@ export default async function ComputerDetailPage({ params }: { params: Promise<{
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">{asset.name}</h1>
-      <dl className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
-        <dt className="opacity-60">Número de serie</dt>
-        <dd>{asset.serialNumber ?? "-"}</dd>
-        <dt className="opacity-60">Dominio</dt>
-        <dd>{computer.domain ?? "-"}</dd>
-      </dl>
+
+      <div>
+        <h2 className="mb-2 text-sm font-medium opacity-70">Editar activo</h2>
+        {/* No key derived from the editable fields here on purpose - the field-based
+            remount key that picks up fresh defaultValues after a save lives on the
+            <form> INSIDE AssetEditForm, not on this component instance. Keying this
+            outer instance by the mutable fields would remount it (and its
+            useActionState/toast state) in the very same commit the post-save
+            router.refresh() delivers fresh data in, silently losing the success
+            toast - see the comment in asset-edit-form.tsx. */}
+        <AssetEditForm asset={asset} />
+        <dl className="mt-4 grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+          <dt className="opacity-60">Dominio</dt>
+          <dd>{computer.domain ?? "-"}</dd>
+        </dl>
+      </div>
 
       <div className="grid grid-cols-2 gap-8">
         <div>

@@ -12,10 +12,12 @@ import { test, expect, type Page } from "@playwright/test";
  *   flujo del activo genérico ("Monitor") termina en el listado, no entra a
  *   ningún detalle.
  * - Computer y Software sí tienen página de detalle propia
- *   (/assets/computers/[id], /assets/software/[id]), pero tampoco exponen
- *   edición de sus campos propios (nombre/serie/etc.) ni borrado - sólo
- *   alta de sub-recursos (componentes, instalaciones, versiones, licencias).
- *   `updateAssetAction`/`softDeleteAssetAction`/`restoreAssetAction`/
+ *   (/assets/computers/[id], /assets/software/[id]). Computer expone edición
+ *   de sus campos base (nombre/serie/inventario/comentario) vía AssetEditForm
+ *   (updateAssetAction) - ver sección "Editar activo" en el detalle. Software
+ *   todavía NO expone edición ni borrado, y ninguno de los dos expone borrado
+ *   en esta versión - sólo alta de sub-recursos (componentes, instalaciones,
+ *   versiones, licencias). `softDeleteAssetAction`/`restoreAssetAction`/
  *   `purgeAssetAction` existen en actions/assets.actions.ts pero no están
  *   conectados a ninguna UI (ver hallazgos reportados aparte).
  * - Sí hay borrado real en la UI para relaciones/posiciones: quitar un
@@ -352,7 +354,11 @@ test.describe.serial("Computer - alta, componente, software instalado y activo s
       await page.waitForURL(/\/assets\/computers\/[^/]+$/);
       computerAId = await idFromUrl(page);
       await expect(page.getByRole("heading", { name: computerAName, level: 1 })).toBeVisible();
-      await expect(page.getByText(computerASerial)).toBeVisible();
+      // El número de serie ahora vive en el <input> editable del AssetEditForm
+      // (no en texto estático), así que se verifica por valor, no por getByText.
+      // Se usa el id (no name="serialNumber", que también matchea el campo del
+      // ComponentForm de "nuevo componente" presente en la misma página).
+      await expect(page.locator("#asset-edit-serial-number")).toHaveValue(computerASerial);
       await expect(page.getByText("e2e.local")).toBeVisible();
     });
 

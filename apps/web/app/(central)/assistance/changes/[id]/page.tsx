@@ -7,6 +7,7 @@ import { ValidationsSection } from "@/components/itil/validations-section";
 import { getChange, listActors, listCosts, listTimelineItems, listUsers, listValidations } from "@itsm/core";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ChangeEditForm } from "./change-edit-form";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -34,15 +35,11 @@ export default async function ChangeDetailPage({ params }: { params: Promise<{ i
         <h1 className="text-2xl font-semibold">{change.title}</h1>
         <StatusSelect id={change.id} currentStatus={change.status} updateStatusAction={updateChangeStatusAction} />
       </div>
-      <p className="whitespace-pre-wrap text-sm opacity-80">{change.content}</p>
-      <p className="text-sm opacity-60">
-        Urgencia: {change.urgency} · Impacto: {change.impact} · Prioridad: {change.priority}
-      </p>
-      {change.plannedStartAt || change.plannedEndAt ? (
-        <p className="text-sm opacity-60">
-          Planificado: {change.plannedStartAt?.toLocaleString() ?? "?"} → {change.plannedEndAt?.toLocaleString() ?? "?"}
-        </p>
-      ) : null}
+
+      <div>
+        <h2 className="mb-2 text-sm font-medium opacity-70">Editar cambio</h2>
+        <ChangeEditForm change={change} />
+      </div>
 
       <div className="grid grid-cols-2 gap-8">
         <ActorsSection itilType="change" itilId={id} actors={actors} users={users} />

@@ -20,22 +20,20 @@ import { test, expect, type Page, type Locator } from "@playwright/test";
  *    urgency=3/impact=3/priority=3/category=null with no way to override. Added urgency/impact/
  *    priority (1-5 selects, default 3) + category (dropdown from the seeded "itil_category"
  *    dropdown category) to ticket-form.tsx, problem-form.tsx, change-form.tsx, wired the
- *    corresponding page.tsx files to fetch categoryOptions, and added a read-only
- *    "Urgencia/Impacto/Prioridad" line to the three [id]/page.tsx detail pages so the values are
- *    at least visible somewhere (previously write-only, not even readable from the UI).
+ *    corresponding page.tsx files to fetch categoryOptions.
  *  - recurring-ticket-form.tsx: the `intervalMinutes` input (required by
  *    createRecurringTicketTemplateSchema via z.number().int().min(1)) was missing the `required`
  *    HTML attribute, so submitting it empty produced `Number("") = 0`, silently tripping a
  *    server-side Zod error instead of failing visibly client-side like every other required
  *    field in this module. Added `required`.
+ *  - title/content/urgency/impact/priority are now editable post-creation via a dedicated
+ *    "Editar ticket/problema/cambio" form on each [id]/page.tsx (ticket-edit-form.tsx,
+ *    problem-edit-form.tsx, change-edit-form.tsx - also change's planned start/end), wired to the
+ *    previously-orphaned updateTicketAction/updateProblemAction/updateChangeAction. Only `status`
+ *    was editable before this pass (still via the separate StatusSelect). Tests below assert these
+ *    values through the edit form's fields (`#<entity>-edit-<field>`), not a read-only line.
  *
  * Findings NOT fixed here (out of exclusive zone, or too broad a change to make opportunistically):
- *  - No UI anywhere calls updateTicketAction/updateProblemAction/updateChangeAction
- *    (apps/web/actions/{tickets,problems,changes}.actions.ts) - title/content/urgency/impact/
- *    priority/category cannot be edited after creation from any detail page. Only `status` is
- *    editable post-creation (via StatusSelect, apps/web/components/itil/status-select.tsx -
- *    shared component, not touched here). These update actions are effectively dead code from
- *    the UI's perspective.
  *  - There is NO delete capability anywhere in the stack for tickets, problems, changes, or
  *    recurring ticket templates - not in the UI, not in apps/web/actions/*, and not even a
  *    service function in packages/core (only documents and asset field definitions have a
@@ -253,8 +251,10 @@ test.describe.serial("Tickets (/assistance/tickets)", () => {
     await expect(page).toHaveURL(/\/assistance\/tickets\/[0-9a-f-]+$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(ticketTitle);
     await expect(page.getByText(content)).toBeVisible();
-    // Persisted triage fields set at creation time (see header-comment fix) are readable.
-    await expect(page.getByText("Urgencia: 4 · Impacto: 2 · Prioridad: 5")).toBeVisible();
+    // Persisted triage fields set at creation time (see header-comment fix) round-trip into the edit form.
+    await expect(page.locator("#ticket-edit-urgency")).toHaveValue("4");
+    await expect(page.locator("#ticket-edit-impact")).toHaveValue("2");
+    await expect(page.locator("#ticket-edit-priority")).toHaveValue("5");
 
     // No delete UI exists anywhere for tickets (documented finding) - regression guard so a future
     // silent addition doesn't go untested, and so nobody re-invents this from the test side.
@@ -296,12 +296,15 @@ test.describe.serial("Tickets (/assistance/tickets)", () => {
     // the form's Server Action binding is ready and silently produce no request at all.
     await page.waitForLoadState("networkidle");
 
-    // Scoped to the form containing textarea[name="content"] - TimelineForm and CostForm both
+    // Scoped to the form containing the timeline's own textarea - TimelineForm and CostForm both
     // render a button literally labelled "Agregar" (cost-form.tsx / timeline-form.tsx), so an
     // unscoped getByRole("button", { name: "Agregar" }) would be ambiguous (strict-mode violation).
+    // Scoped by aria-label rather than textarea[name="content"] - ticket-edit-form.tsx's own
+    // content field also uses name="content", so the name-based filter is ambiguous too now.
     const followupText = `Seguimiento E2E ${Date.now()}`;
-    const timelineForm = page.locator("form", { has: page.locator('textarea[name="content"]') });
-    await timelineForm.locator('textarea[name="content"]').fill(followupText);
+    const timelineTextarea = page.getByRole("textbox", { name: "Contenido de la entrada" });
+    const timelineForm = page.locator("form", { has: timelineTextarea });
+    await timelineTextarea.fill(followupText);
     await timelineForm.getByRole("button", { name: "Agregar" }).click();
     await page.waitForLoadState("networkidle");
 
@@ -374,7 +377,9 @@ test.describe.serial("Problems (/assistance/problems)", () => {
     await expect(page).toHaveURL(/\/assistance\/problems\/[0-9a-f-]+$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(problemTitle);
     await expect(page.getByText(content)).toBeVisible();
-    await expect(page.getByText("Urgencia: 5 · Impacto: 5 · Prioridad: 1")).toBeVisible();
+    await expect(page.locator("#problem-edit-urgency")).toHaveValue("5");
+    await expect(page.locator("#problem-edit-impact")).toHaveValue("5");
+    await expect(page.locator("#problem-edit-priority")).toHaveValue("1");
 
     await expect(page.getByRole("button", { name: /eliminar|borrar/i })).toHaveCount(0);
 
@@ -486,8 +491,11 @@ test.describe.serial("Changes (/assistance/changes)", () => {
     await expect(page).toHaveURL(/\/assistance\/changes\/[0-9a-f-]+$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(changeTitle);
     await expect(page.getByText(content)).toBeVisible();
-    await expect(page.getByText("Urgencia: 3 · Impacto: 4 · Prioridad: 4")).toBeVisible();
-    await expect(page.getByText(/Planificado:/)).toBeVisible();
+    await expect(page.locator("#change-edit-urgency")).toHaveValue("3");
+    await expect(page.locator("#change-edit-impact")).toHaveValue("4");
+    await expect(page.locator("#change-edit-priority")).toHaveValue("4");
+    await expect(page.locator("#change-edit-planned-start")).not.toHaveValue("");
+    await expect(page.locator("#change-edit-planned-end")).not.toHaveValue("");
 
     await expect(page.getByRole("button", { name: /eliminar|borrar/i })).toHaveCount(0);
 
@@ -659,7 +667,9 @@ test.describe.serial("QA - Tickets: datos propios y validación de tipos/requeri
     await expect(page).toHaveURL(/\/assistance\/tickets\/[0-9a-f-]+$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(qaTicketTitle);
     await expect(page.getByText(content)).toBeVisible();
-    await expect(page.getByText("Urgencia: 2 · Impacto: 3 · Prioridad: 2")).toBeVisible();
+    await expect(page.locator("#ticket-edit-urgency")).toHaveValue("2");
+    await expect(page.locator("#ticket-edit-impact")).toHaveValue("3");
+    await expect(page.locator("#ticket-edit-priority")).toHaveValue("2");
 
     expectNoCriticalErrors(diagnostics);
   });
@@ -710,7 +720,9 @@ test.describe.serial("QA - Problems: datos propios y validación de requeridos",
     await expect(page).toHaveURL(/\/assistance\/problems\/[0-9a-f-]+$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(qaProblemTitle);
     await expect(page.getByText(content)).toBeVisible();
-    await expect(page.getByText("Urgencia: 4 · Impacto: 4 · Prioridad: 3")).toBeVisible();
+    await expect(page.locator("#problem-edit-urgency")).toHaveValue("4");
+    await expect(page.locator("#problem-edit-impact")).toHaveValue("4");
+    await expect(page.locator("#problem-edit-priority")).toHaveValue("3");
 
     expectNoCriticalErrors(diagnostics);
   });
@@ -760,10 +772,12 @@ test.describe.serial("QA - Changes: datos propios y comportamiento real de las f
     await expect(page).toHaveURL(/\/assistance\/changes\/[0-9a-f-]+$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(qaChangeTitle);
     await expect(page.getByText(content)).toBeVisible();
-    await expect(page.getByText("Urgencia: 1 · Impacto: 2 · Prioridad: 1")).toBeVisible();
-    // change.tsx only renders the "Planificado:" line when either date is set - confirms the
-    // null path round-trips cleanly instead of e.g. rendering "Planificado: ? → ?".
-    await expect(page.getByText(/Planificado:/)).toHaveCount(0);
+    await expect(page.locator("#change-edit-urgency")).toHaveValue("1");
+    await expect(page.locator("#change-edit-impact")).toHaveValue("2");
+    await expect(page.locator("#change-edit-priority")).toHaveValue("1");
+    // Confirms the null path round-trips cleanly instead of e.g. a spurious date string.
+    await expect(page.locator("#change-edit-planned-start")).toHaveValue("");
+    await expect(page.locator("#change-edit-planned-end")).toHaveValue("");
 
     expectNoCriticalErrors(diagnostics);
   });

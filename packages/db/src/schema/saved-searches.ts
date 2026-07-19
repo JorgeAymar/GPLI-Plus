@@ -35,8 +35,6 @@ export const savedSearches = pgTable(
     queryJson: jsonb("query_json").notNull().default({}),
     type: savedSearchTypeEnum("type").notNull().default("bookmark"),
     doCount: savedSearchDoCountEnum("do_count").notNull().default("auto"),
-    lastExecutionAt: timestamp("last_execution_at", { mode: "date" }),
-    executionCount: integer("execution_count").notNull().default(0),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },

@@ -5,14 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { getAssetDefinitionByKey } from "../assets/asset-definition-service";
 import { createAsset } from "../assets/asset-service";
 import { createEntity } from "../entities/entity-service";
-import {
-  addImpactRelation,
-  buildImpactGraph,
-  getOrCreateImpactContext,
-  listDirectRelations,
-  removeImpactRelation,
-  updateImpactContextMaxDepth,
-} from "./impact-service";
+import { addImpactRelation, buildImpactGraph, listDirectRelations, removeImpactRelation } from "./impact-service";
 
 const RUN = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 const PREFIX = `__vitest_assets__${RUN}_`;
@@ -132,28 +125,5 @@ describe("impact-service", () => {
 
   it("throws when the root asset does not exist", async () => {
     await expect(buildImpactGraph("00000000-0000-0000-0000-000000000000")).rejects.toThrow();
-  });
-
-  describe("impact contexts", () => {
-    it("getOrCreateImpactContext is idempotent and defaults maxDepth to 5", async () => {
-      const asset = await makeAsset(`${PREFIX}context-asset`);
-
-      const first = await getOrCreateImpactContext(asset);
-      expect(first.rootAssetId).toBe(asset);
-      expect(first.maxDepth).toBe(5);
-
-      const second = await getOrCreateImpactContext(asset);
-      expect(second.id).toBe(first.id);
-    });
-
-    it("updateImpactContextMaxDepth creates the context on demand and persists the new value", async () => {
-      const asset = await makeAsset(`${PREFIX}context-update-asset`);
-
-      const updated = await updateImpactContextMaxDepth(asset, 3);
-      expect(updated.maxDepth).toBe(3);
-
-      const fetchedAgain = await getOrCreateImpactContext(asset);
-      expect(fetchedAgain.maxDepth).toBe(3);
-    });
   });
 });

@@ -521,8 +521,9 @@ test.describe.serial("Proyectos - flujo E2E", () => {
     await page.waitForURL(/\/tools\/projects\/[^/]+$/);
 
     await expect(page.getByRole("heading", { level: 1, name: projectName })).toBeVisible();
+    // Código/Avance are now editable fields (project-edit-form.tsx), not read-only text.
     await expect(page.getByText("Código")).toBeVisible();
-    await expect(page.getByText(projectCode, { exact: true })).toBeVisible();
+    await expect(page.locator("#project-code")).toHaveValue(projectCode);
     await expect(page.getByText("Avance")).toBeVisible();
 
     const amountInput = page.locator('input[name="amount"]');
@@ -539,7 +540,10 @@ test.describe.serial("Proyectos - flujo E2E", () => {
     await page.locator("li", { hasText: projectName }).getByRole("link").click();
     await page.waitForURL(/\/tools\/projects\/[^/]+$/);
 
-    await page.locator('input[name="name"]').fill(taskName);
+    // #project-task-name, not the generic input[name="name"] - the project's own
+    // edit form (project-edit-form.tsx) added a same-named "Nombre" field to this
+    // same page, so an unscoped locator is now a strict-mode violation.
+    await page.locator("#project-task-name").fill(taskName);
     await page.locator('input[name="isMilestone"]').check();
     await page.getByRole("button", { name: "Crear tarea" }).click();
 
@@ -998,8 +1002,9 @@ test.describe.serial("QA - Proyectos: datos propios y validación de 'Monto' del
     await page.waitForURL(/\/tools\/projects\/[^/]+$/);
 
     // Not a milestone this time (the E2E- fixture above always checks isMilestone) - exercises
-    // the plain-task path instead.
-    await page.locator('input[name="name"]').fill(qaTaskName);
+    // the plain-task path instead. #project-task-name, not the generic input[name="name"] -
+    // the project's own edit form added a same-named "Nombre" field to this same page.
+    await page.locator("#project-task-name").fill(qaTaskName);
     await page.getByRole("button", { name: "Crear tarea" }).click();
     // Scoped to the "Tareas" list specifically - once created, the task name also appears as a
     // <option> in this same form's own "Tarea padre" <select> (for a future task) and in the

@@ -13,6 +13,7 @@ import type { ProjectTask } from "@itsm/db";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProjectCostForm } from "./project-cost-form";
+import { ProjectEditForm } from "./project-edit-form";
 import { ProjectTaskForm } from "./project-task-form";
 import { ProjectTeamForm } from "./project-team-form";
 
@@ -86,18 +87,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-semibold">{project.name}</h1>
-        <dl className="mt-2 grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
-          <dt className="opacity-60">Código</dt>
-          <dd>{project.code ?? "-"}</dd>
-          <dt className="opacity-60">Prioridad</dt>
-          <dd>{project.priority}</dd>
-          <dt className="opacity-60">Inicio planeado</dt>
-          <dd>{project.planStartAt ? project.planStartAt.toLocaleDateString() : "-"}</dd>
-          <dt className="opacity-60">Fin planeado</dt>
-          <dd>{project.planEndAt ? project.planEndAt.toLocaleDateString() : "-"}</dd>
-          <dt className="opacity-60">Avance</dt>
-          <dd>{project.percentDone}%</dd>
-        </dl>
+        <div className="mt-4 max-w-md">
+          <h2 className="mb-2 text-sm font-medium opacity-70">Editar proyecto</h2>
+          <ProjectEditForm project={project} />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-8">

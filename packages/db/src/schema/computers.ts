@@ -12,7 +12,6 @@ export const computers = pgTable(
     osDropdownItemId: uuid("os_dropdown_item_id").references(() => dropdownItems.id),
     osVersionDropdownItemId: uuid("os_version_dropdown_item_id").references(() => dropdownItems.id),
     domain: text("domain"),
-    lastBootAt: timestamp("last_boot_at", { mode: "date" }),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
