@@ -21,18 +21,20 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="rounded-md border border-black/10 p-4 dark:border-white/10">
-        <h2 className="text-sm font-medium opacity-70">{t("assistantHeading")}</h2>
-        <p className="mt-1 text-sm opacity-70">{t("assistantDescription")}</p>
-        <a
-          href="http://localhost:3400"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-block rounded-md border border-black/15 px-3 py-2 text-sm hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/5"
-        >
-          {t("assistantCta")}
-        </a>
-      </div>
+      {process.env.AI_ASSISTANT_URL ? (
+        <div className="rounded-md border border-black/10 p-4 dark:border-white/10">
+          <h2 className="text-sm font-medium opacity-70">{t("assistantHeading")}</h2>
+          <p className="mt-1 text-sm opacity-70">{t("assistantDescription")}</p>
+          <a
+            href={process.env.AI_ASSISTANT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-block rounded-md border border-black/15 px-3 py-2 text-sm hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/5"
+          >
+            {t("assistantCta")}
+          </a>
+        </div>
+      ) : null}
     </div>
   );
 }

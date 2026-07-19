@@ -89,7 +89,7 @@ test.describe("Dashboard (/dashboard)", () => {
     await expect(page).toHaveURL(/\/dashboard$/);
     await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
 
-    const info = page.locator("p");
+    const info = page.locator("p", { hasText: "Entidad activa:" });
     await expect(info).toContainText("Entidad activa:");
     await expect(info).toContainText("Perfil activo:");
     // Seeded by packages/core/scripts/seed.ts - must always be present.
