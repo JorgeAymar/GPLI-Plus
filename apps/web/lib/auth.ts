@@ -14,6 +14,7 @@ import {
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import type { OIDCConfig } from "next-auth/providers";
+import { cache } from "react";
 
 /**
  * Generic OIDC provider (Google Workspace, Azure AD / Entra ID, Okta,
@@ -164,3 +165,12 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
     },
   },
 });
+
+/**
+ * `auth()` itself is NOT wrapped in React `cache()` by next-auth - every direct
+ * call re-runs the full JWT decode + `jwt`/`session` callback pair from scratch.
+ * This wrapper memoizes it per request so every module that needs the session
+ * (lib/session.ts, i18n/request.ts, ...) shares a single decode instead of
+ * each paying the cost independently.
+ */
+export const getSession = cache(() => auth());
