@@ -59,9 +59,14 @@
     "title": "Dashboard",
     "activeEntity": "Entidade ativa",
     "activeProfile": "Perfil ativo",
-    "assistantHeading": "Assistente de IA",
+    "openTickets": "Tickets abertos",
+    "slaCompliance": "Conformidade de SLA (30 dias)",
+    "totalAssets": "Ativos cadastrados",
+    "contractsExpiring": "Contratos a vencer (30 dias)",
+    "viewReport": "Ver relatório completo",
+    "assistantHeading": "Assistente externo",
     "assistantDescription": "Acesse o assistente de inteligência artificial para resolver dúvidas e agilizar tarefas fora do GLPI-Plus.",
-    "assistantCta": "Abrir assistente"
+    "assistantCta": "Abrir assistente externo"
   },
   "account": {
     "title": "Minha conta",
