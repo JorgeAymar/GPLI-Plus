@@ -1,71 +1,74 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 interface NavItem {
   href?: string;
-  label: string;
+  labelKey: string;
   section?: boolean;
 }
 
 const NAV: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/account", label: "Mi cuenta" },
-  { label: "Asistencia", section: true },
-  { href: "/assistance/tickets", label: "Tickets" },
-  { href: "/assistance/problems", label: "Problemas" },
-  { href: "/assistance/changes", label: "Cambios" },
-  { href: "/assistance/recurring-tickets", label: "Tickets recurrentes" },
-  { label: "Activos", section: true },
-  { href: "/assets", label: "Todos los activos" },
-  { href: "/assets/computers", label: "Computadoras" },
-  { href: "/assets/network-equipment", label: "Equipos de red" },
-  { href: "/assets/software", label: "Software" },
-  { href: "/assets/dcim", label: "DCIM" },
-  { href: "/assets/dcim/cables", label: "Cables" },
-  { label: "Gestión", section: true },
-  { href: "/management/suppliers", label: "Proveedores" },
-  { href: "/management/contacts", label: "Contactos" },
-  { href: "/management/contracts", label: "Contratos" },
-  { href: "/management/budgets", label: "Presupuestos" },
-  { href: "/management/certificates", label: "Certificados" },
-  { href: "/management/consumables", label: "Consumibles" },
-  { label: "Herramientas", section: true },
-  { href: "/tools/knowledge-base", label: "Base de conocimiento" },
-  { href: "/tools/reservations", label: "Reservas" },
-  { href: "/tools/projects", label: "Proyectos" },
-  { href: "/tools/reports", label: "Reportes" },
-  { href: "/tools/saved-searches", label: "Búsquedas guardadas" },
-  { href: "/tools/rss-feeds", label: "Feeds RSS" },
-  { href: "/tools/dashboards", label: "Dashboards" },
-  { href: "/tools/reminders", label: "Recordatorios" },
-  { href: "/tools/planning", label: "Planificación" },
-  { label: "Administración", section: true },
-  { href: "/administration/entities", label: "Entidades" },
-  { href: "/administration/users", label: "Usuarios" },
-  { href: "/administration/groups", label: "Grupos" },
-  { href: "/administration/profiles", label: "Perfiles" },
-  { href: "/administration/audit-log", label: "Registro de auditoría" },
-  { label: "Configuración", section: true },
-  { href: "/setup/asset-definitions", label: "Tipos de activo" },
-  { href: "/setup/dropdowns", label: "Listas desplegables" },
-  { href: "/setup/sla-policies", label: "Políticas SLA" },
-  { href: "/setup/notification-templates", label: "Plantillas de notificación" },
-  { href: "/setup/rules", label: "Reglas" },
-  { href: "/setup/inventory-agents", label: "Agentes de inventario" },
-  { href: "/setup/api-clients", label: "Clientes API" },
-  { href: "/setup/webhooks", label: "Webhooks" },
-  { href: "/setup/auth-sources", label: "Fuentes de autenticación (LDAP/OIDC)" },
-  { href: "/setup/service-catalog", label: "Catálogo de servicios" },
-  { href: "/setup/ticket-fields", label: "Campos de ticket" },
-  { href: "/setup/cron-jobs", label: "Trabajos programados" },
+  { href: "/dashboard", labelKey: "dashboard" },
+  { href: "/account", labelKey: "account" },
+  { labelKey: "sectionAsistencia", section: true },
+  { href: "/assistance/tickets", labelKey: "tickets" },
+  { href: "/assistance/problems", labelKey: "problems" },
+  { href: "/assistance/changes", labelKey: "changes" },
+  { href: "/assistance/recurring-tickets", labelKey: "recurringTickets" },
+  { labelKey: "sectionActivos", section: true },
+  { href: "/assets", labelKey: "allAssets" },
+  { href: "/assets/computers", labelKey: "computers" },
+  { href: "/assets/network-equipment", labelKey: "networkEquipment" },
+  { href: "/assets/software", labelKey: "software" },
+  { href: "/assets/dcim", labelKey: "dcim" },
+  { href: "/assets/dcim/cables", labelKey: "cables" },
+  { labelKey: "sectionGestion", section: true },
+  { href: "/management/suppliers", labelKey: "suppliers" },
+  { href: "/management/contacts", labelKey: "contacts" },
+  { href: "/management/contracts", labelKey: "contracts" },
+  { href: "/management/budgets", labelKey: "budgets" },
+  { href: "/management/certificates", labelKey: "certificates" },
+  { href: "/management/consumables", labelKey: "consumables" },
+  { labelKey: "sectionHerramientas", section: true },
+  { href: "/tools/knowledge-base", labelKey: "knowledgeBase" },
+  { href: "/tools/reservations", labelKey: "reservations" },
+  { href: "/tools/projects", labelKey: "projects" },
+  { href: "/tools/reports", labelKey: "reports" },
+  { href: "/tools/saved-searches", labelKey: "savedSearches" },
+  { href: "/tools/rss-feeds", labelKey: "rssFeeds" },
+  { href: "/tools/dashboards", labelKey: "dashboards" },
+  { href: "/tools/reminders", labelKey: "reminders" },
+  { href: "/tools/planning", labelKey: "planning" },
+  { labelKey: "sectionAdministracion", section: true },
+  { href: "/administration/entities", labelKey: "entities" },
+  { href: "/administration/users", labelKey: "users" },
+  { href: "/administration/groups", labelKey: "groups" },
+  { href: "/administration/profiles", labelKey: "profiles" },
+  { href: "/administration/audit-log", labelKey: "auditLog" },
+  { labelKey: "sectionConfiguracion", section: true },
+  { href: "/setup/asset-definitions", labelKey: "assetDefinitions" },
+  { href: "/setup/dropdowns", labelKey: "dropdowns" },
+  { href: "/setup/sla-policies", labelKey: "slaPolicies" },
+  { href: "/setup/notification-templates", labelKey: "notificationTemplates" },
+  { href: "/setup/rules", labelKey: "rules" },
+  { href: "/setup/inventory-agents", labelKey: "inventoryAgents" },
+  { href: "/setup/api-clients", labelKey: "apiClients" },
+  { href: "/setup/webhooks", labelKey: "webhooks" },
+  { href: "/setup/auth-sources", labelKey: "authSources" },
+  { href: "/setup/service-catalog", labelKey: "serviceCatalog" },
+  { href: "/setup/ticket-fields", labelKey: "ticketFields" },
+  { href: "/setup/cron-jobs", labelKey: "cronJobs" },
 ];
 
-export function NavSidebar() {
+export async function NavSidebar() {
+  const t = await getTranslations("nav");
+
   return (
     <nav className="flex w-56 shrink-0 flex-col gap-1 border-r border-black/10 p-4 dark:border-white/10">
       {NAV.map((item) =>
         item.section ? (
-          <div key={item.label} className="mt-4 px-3 pb-1 text-xs font-medium uppercase tracking-wide opacity-50 first:mt-0">
-            {item.label}
+          <div key={item.labelKey} className="mt-4 px-3 pb-1 text-xs font-medium uppercase tracking-wide opacity-50 first:mt-0">
+            {t(item.labelKey)}
           </div>
         ) : (
           <Link
@@ -73,7 +76,7 @@ export function NavSidebar() {
             href={item.href!}
             className="rounded-md px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
           >
-            {item.label}
+            {t(item.labelKey)}
           </Link>
         ),
       )}
