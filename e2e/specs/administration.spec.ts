@@ -53,7 +53,14 @@ test.beforeEach(async ({ page }) => {
   failedRequests = [];
 
   page.on("console", (msg: ConsoleMessage) => {
-    if (msg.type() === "error") consoleErrors.push(msg.text());
+    // Chrome auto-logs any >=400 response as a "Failed to load resource" console error,
+    // duplicating what the `requestfailed`/status-code layer already would. A Server Action
+    // that throws to report an expected validation/permission error (e.g. the malformed-username
+    // and permission-enforcement QA tests added below) always surfaces as a non-2xx response at
+    // the transport level - that's how Next.js Server Actions propagate a thrown error, not a
+    // bug - so this specific browser-native log line is not actionable application state. Same
+    // filter already used in tools.spec.ts/setup.spec.ts's diagnostics helpers.
+    if (msg.type() === "error" && !/^Failed to load resource:/.test(msg.text())) consoleErrors.push(msg.text());
   });
   page.on("pageerror", (err) => pageErrors.push(String(err)));
   page.on("requestfailed", (req: Request) => {
@@ -393,5 +400,278 @@ test.describe("Audit log (/administration/audit-log)", () => {
     const prevLink = page.getByRole("link", { name: "Anterior" });
     await expect(prevLink).toBeVisible();
     await expect(prevLink).toHaveAttribute("href", /page=1/);
+  });
+
+  test("un 'page' fuera de rango sigue rindiendo una página válida en vez de romperse", async ({ page }) => {
+    await page.goto("/administration/audit-log?page=9999");
+    await expect(page.getByRole("heading", { level: 1, name: "Registro de auditoría" })).toBeVisible();
+    await expect(page.getByText(/Página \d+ de \d+/)).toBeVisible();
+  });
+});
+
+/* =============================================================================================
+ * QA pass additions below: (1) own, self-authored realistic test data (QA-ADMINISTRATION-*
+ * prefix, NOT copy-pasted from the E2E-ADMIN-* fixtures above) with create -> list persistence
+ * checks for every create-form in this module, including Entities (previously read-only in this
+ * spec - see the file header's original rationale; a single own QA entity is safe here since
+ * nothing else in this suite depends on the exact shape of the entity tree, only on "Global"
+ * existing by name), and (2) data-type/required-field validation that asserts the REAL observed
+ * browser behavior (via .validity, not guessed) plus - for the one module-wide gap this exposed
+ * (Users - see the fix note below) - the closest thing Administración has to Setup's already-
+ * established "readable error, not a raw JSON blob" regression tests.
+ * ============================================================================================= */
+
+test.describe.serial("QA - Entities: entidad propia y su disponibilidad como 'Entidad padre'", () => {
+  const suffix = uniqueSuffix();
+  const qaEntityName = `QA-ADMINISTRATION-ENTITY-${suffix}`;
+  const qaChildEntityName = `QA-ADMINISTRATION-ENTITY-CHILD-${suffix}`;
+
+  test("crea una entidad propia bajo Global, y una sub-entidad propia bajo esa, y ambas quedan visibles en el árbol", async ({ page }) => {
+    await page.goto("/administration/entities");
+    await page.getByLabel("Nombre").fill(qaEntityName);
+    await page.getByLabel("Entidad padre").selectOption({ label: "Global" });
+    await page.getByLabel("Comentario").fill("Entidad de prueba QA - sin UI de borrado disponible, se deja permanentemente.");
+    await page.getByRole("button", { name: "Crear entidad" }).click();
+
+    const treeHeading = page.getByRole("heading", { level: 2, name: "Árbol de entidades" });
+    const treeContainer = treeHeading.locator("xpath=following-sibling::div[1]");
+    await expect(treeContainer.getByText(qaEntityName, { exact: false })).toBeVisible();
+
+    // Reload to force a fresh server render of the "Entidad padre" <select> - confirms the new
+    // entity round-tripped through the DB (not just optimistic client state) and is genuinely
+    // usable as a parent for further entities, i.e. full CRUD-visibility across the module.
+    await page.reload();
+    await expect(page.getByLabel("Entidad padre").getByRole("option", { name: qaEntityName })).toHaveCount(1);
+
+    await page.getByLabel("Nombre").fill(qaChildEntityName);
+    await page.getByLabel("Entidad padre").selectOption({ label: qaEntityName });
+    await page.getByRole("button", { name: "Crear entidad" }).click();
+    await expect(treeContainer.getByText(qaChildEntityName, { exact: false })).toBeVisible();
+  });
+});
+
+test.describe.serial("QA - Users: datos propios y validación de tipos/requeridos (email, contraseña, usuario)", () => {
+  const suffix = uniqueSuffix();
+  const qaDisplayName = `QA-ADMINISTRATION-USER-${suffix}`;
+  const qaUsername = `qa-admin-user-${suffix}`;
+  const qaEmail = `qa-admin-user-${suffix}@example.test`;
+  const qaPassword = "QaAdmin2026!";
+
+  test("crea un usuario con datos propios y sigue apareciendo en la tabla tras recargar", async ({ page }) => {
+    await page.goto("/administration/users");
+    await page.getByLabel("Nombre para mostrar").fill(qaDisplayName);
+    await page.getByLabel("Usuario").fill(qaUsername);
+    await page.getByLabel("Email").fill(qaEmail);
+    await page.getByLabel("Contraseña").fill(qaPassword);
+    await page.getByLabel("Entidad por defecto").selectOption({ label: "Global" });
+    await page.getByRole("button", { name: "Crear usuario" }).click();
+    await expect(page.locator("tbody tr", { hasText: qaUsername })).toBeVisible();
+
+    await page.reload();
+    const row = page.locator("tbody tr", { hasText: qaUsername });
+    await expect(row).toBeVisible();
+    await expect(row).toContainText(qaDisplayName);
+    await expect(row).toContainText(qaEmail);
+  });
+
+  test("un email con formato inválido bloquea el envío nativamente y no crea el usuario", async ({ page }) => {
+    await page.goto("/administration/users");
+    const bogusUsername = `qa-admin-user-bademail-${uniqueSuffix()}`;
+    const emailInput = page.getByLabel("Email");
+    await page.getByLabel("Nombre para mostrar").fill("QA sin email válido");
+    await page.getByLabel("Usuario").fill(bogusUsername);
+    await emailInput.fill("not-an-email");
+    await page.getByLabel("Contraseña").fill(qaPassword);
+    await page.getByRole("button", { name: "Crear usuario" }).click();
+
+    const validity = await emailInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, typeMismatch: el.validity.typeMismatch }));
+    expect(validity).toEqual({ valid: false, typeMismatch: true });
+    await expect(page.locator("tbody tr", { hasText: bogusUsername })).toHaveCount(0);
+  });
+
+  test("una contraseña de menos de 8 caracteres bloquea el envío nativamente (minlength) y no crea el usuario", async ({ page }) => {
+    await page.goto("/administration/users");
+    const bogusUsername = `qa-admin-user-shortpwd-${uniqueSuffix()}`;
+    const passwordInput = page.getByLabel("Contraseña");
+    await page.getByLabel("Nombre para mostrar").fill("QA contraseña corta");
+    await page.getByLabel("Usuario").fill(bogusUsername);
+    await page.getByLabel("Email").fill(`${bogusUsername}@example.test`);
+    await passwordInput.fill("short1");
+    await page.getByRole("button", { name: "Crear usuario" }).click();
+
+    const validity = await passwordInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, tooShort: el.validity.tooShort }));
+    expect(validity).toEqual({ valid: false, tooShort: true });
+    await expect(page.locator("tbody tr", { hasText: bogusUsername })).toHaveCount(0);
+  });
+
+  test("un 'Usuario' con caracteres no permitidos por el regex del schema se rechaza con un mensaje legible, no un blob JSON crudo (regresión createUserAction)", async ({
+    page,
+  }) => {
+    await page.goto("/administration/users");
+    const bogusUsername = "qa admin user with spaces"; // fails createUserSchema's /^[a-zA-Z0-9_.-]+$/ regex
+    const bogusEmail = `qa-admin-user-badusername-${uniqueSuffix()}@example.test`;
+    // The "Usuario" <input> has no client-side `pattern` attribute (only `required`), so this
+    // value reaches the Server Action - createUserSchema's regex rejects it there instead.
+    await page.getByLabel("Nombre para mostrar").fill("QA usuario con espacios");
+    await page.getByLabel("Usuario").fill(bogusUsername);
+    await page.getByLabel("Email").fill(bogusEmail);
+    await page.getByLabel("Contraseña").fill(qaPassword);
+    await page.getByRole("button", { name: "Crear usuario" }).click();
+
+    const error = page.locator("form p.text-red-600").first();
+    await expect(error).toBeVisible();
+    const text = (await error.textContent())?.trim() ?? "";
+    expect(text.startsWith("[") || text.startsWith("{"), `error no debería ser JSON crudo: ${text}`).toBe(false);
+    expect(text).toContain("Only letters, digits, dots, dashes and underscores");
+    await expect(page.locator("tbody tr", { hasText: bogusEmail })).toHaveCount(0);
+  });
+});
+
+test.describe.serial("QA - Groups: datos propios y validación de nombre requerido", () => {
+  const qaGroupName = `QA-ADMINISTRATION-GROUP-${uniqueSuffix()}`;
+
+  test("crea un grupo con datos propios y aparece en la lista", async ({ page }) => {
+    await page.goto("/administration/groups");
+    await page.getByLabel("Nombre").fill(qaGroupName);
+    await page.getByRole("button", { name: "Crear grupo" }).click();
+    await expect(page.getByRole("link", { name: qaGroupName, exact: true })).toBeVisible();
+  });
+
+  test("'Nombre' vacío bloquea el envío nativamente y no crea el grupo", async ({ page }) => {
+    await page.goto("/administration/groups");
+    const nameInput = page.getByLabel("Nombre");
+    // name left empty - the only field on this form.
+    await page.getByRole("button", { name: "Crear grupo" }).click();
+    const validity = await nameInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+  });
+});
+
+test.describe.serial("QA - Profiles: perfil propio con permisos en cero y su aplicación real sobre un usuario asignado", () => {
+  const suffix = uniqueSuffix();
+  const qaDisplayName = `QA-ADMINISTRATION-USER2-${suffix}`;
+  const qaUsername = `qa-admin-user2-${suffix}`;
+  const qaEmail = `qa-admin-user2-${suffix}@example.test`;
+  const qaPassword = "QaAdmin2026!";
+  const qaProfileName = `QA-ADMINISTRATION-PROFILE-${suffix}`;
+
+  // NOTE on why this is worth the extra setup: the pre-existing "toggling a right checkbox
+  // persists across reload" test above only proves the checkbox's own DB row round-trips - it
+  // never proves the change actually changes what a real logged-in user with that profile can
+  // do. This block does: it creates its own user+profile (zero rights to start), assigns the
+  // profile via the "Asignar" form (deliberately NOT exercised by the page-load test above, out
+  // of caution for reassigning a *real* user's profile on a shared dev env - safe here since both
+  // sides of the assignment are QA fixtures created in the same test), then drives a SEPARATE
+  // browser context logged in as that user to prove requireRight() actually blocks/allows the
+  // create-entity action as the permission bit is flipped off/on.
+
+  test("crea un usuario y un perfil propios (sin permisos) y asigna el perfil como perfil por defecto del usuario", async ({ page }) => {
+    await page.goto("/administration/users");
+    await page.getByLabel("Nombre para mostrar").fill(qaDisplayName);
+    await page.getByLabel("Usuario").fill(qaUsername);
+    await page.getByLabel("Email").fill(qaEmail);
+    await page.getByLabel("Contraseña").fill(qaPassword);
+    await page.getByLabel("Entidad por defecto").selectOption({ label: "Global" });
+    await page.getByRole("button", { name: "Crear usuario" }).click();
+    await expect(page.locator("tbody tr", { hasText: qaUsername })).toBeVisible();
+
+    await page.goto("/administration/profiles");
+    await page.getByLabel("Nombre").fill(qaProfileName);
+    await page.getByLabel("Interfaz").selectOption({ label: "Central (admin/técnico)" });
+    await page.getByRole("button", { name: "Crear perfil" }).click();
+    await expect(page.locator("tbody tr", { hasText: qaProfileName })).toBeVisible();
+
+    const assignForm = page.locator("form").filter({ has: page.locator('select[name="userId"]') });
+    await assignForm.getByLabel("Usuario", { exact: true }).selectOption({ label: qaDisplayName });
+    await assignForm.getByLabel("Perfil", { exact: true }).selectOption({ label: qaProfileName });
+    await assignForm.getByLabel("Entidad", { exact: true }).selectOption({ label: "Global" });
+    await assignForm.getByLabel("Por defecto").check();
+    await assignForm.getByRole("button", { name: "Asignar" }).click();
+    await expect(assignForm.locator("p.text-red-600")).toHaveCount(0);
+  });
+
+  test("el usuario recién asignado puede iniciar sesión, pero su perfil sin permisos le bloquea crear una entidad", async ({ browser }) => {
+    // IMPORTANT: browser.newContext() alone silently inherits this project's `use.storageState`
+    // (playwright/.auth/admin.json, see playwright.config.ts) - verified by inspecting
+    // ctx.cookies() right after creation, which already had the admin session cookie before any
+    // navigation happened. Passing an explicit empty storageState is required to actually get an
+    // unauthenticated context to log in as a different user.
+    const qaContext = await browser.newContext({ storageState: { cookies: [], origins: [] } });
+    const qaPage = await qaContext.newPage();
+    try {
+      await qaPage.goto("/login");
+      await qaPage.getByLabel("Email").fill(qaEmail);
+      await qaPage.getByLabel("Contraseña").fill(qaPassword);
+      await qaPage.getByRole("button", { name: /ingresar/i }).click();
+      // Confirms resolveAuthContext() actually picked up the isDefault=true assignment made
+      // above - if it hadn't taken effect, login would bounce back to /login instead.
+      await qaPage.waitForURL(/\/dashboard/);
+      await expect(qaPage.getByRole("heading", { level: 1 })).toBeVisible();
+
+      await qaPage.goto("/administration/entities");
+      const bogusName = `QA-ADMINISTRATION-ENTITY-SHOULD-NOT-EXIST-${suffix}`;
+      await qaPage.getByLabel("Nombre").fill(bogusName);
+      await qaPage.getByRole("button", { name: "Crear entidad" }).click();
+
+      // createProfile() inserts no profile_module_rights rows, so this QA profile starts with
+      // zero rights on every module - createEntityAction's requireRight(ADMINISTRATION_ENTITY,
+      // CREATE) must reject this real, live session.
+      await expect(qaPage.getByText(/Missing permission/)).toBeVisible();
+      await expect(qaPage.getByText(bogusName, { exact: true })).toHaveCount(0);
+    } finally {
+      await qaContext.close();
+    }
+  });
+
+  test("tras otorgar CREATE de administration.entity al perfil, el MISMO usuario ya puede crear la entidad (la permission-matrix realmente se aplica)", async ({
+    page,
+    browser,
+  }) => {
+    await page.goto("/administration/profiles");
+    const row = page.locator("tbody tr", { hasText: qaProfileName });
+    const link = row.getByRole("link", { name: "Permisos →" });
+    const href = await link.getAttribute("href");
+    expect(href).toBeTruthy();
+    await page.goto(href!);
+
+    // Column order matches RIGHT (packages/core/src/auth/permissions.ts) object-literal insertion
+    // order - READ, CREATE, UPDATE, DELETE, PURGE, APPROVE, ASSIGN - so CREATE is the 2nd checkbox.
+    const entityRow = page.locator("tr", { hasText: "administration.entity" });
+    const createCheckbox = entityRow.getByRole("checkbox").nth(1);
+    await expect(createCheckbox).not.toBeChecked();
+    await createCheckbox.click();
+    await expect(createCheckbox).toBeChecked();
+    await expect(createCheckbox).toBeEnabled();
+    await page.waitForLoadState("networkidle");
+
+    // IMPORTANT: browser.newContext() alone silently inherits this project's `use.storageState`
+    // (playwright/.auth/admin.json, see playwright.config.ts) - verified by inspecting
+    // ctx.cookies() right after creation, which already had the admin session cookie before any
+    // navigation happened. Passing an explicit empty storageState is required to actually get an
+    // unauthenticated context to log in as a different user.
+    const qaContext = await browser.newContext({ storageState: { cookies: [], origins: [] } });
+    const qaPage = await qaContext.newPage();
+    try {
+      await qaPage.goto("/login");
+      await qaPage.getByLabel("Email").fill(qaEmail);
+      await qaPage.getByLabel("Contraseña").fill(qaPassword);
+      await qaPage.getByRole("button", { name: /ingresar/i }).click();
+      await qaPage.waitForURL(/\/dashboard/);
+
+      await qaPage.goto("/administration/entities");
+      const entityName = `QA-ADMINISTRATION-ENTITY-${suffix}`;
+      await qaPage.getByLabel("Nombre").fill(entityName);
+      await qaPage.getByRole("button", { name: "Crear entidad" }).click();
+
+      // Same user, same profile - only the permission bit changed. This is the real proof that a
+      // permission-matrix change actually takes effect for a live session's requireRight() check,
+      // not just that the checkbox's own DB row persists.
+      await expect(qaPage.getByText(/Missing permission/)).toHaveCount(0);
+      const treeHeading = qaPage.getByRole("heading", { level: 2, name: "Árbol de entidades" });
+      const treeContainer = treeHeading.locator("xpath=following-sibling::div[1]");
+      await expect(treeContainer.getByText(entityName, { exact: false })).toBeVisible();
+    } finally {
+      await qaContext.close();
+    }
   });
 });

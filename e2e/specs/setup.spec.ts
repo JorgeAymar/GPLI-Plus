@@ -563,3 +563,456 @@ test.describe("Cobertura: create-only rápido para páginas restantes", () => {
     diag.assertClean();
   });
 });
+
+/* ===========================================================================================
+ * QA pass additions below: (1) own, self-authored realistic test data (QA-SETUP-* prefix, NOT
+ * copy-pasted from the E2E-SETUP-* fixtures above) with create -> list/detail persistence checks
+ * for every create-form in this module, and (2) data-type/required-field validation that asserts
+ * the REAL observed behavior - native HTML5 constraint validation via .validity where a client
+ * attribute exists, or (where it doesn't) the actual server-side Zod rejection message, verified
+ * to be readable text (this module's actions all already route through the parseInput() helper
+ * documented in section 3 above, so - unlike some Herramientas/Administración actions found to be
+ * missing it during this same QA pass - no raw-JSON-blob bug was found here). Playwright's
+ * .fill() throws outright for non-numeric text on input[type=number] - not what a real user
+ * typing experiences - so those cases use .pressSequentially() instead, verified manually first.
+ * =========================================================================================== */
+
+test.describe.serial("QA: Asset Definition - datos propios y validación de formato de 'key'", () => {
+  const id = randomSlug();
+  const qaKey = `qa_setup_${id}`;
+  const qaName = `QA-SETUP-AssetDef-${id}`;
+  let qaDefinitionId: string | undefined;
+
+  test("crear un tipo de activo con datos propios (incluye ícono) y abrir su detalle", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/asset-definitions");
+    await page.locator('input[name="key"]').fill(qaKey);
+    await page.locator('input[name="name"]').fill(qaName);
+    await page.locator('input[name="icon"]').fill("qa-icon");
+    await page.getByRole("button", { name: "Crear tipo de activo" }).click();
+
+    const link = page.getByRole("link", { name: new RegExp(qaName) });
+    await expect(link).toBeVisible();
+    const href = await link.getAttribute("href");
+    qaDefinitionId = href?.split("/").pop();
+    await link.click();
+    await expect(page.getByRole("heading", { level: 1, name: qaName })).toBeVisible();
+    diag.assertClean();
+  });
+
+  test("'key' vacía bloquea el envío nativamente, y una 'key' con mayúsculas es rechazada con un mensaje legible, no un blob JSON", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/asset-definitions");
+
+    const keyInput = page.locator('input[name="key"]');
+    const bogusName = `QA-SETUP-AssetDef-SHOULD-NOT-EXIST-${randomSlug()}`;
+    // key left empty, name filled - required-field check first.
+    await page.locator('input[name="name"]').fill(bogusName);
+    await page.getByRole("button", { name: "Crear tipo de activo" }).click();
+    const validity = await keyInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+
+    // Now a syntactically non-empty but invalid key (uppercase) - this <input> has no client-side
+    // `pattern` attribute, so it reaches createAssetDefinitionSchema's own regex on the server.
+    await keyInput.fill("InvalidKey");
+    await page.getByRole("button", { name: "Crear tipo de activo" }).click();
+    const error = page.locator("form p.text-red-600").first();
+    await expect(error).toBeVisible();
+    const text = (await error.textContent())?.trim() ?? "";
+    expect(text.startsWith("[") || text.startsWith("{"), `error no debería ser JSON crudo: ${text}`).toBe(false);
+    expect(text).toContain("Solo minúsculas, dígitos y guión bajo");
+    await expect(page.getByText(bogusName)).toHaveCount(0);
+
+    diag.assertNoConsoleErrors();
+  });
+
+  test("campo personalizado: 'key' con un espacio es rechazada con un mensaje legible, no un blob JSON", async ({ page }) => {
+    test.skip(!qaDefinitionId, "no se pudo resolver el id del tipo de activo");
+    const diag = diagnostics(page);
+    await page.goto(`/setup/asset-definitions/${qaDefinitionId}`);
+
+    await page.locator('input[name="key"]').fill("invalid key");
+    await page.locator('input[name="label"]').fill(`QA-SETUP-Field-SHOULD-NOT-EXIST-${randomSlug()}`);
+    await page.getByRole("button", { name: "Crear campo" }).click();
+
+    const error = page.locator("form p.text-red-600").first();
+    await expect(error).toBeVisible();
+    const text = (await error.textContent())?.trim() ?? "";
+    expect(text.startsWith("[") || text.startsWith("{"), `error no debería ser JSON crudo: ${text}`).toBe(false);
+    expect(text).toContain("Solo letras, dígitos y guión bajo");
+
+    diag.assertNoConsoleErrors();
+  });
+});
+
+test.describe.serial("QA: Dropdown category + item - datos propios y validación de 'Nombre' requerido", () => {
+  const id = randomSlug();
+  const qaCategoryKey = `qa_setup_${id}`;
+  const qaCategoryName = `QA-SETUP-Category-${id}`;
+  const qaItemName = `QA-SETUP-Item-${id}`;
+  let qaCategoryId: string | undefined;
+
+  test("crear categoría e item propios y verificarlos en la lista/detalle", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/dropdowns");
+    await page.locator('input[name="key"]').fill(qaCategoryKey);
+    await page.locator('input[name="name"]').fill(qaCategoryName);
+    await page.getByRole("button", { name: "Crear categoría" }).click();
+
+    const link = page.getByRole("link", { name: new RegExp(qaCategoryName) });
+    await expect(link).toBeVisible();
+    const href = await link.getAttribute("href");
+    qaCategoryId = href?.split("/").pop();
+    await link.click();
+    await expect(page.getByRole("heading", { level: 1, name: qaCategoryName })).toBeVisible();
+
+    await page.locator('input[name="name"]').fill(qaItemName);
+    await page.getByRole("button", { name: "Crear item" }).click();
+    await expect(page.getByText(qaItemName)).toBeVisible();
+    diag.assertClean();
+  });
+
+  test("'Nombre' de categoría vacío bloquea el envío nativamente y no crea la categoría", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/dropdowns");
+    const nameInput = page.locator('input[name="name"]');
+    await page.locator('input[name="key"]').fill(`qa_setup_${randomSlug()}`);
+    // name left empty.
+    await page.getByRole("button", { name: "Crear categoría" }).click();
+    const validity = await nameInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+    diag.assertNoConsoleErrors();
+  });
+
+  test("'Nombre' de item vacío bloquea el envío nativamente y no crea el item", async ({ page }) => {
+    test.skip(!qaCategoryId, "no se pudo resolver el id de la categoría");
+    const diag = diagnostics(page);
+    await page.goto(`/setup/dropdowns/${qaCategoryId}`);
+    const nameInput = page.locator('input[name="name"]');
+    await page.getByRole("button", { name: "Crear item" }).click();
+    const validity = await nameInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+    diag.assertNoConsoleErrors();
+  });
+});
+
+test.describe.serial("QA: SLA Policy - datos propios y validación de tto/ttrMinutes", () => {
+  const id = randomSlug();
+  const qaName = `QA-SETUP-SLA-${id}`;
+
+  test("crear política SLA con datos propios (solo tiempo de resolución) y verla en la lista", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/sla-policies");
+    await page.locator('input[name="name"]').fill(qaName);
+    // ttoMinutes left empty on purpose (optional per createSlaPolicySchema) - exercises the other
+    // half of the pair vs. the E2E-SETUP fixture above, which always fills both.
+    await page.locator('input[name="ttrMinutes"]').fill("720");
+    await page.getByRole("button", { name: "Crear política SLA" }).click();
+    const row = page.locator("li", { hasText: qaName });
+    await expect(row).toContainText("720min");
+    diag.assertClean();
+  });
+
+  test("letras tecleadas en 'ttoMinutes' no se registran, y 0 es bloqueado por la restricción min=1 del input", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/sla-policies");
+
+    const ttoInput = page.locator('input[name="ttoMinutes"]');
+    // (b) wrong-type: verified manually - letters typed key-by-key into a type=number input
+    // never register.
+    await ttoInput.pressSequentially("abc");
+    expect(await ttoInput.inputValue()).toBe("");
+
+    await ttoInput.fill("0");
+    const validity = await ttoInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, rangeUnderflow: el.validity.rangeUnderflow }));
+    expect(validity).toEqual({ valid: false, rangeUnderflow: true });
+
+    const bogusName = `QA-SETUP-SLA-SHOULD-NOT-EXIST-${randomSlug()}`;
+    await page.locator('input[name="name"]').fill(bogusName);
+    await page.getByRole("button", { name: "Crear política SLA" }).click();
+    await expect(page.getByText(bogusName)).toHaveCount(0);
+
+    diag.assertClean();
+  });
+});
+
+test.describe.serial("QA: Notification Template - datos propios y validación de formato de 'key'", () => {
+  const id = randomSlug();
+  const qaKey = `qa_setup_${id}`;
+  const qaName = `QA-SETUP-Template-${id}`;
+
+  test("crear plantilla con datos propios y verla en la lista", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/notification-templates");
+    await page.locator('input[name="key"]').fill(qaKey);
+    await page.locator('input[name="name"]').fill(qaName);
+    await page.locator('input[name="subjectTemplate"]').fill("Recordatorio QA: {{ticketTitle}} sigue abierto");
+    await page.locator('textarea[name="bodyTemplate"]').fill("Este es el cuerpo de la plantilla de prueba QA.");
+    await page.getByRole("button", { name: "Crear plantilla" }).click();
+    await expect(page.getByText(qaName)).toBeVisible();
+    diag.assertClean();
+  });
+
+  test("una 'key' con espacios/mayúsculas es rechazada con un mensaje legible, no un blob JSON", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/notification-templates");
+    const bogusName = `QA-SETUP-Template-SHOULD-NOT-EXIST-${randomSlug()}`;
+    await page.locator('input[name="key"]').fill("Invalid Key With Spaces");
+    await page.locator('input[name="name"]').fill(bogusName);
+    await page.locator('input[name="subjectTemplate"]').fill("Asunto QA");
+    await page.locator('textarea[name="bodyTemplate"]').fill("Cuerpo QA");
+    await page.getByRole("button", { name: "Crear plantilla" }).click();
+
+    const error = page.locator("form p.text-red-600").first();
+    await expect(error).toBeVisible();
+    const text = (await error.textContent())?.trim() ?? "";
+    expect(text.startsWith("[") || text.startsWith("{"), `error no debería ser JSON crudo: ${text}`).toBe(false);
+    expect(text).toContain("Solo minúsculas, dígitos y guión bajo");
+    await expect(page.getByText(bogusName)).toHaveCount(0);
+
+    diag.assertNoConsoleErrors();
+  });
+});
+
+test.describe.serial("QA: Rule + criterio/acción - datos propios y validación de requeridos", () => {
+  const id = randomSlug();
+  const qaRuleType = `qa_setup_ruletype_${id}`;
+  const qaRuleName = `QA-SETUP-Rule-${id}`;
+  let qaRuleId: string | undefined;
+
+  test("crear regla propia (ranking y coincidencia 'any') y abrir su detalle", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/rules");
+    await page.locator('input[name="ruleType"]').fill(qaRuleType);
+    await page.locator('input[name="name"]').fill(qaRuleName);
+    await page.locator('input[name="ranking"]').fill("5");
+    await page.locator('select[name="matchType"]').selectOption("any");
+    await page.getByRole("button", { name: "Crear regla" }).click();
+
+    const link = page.getByRole("link", { name: qaRuleName });
+    await expect(link).toBeVisible();
+    const href = await link.getAttribute("href");
+    qaRuleId = href?.split("/").pop();
+    await link.click();
+    await expect(page.getByRole("heading", { level: 1, name: qaRuleName })).toBeVisible();
+    diag.assertClean();
+  });
+
+  test("'Tipo de regla' vacío bloquea el envío nativamente y no crea la regla", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/rules");
+    const ruleTypeInput = page.locator('input[name="ruleType"]');
+    const bogusName = `QA-SETUP-Rule-SHOULD-NOT-EXIST-${randomSlug()}`;
+    // ruleType left empty, name filled.
+    await page.locator('input[name="name"]').fill(bogusName);
+    await page.getByRole("button", { name: "Crear regla" }).click();
+    const validity = await ruleTypeInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+    await expect(page.getByText(bogusName)).toHaveCount(0);
+    diag.assertNoConsoleErrors();
+  });
+
+  test("'Valor' vacío en el formulario de criterio bloquea el envío nativamente", async ({ page }) => {
+    test.skip(!qaRuleId, "no se pudo resolver el id de la regla");
+    const diag = diagnostics(page);
+    await page.goto(`/setup/rules/${qaRuleId}`);
+
+    const criteriaValueInput = page.locator('input[name="value"]').first();
+    await page.locator('input[name="field"]').first().fill("priority");
+    // value left empty - field/operator/value are the criteria form's own inputs.
+    await page.getByRole("button", { name: "Agregar criterio" }).click();
+    const validity = await criteriaValueInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+
+    diag.assertNoConsoleErrors();
+  });
+});
+
+test.describe.serial("QA: Webhook - datos propios y validación de URL/secreto", () => {
+  const id = randomSlug();
+  const qaName = `QA-SETUP-Webhook-${id}`;
+
+  test("crear webhook propio (itemType 'problem', evento 'update') y verlo en el detalle", async ({ page }) => {
+    const diag = diagnostics(page);
+    const qaUrl = `https://example.com/qa-setup-webhook-${id}`;
+    await page.goto("/setup/webhooks");
+    await page.locator('input[name="name"]').fill(qaName);
+    await page.locator('input[name="itemType"]').fill("problem");
+    await page.locator('select[name="event"]').selectOption("update");
+    await page.locator('input[name="url"]').fill(qaUrl);
+    await page.locator('input[name="secret"]').fill(`qaSetupSecret-${id}`);
+    await page.locator('input[name="maxRetries"]').fill("5");
+    await page.getByRole("button", { name: "Crear webhook" }).click();
+
+    const link = page.getByRole("link", { name: new RegExp(qaName) });
+    await expect(link).toBeVisible();
+    await link.click();
+    // Scoped to the single summary <p> (webhooks/[id]/page.tsx) rather than an unscoped
+    // getByText() - "Últimos envíos" queue rows below can independently contain overlapping
+    // substrings (e.g. "opacity-40"-classed spans), which is otherwise a strict-mode violation
+    // risk, and this module keeps every webhook ever created (no delete UI - see file header).
+    const summary = page.locator("p.text-sm.opacity-60");
+    await expect(summary).toContainText(`problem · update · ${qaUrl}`);
+    diag.assertClean();
+  });
+
+  test("una URL con formato inválido y un secreto de menos de 8 caracteres bloquean el envío nativamente", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/webhooks");
+
+    const bogusName = `QA-SETUP-Webhook-SHOULD-NOT-EXIST-${randomSlug()}`;
+    const urlInput = page.locator('input[name="url"]');
+    const secretInput = page.locator('input[name="secret"]');
+    await page.locator('input[name="name"]').fill(bogusName);
+    await page.locator('input[name="itemType"]').fill("ticket");
+    await urlInput.fill("not-a-url");
+    await secretInput.fill("short1");
+    await page.getByRole("button", { name: "Crear webhook" }).click();
+
+    const urlValidity = await urlInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, typeMismatch: el.validity.typeMismatch }));
+    expect(urlValidity).toEqual({ valid: false, typeMismatch: true });
+    const secretValidity = await secretInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, tooShort: el.validity.tooShort }));
+    expect(secretValidity).toEqual({ valid: false, tooShort: true });
+    await expect(page.getByText(bogusName)).toHaveCount(0);
+
+    diag.assertClean();
+  });
+});
+
+test.describe.serial("QA: LDAP source - datos propios y validación de rango de puerto", () => {
+  const id = randomSlug();
+  const qaName = `QA-SETUP-LDAP-${id}`;
+
+  test("crear fuente LDAP propia (puerto 636, TLS activado) y verla en la lista", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/auth-sources");
+    await page.locator('input[name="name"]').fill(qaName);
+    await page.locator('input[name="host"]').fill(`ldaps-${id}.example.com`);
+    await page.locator('input[name="port"]').fill("636");
+    await page.locator('input[name="baseDn"]').fill(`dc=qa-setup-${id},dc=com`);
+    await page.locator('input[name="bindDn"]').fill(`cn=svc,dc=qa-setup-${id},dc=com`);
+    await page.locator('input[name="bindPasswordEncrypted"]').fill(`QaSetupBindPwd-${id}`);
+    await page.locator('input[name="syncField"]').fill("uid");
+    await page.locator('input[name="useTls"]').check();
+    await page.getByRole("button", { name: "Crear fuente LDAP" }).click();
+    await expect(page.getByText(qaName)).toBeVisible();
+    diag.assertClean();
+  });
+
+  test("un puerto fuera de rango (99999) es rechazado con un mensaje legible, no un blob JSON (el input no tiene min/max propio)", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/auth-sources");
+
+    const bogusName = `QA-SETUP-LDAP-SHOULD-NOT-EXIST-${randomSlug()}`;
+    // The 'port' <input> has no min/max attribute (only type=number, defaultValue=389), so an
+    // out-of-range value reaches createLdapAuthSourceSchema's own .max(65535) on the server.
+    await page.locator('input[name="name"]').fill(bogusName);
+    await page.locator('input[name="host"]').fill("ldap.example.com");
+    await page.locator('input[name="port"]').fill("99999");
+    await page.locator('input[name="baseDn"]').fill("dc=example,dc=com");
+    await page.locator('input[name="bindDn"]').fill("cn=admin,dc=example,dc=com");
+    await page.locator('input[name="bindPasswordEncrypted"]').fill("somepassword");
+    await page.locator('input[name="syncField"]').fill("mail");
+    await page.getByRole("button", { name: "Crear fuente LDAP" }).click();
+
+    const error = page.locator("form p.text-red-600").first();
+    await expect(error).toBeVisible();
+    const text = (await error.textContent())?.trim() ?? "";
+    expect(text.startsWith("[") || text.startsWith("{"), `error no debería ser JSON crudo: ${text}`).toBe(false);
+    await expect(page.getByText(bogusName)).toHaveCount(0);
+
+    diag.assertNoConsoleErrors();
+  });
+});
+
+test.describe.serial("QA: Service Catalog - datos propios y validación de 'Nombre' requerido", () => {
+  const id = randomSlug();
+  const qaName = `QA-SETUP-Catalog-${id}`;
+
+  test("crear tipo de solicitud propio (tipo 'incident') y verlo en la lista", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/service-catalog");
+    await page.locator('input[name="name"]').fill(qaName);
+    await page.locator('textarea[name="description"]').fill("Descripción de prueba QA para el catálogo de servicios.");
+    await page.locator('select[name="ticketType"]').selectOption("incident");
+    await page.locator('input[name="sortOrder"]').fill("3");
+    await page.getByRole("button", { name: "Crear tipo de solicitud" }).click();
+    await expect(page.getByText(qaName)).toBeVisible();
+    diag.assertClean();
+  });
+
+  test("'Nombre' vacío bloquea el envío nativamente y no crea el tipo de solicitud", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/service-catalog");
+    const nameInput = page.locator('input[name="name"]');
+    await page.getByRole("button", { name: "Crear tipo de solicitud" }).click();
+    const validity = await nameInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+    diag.assertNoConsoleErrors();
+  });
+});
+
+test.describe.serial("QA: Ticket Field - datos propios y validación de formato de 'key'", () => {
+  const id = randomSlug();
+  const qaKey = `qa_setup_field_${id}`;
+  const qaLabel = `QA-SETUP-TicketField-${id}`;
+
+  test("crear campo de ticket propio (tipo 'incident', obligatorio) y verlo en la lista", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/ticket-fields");
+    await page.locator('select[name="ticketType"]').selectOption("incident");
+    await page.locator('input[name="key"]').fill(qaKey);
+    await page.locator('input[name="label"]').fill(qaLabel);
+    await page.locator('input[name="isRequired"]').check();
+    await page.getByRole("button", { name: "Crear campo" }).click();
+    await expect(page.getByText(qaLabel)).toBeVisible();
+    diag.assertClean();
+  });
+
+  test("una 'key' con un espacio es rechazada con un mensaje legible, no un blob JSON", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/ticket-fields");
+    const bogusLabel = `QA-SETUP-TicketField-SHOULD-NOT-EXIST-${randomSlug()}`;
+    await page.locator('input[name="key"]').fill("invalid key");
+    await page.locator('input[name="label"]').fill(bogusLabel);
+    await page.getByRole("button", { name: "Crear campo" }).click();
+
+    const error = page.locator("form p.text-red-600").first();
+    await expect(error).toBeVisible();
+    const text = (await error.textContent())?.trim() ?? "";
+    expect(text.startsWith("[") || text.startsWith("{"), `error no debería ser JSON crudo: ${text}`).toBe(false);
+    expect(text).toContain("Solo letras, dígitos y guión bajo");
+    await expect(page.getByText(bogusLabel)).toHaveCount(0);
+
+    diag.assertNoConsoleErrors();
+  });
+});
+
+test.describe.serial("QA: API Client - datos propios (múltiples scopes) y confirmación del outlier de ~50 inputs", () => {
+  const id = randomSlug();
+  const qaName = `QA-SETUP-ApiClient-${id}`;
+
+  test("crear cliente API con datos propios seleccionando varios scopes", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/setup/api-clients");
+
+    // Confirms the "53 inputs" outlier flagged by a prior audit is exactly what reading
+    // api-clients/page.tsx predicts (scopeOptions={Object.values(MODULE)}): one checkbox per
+    // MODULE constant, not a bug - a real ITSM system has dozens of modules to scope a client to.
+    const scopeCheckboxes = page.locator('input[name="scopes"]');
+    const scopeCount = await scopeCheckboxes.count();
+    expect(scopeCount).toBeGreaterThan(30);
+
+    await page.locator('input[name="name"]').fill(qaName);
+    await scopeCheckboxes.nth(0).check();
+    await scopeCheckboxes.nth(1).check();
+    await scopeCheckboxes.nth(2).check();
+    await page.getByRole("button", { name: "Crear cliente API" }).click();
+
+    const keyBlock = page.locator("pre");
+    await expect(keyBlock).toBeVisible();
+    const row = page.locator("tbody tr", { hasText: qaName });
+    await expect(row).toContainText("Activo");
+    diag.assertClean();
+  });
+});

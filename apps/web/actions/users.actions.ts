@@ -3,6 +3,25 @@
 import { requireAuthContext } from "@/lib/session";
 import { MODULE, RIGHT, createUser, createUserSchema, recordAuditLog, requireRight } from "@itsm/core";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+/**
+ * `schema.parse()` throws a `ZodError` whose `.message` getter is a JSON blob
+ * (see zod's ZodError#message), not a human-readable string - e.g. the
+ * `username` field's regex constraint (createUserSchema) has no client-side
+ * `pattern` attribute on user-form.tsx's <input>, so a value with disallowed
+ * characters reaches this action and would otherwise surface as unreadable
+ * JSON in the form's error paragraph. Use `.safeParse` instead and rethrow a
+ * clean message - same pattern already used throughout
+ * apps/web/actions/{dropdowns,api-clients,...}.actions.ts.
+ */
+function parseInput<Schema extends z.ZodTypeAny>(schema: Schema, input: unknown): z.infer<Schema> {
+  const result = schema.safeParse(input);
+  if (!result.success) {
+    throw new Error(result.error.issues.map((issue) => issue.message).join("; "));
+  }
+  return result.data;
+}
 
 export async function createUserAction(input: {
   email: string;
@@ -13,7 +32,7 @@ export async function createUserAction(input: {
 }) {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ADMINISTRATION_USER, RIGHT.CREATE);
-  const parsed = createUserSchema.parse(input);
+  const parsed = parseInput(createUserSchema, input);
   const user = await createUser(parsed);
   // NOTE: never persist passwordHash into the audit trail - "Ver cambios" on
   // /administration/audit-log renders `after` as raw JSON to any admin with READ
