@@ -1,0 +1,100 @@
+# Production stack: on-premise, single-node Docker Swarm.
+#
+# This file is Swarm-only. The `deploy:` keys below (replicas, update_config,
+# rollback_config, restart_policy) are only read by `docker stack deploy` —
+# plain `docker compose up` silently ignores them. Don't use this file with
+# `docker compose up`; it exists to be deployed via ./scripts/deploy.sh, which
+# wraps `docker stack deploy -c docker-compose.prod.yml itsm`.
+#
+# Zero-downtime updates come from Swarm's rolling-update mechanism combined
+# with the HEALTHCHECK already baked into apps/web/Dockerfile: on every
+# deploy, Swarm starts the new "web" task first (update_config.order:
+# start-first) and only stops the old one once the new container reports
+# healthy via `GET /api/health`. The routing mesh keeps the published port
+# bound throughout, so in-flight/new requests never hit a dead container —
+# this works even at replicas: 1, no extra nodes required.
+#
+# The "worker" service (apps/worker/Dockerfile) runs the pg-boss background
+# jobs (SLA escalation, notifications, recurring tickets, webhooks, RSS
+# refresh, saved-search alerts). It doesn't get start-first/zero-downtime
+# treatment like "web": a brief job-processing gap during its own restart is
+# fine, since pg-boss persists queued jobs in Postgres and picks them back up
+# once the container is back — no need to over-engineer its update strategy.
+#
+# None of these services use `depends_on` for startup ordering: Swarm
+# ignores the `depends_on` key entirely (it's a plain Compose concept with
+# no Swarm equivalent), so declaring it would just be misleading. What
+# actually provides resilience against Postgres not being ready yet is each
+# service's `restart_policy: condition: any` — if web/worker crash on a
+# failed DB connection before Postgres is up, Swarm just restarts them.
+#
+# One-time setup, first install, and update instructions: see README.md,
+# "Producción (instalación on-premise vía Docker)".
+
+services:
+  postgres:
+    image: postgres:16
+    env_file:
+      - .env.production
+    volumes:
+      - itsm_postgres_data:/var/lib/postgresql/data
+    networks:
+      - itsm_internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+  web:
+    # IMAGE_TAG is set by scripts/deploy.sh to the short git SHA of the build
+    # being deployed; defaults to "latest" for manual `IMAGE_TAG=... docker
+    # stack deploy` invocations.
+    image: itsm-web:${IMAGE_TAG:-latest}
+    env_file:
+      - .env.production
+    ports:
+      - "${WEB_PUBLISHED_PORT:-3000}:3000"
+    networks:
+      - itsm_internal
+    volumes:
+      # STORAGE_LOCAL_PATH (.env.production, default "./.data/documents")
+      # resolves relative to the container's WORKDIR (/app, see
+      # apps/web/Dockerfile) -> /app/.data/documents. Without this volume,
+      # every deploy replaces the container filesystem and destroys all
+      # ticket/asset attachments (packages/core/src/storage/storage-adapter.ts
+      # only implements the "local" driver today).
+      - itsm_documents_data:/app/.data/documents
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
+        failure_action: rollback
+        delay: 5s
+        monitor: 20s
+      rollback_config:
+        # Symmetric with update_config: a rollback also starts the
+        # known-good image before stopping the failed one, so reverting a
+        # bad deploy is zero-downtime too, not just rolling forward.
+        order: start-first
+      restart_policy:
+        condition: any
+
+  worker:
+    # Same IMAGE_TAG convention as "web" (see above).
+    image: itsm-worker:${IMAGE_TAG:-latest}
+    env_file:
+      - .env.production
+    networks:
+      - itsm_internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+networks:
+  itsm_internal:
+    driver: overlay
+
+volumes:
+  itsm_postgres_data:
+  itsm_documents_data:
