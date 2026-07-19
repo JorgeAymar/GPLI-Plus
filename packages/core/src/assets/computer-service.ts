@@ -12,11 +12,12 @@ import { and, eq, inArray, isNull } from "drizzle-orm";
 import { recordAuditLog } from "../audit/audit-service";
 import { listSubtree } from "../entities/entity-service";
 import type { CreateComputerInput } from "../validation/computer.zod";
+import { ASSET_DEFINITION_KEY } from "./asset-definition-keys";
 import { getAssetDefinitionByKey } from "./asset-definition-service";
 import { validateCustomFields } from "./dynamic-schema";
 
 async function requireComputerDefinition() {
-  const definition = await getAssetDefinitionByKey("computer");
+  const definition = await getAssetDefinitionByKey(ASSET_DEFINITION_KEY.COMPUTER);
   if (!definition) throw new Error('Asset definition "computer" not found - run the seed script first');
   return definition;
 }

@@ -3,11 +3,12 @@ import { and, eq, inArray, isNull } from "drizzle-orm";
 import { recordAuditLog } from "../audit/audit-service";
 import { listSubtree } from "../entities/entity-service";
 import type { CreateNetworkEquipmentInput } from "../validation/network-equipment.zod";
+import { ASSET_DEFINITION_KEY } from "./asset-definition-keys";
 import { getAssetDefinitionByKey } from "./asset-definition-service";
 import { validateCustomFields } from "./dynamic-schema";
 
 async function requireNetworkEquipmentDefinition() {
-  const definition = await getAssetDefinitionByKey("network_equipment");
+  const definition = await getAssetDefinitionByKey(ASSET_DEFINITION_KEY.NETWORK_EQUIPMENT);
   if (!definition) throw new Error('Asset definition "network_equipment" not found - run the seed script first');
   return definition;
 }
