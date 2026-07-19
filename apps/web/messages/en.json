@@ -59,9 +59,14 @@
     "title": "Dashboard",
     "activeEntity": "Active entity",
     "activeProfile": "Active profile",
-    "assistantHeading": "AI Assistant",
+    "openTickets": "Open tickets",
+    "slaCompliance": "SLA compliance (30 days)",
+    "totalAssets": "Registered assets",
+    "contractsExpiring": "Contracts expiring (30 days)",
+    "viewReport": "View full report",
+    "assistantHeading": "External Assistant",
     "assistantDescription": "Open the AI assistant to resolve queries and speed up tasks outside GLPI-Plus.",
-    "assistantCta": "Open assistant"
+    "assistantCta": "Open external assistant"
   },
   "account": {
     "title": "My account",

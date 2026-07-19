@@ -59,9 +59,14 @@
     "title": "Dashboard",
     "activeEntity": "Aktive Entität",
     "activeProfile": "Aktives Profil",
-    "assistantHeading": "KI-Assistent",
+    "openTickets": "Offene Tickets",
+    "slaCompliance": "SLA-Einhaltung (30 Tage)",
+    "totalAssets": "Erfasste Assets",
+    "contractsExpiring": "Auslaufende Verträge (30 Tage)",
+    "viewReport": "Vollständigen Bericht anzeigen",
+    "assistantHeading": "Externer Assistent",
     "assistantDescription": "Öffnen Sie den KI-Assistenten, um Fragen zu klären und Aufgaben außerhalb von GLPI-Plus zu beschleunigen.",
-    "assistantCta": "Assistent öffnen"
+    "assistantCta": "Externen Assistenten öffnen"
   },
   "account": {
     "title": "Mein Konto",

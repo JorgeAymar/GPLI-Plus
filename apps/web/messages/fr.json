@@ -59,9 +59,14 @@
     "title": "Tableau de bord",
     "activeEntity": "Entité active",
     "activeProfile": "Profil actif",
-    "assistantHeading": "Assistant IA",
+    "openTickets": "Tickets ouverts",
+    "slaCompliance": "Conformité SLA (30 jours)",
+    "totalAssets": "Actifs enregistrés",
+    "contractsExpiring": "Contrats arrivant à échéance (30 jours)",
+    "viewReport": "Voir le rapport complet",
+    "assistantHeading": "Assistant externe",
     "assistantDescription": "Accédez à l'assistant d'intelligence artificielle pour résoudre des questions et accélérer des tâches en dehors de GLPI-Plus.",
-    "assistantCta": "Ouvrir l'assistant"
+    "assistantCta": "Ouvrir l'assistant externe"
   },
   "account": {
     "title": "Mon compte",
