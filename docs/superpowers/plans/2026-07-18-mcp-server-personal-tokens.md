@@ -1146,7 +1146,7 @@ describe("MCP route integration (requires `npm run dev` running)", () => {
     expect(toolNames).toContain("list_computers");
     expect(toolNames).toContain("list_problems");
     expect(toolNames).toContain("list_changes");
-    expect(toolNames.length).toBe(9); // 5 itemtypes x (list + get), all 5 have `get`
+    expect(toolNames.length).toBe(10); // 5 itemtypes x (list + get), all 5 have `get`
 
     const result = await client.callTool({ name: "list_tickets", arguments: {} });
     expect(result.isError).not.toBe(true);
