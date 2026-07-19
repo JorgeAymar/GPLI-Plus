@@ -51,6 +51,7 @@ declare module "next-auth" {
     userId: string;
     activeEntityId: string | null;
     activeProfileId: string | null;
+    language: string;
   }
 }
 
@@ -63,6 +64,7 @@ declare module "@auth/core/jwt" {
     userId?: string;
     activeEntityId?: string | null;
     activeProfileId?: string | null;
+    language?: string;
   }
 }
 
@@ -136,6 +138,9 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         });
         token.activeEntityId = context?.activeEntity.id ?? null;
         token.activeProfileId = context?.activeProfile.id ?? null;
+        // context.user is the full users row resolveAuthContext already fetched -
+        // reuse it instead of a second query just for language.
+        token.language = context?.user.language ?? "es";
         // Fires exactly once per sign-in (this branch only runs when `user` is present,
         // i.e. right after `authorize()` succeeds) - covers both the local and LDAP paths
         // without duplicating the call in authorize()'s two return branches.
@@ -145,6 +150,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
       if (trigger === "update" && session) {
         if ("activeEntityId" in session) token.activeEntityId = session.activeEntityId;
         if ("activeProfileId" in session) token.activeProfileId = session.activeProfileId;
+        if ("language" in session) token.language = session.language;
       }
 
       return token;
@@ -153,6 +159,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
       session.userId = token.userId as string;
       session.activeEntityId = (token.activeEntityId as string | null) ?? null;
       session.activeProfileId = (token.activeProfileId as string | null) ?? null;
+      session.language = (token.language as string | undefined) ?? "es";
       return session;
     },
   },

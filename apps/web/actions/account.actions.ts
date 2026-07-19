@@ -1,5 +1,6 @@
 "use server";
 
+import { unstable_update } from "@/lib/auth";
 import { requireAuthContext } from "@/lib/session";
 import {
   createPersonalApiClient,
@@ -59,6 +60,7 @@ export async function updateMyLanguageAction(input: unknown): Promise<User> {
   const context = await requireAuthContext();
   const parsed = parseInput(updateLanguageSchema, input);
   const user = await updateUserLanguage(context.user.id, parsed.language);
+  await unstable_update({ language: parsed.language });
   revalidatePath("/account");
   return user;
 }
