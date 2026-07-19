@@ -1,6 +1,6 @@
 # Esta plataforma vs. GLPI original
 
-Este documento compara la reimplementación (Next.js 16 + TypeScript + PostgreSQL) con GLPI (PHP + MySQL/MariaDB, GPL-3.0), la referencia funcional usada solo como catálogo de features (ver [`docs/architecture-plan.md`](architecture-plan.md) para la justificación legal completa del enfoque *clean-room*). El objetivo no es decir que GLPI es "malo" — es un producto maduro con 20+ años de producción real — sino documentar en qué la reescritura sobre una base moderna resultó en ventajas concretas, medibles, y dónde GLPI todavía tiene más superficie cubierta (paridad no significa superset).
+Este documento compara la reimplementación (Next.js 16 + TypeScript + PostgreSQL) con [GLPI](https://www.glpi-project.org/en/) (PHP + MySQL/MariaDB, GPL-3.0), la referencia funcional usada solo como catálogo de features (ver [`docs/architecture-plan.md`](architecture-plan.md) para la justificación legal completa del enfoque *clean-room*). El objetivo no es decir que GLPI es "malo" — es un producto maduro con 20+ años de producción real — sino documentar en qué la reescritura sobre una base moderna resultó en ventajas concretas, medibles, y dónde GLPI todavía tiene más superficie cubierta (paridad no significa superset).
 
 ## Resumen ejecutivo
 
@@ -68,6 +68,21 @@ Esta plataforma cerró esta sesión con:
 - **Sistema de plugins de terceros**: GLPI tiene un ecosistema de plugins de la comunidad acumulado en 20+ años; esta plataforma no lo tiene por la decisión de seguridad ya explicada (extensibilidad vía API/Webhooks en su lugar).
 - **OAuth2 como authorization server completo**: GLPI puede actuar como IdP OAuth2; esta plataforma usa bearer tokens simples (suficiente para el modelo de negocio de scripts propios del cliente, no para ser IdP de terceros).
 - **Volumen de configuración/edge cases acumulados**: GLPI cubre dos décadas de casos borde reportados por su comunidad; esta plataforma, al ser nueva, no tiene ese historial — mitigado por la cobertura de tests descrita arriba, pero es una diferencia real de madurez temporal, no de arquitectura.
+
+## Plugins de GLPI: cuáles son gratis y cuáles se venden aparte
+
+GLPI separa su catálogo de plugins en dos niveles (relevado directamente de [glpi-project.org/en/plugins](https://www.glpi-project.org/en/plugins/) y [glpi-project.org/en/pricing](https://www.glpi-project.org/en/pricing/)):
+
+**Community (gratis, open source)**: GLPI Inventory, Data Injection, Formcreator, Fields, Gantt, Metabase, Centreon, LDAP Tools, JAMF, SCCM, Database Inventory, Tags, News, PDF, Order, Escalade, Crédit, Uninstall, Advanced Forms, Advanced Planning, More Reporting, Treeview, Use Items Export, Generic Object, y otros — todo instalable sin costo.
+
+**Exclusive (requieren suscripción paga GLPI Network — planes Basic desde $100/mes hasta Advanced $1.000/mes)**: OAuthSSO, SCIM, GLPI-AI, AdvancedDashboard, ApprovalByMail, Cloud Inventory, Translate (traducción vía DeepL), Branding, WhatsApp, GDPR Tools, Anonymize, Renamer, Unread, PowerDNS, Holiday, Collaborativetools, Splitcat, GLPI Android Agent Config.
+
+**Lectura para esta plataforma**: varios de los plugins "Exclusive" de GLPI (SSO/SCIM empresarial, dashboards avanzados, aprobación por email, inventario de nube) son candidatos naturales a construirse **incluidos** (no como upsell de suscripción por tiers) — varios módulos ya cubren el terreno funcional adyacente:
+- **AdvancedDashboard** → ya existe una base sólida (`packages/core/src/dashboards/`, `/tools/dashboards`); ampliarlo compite directo con el tier pago de GLPI sin costo extra al cliente.
+- **ApprovalByMail** → el motor de notificaciones (`packages/core/src/notifications/`) y las validaciones ITIL (`itil_validations`, ya usadas en Changes) son la base directa; falta el lado "aprobar respondiendo un email" (parsear la respuesta entrante).
+- **Cloud Inventory** → no hay soporte de inventario AWS/Azure/GCP todavía; sería un módulo nuevo, no una extensión de algo existente.
+- **OAuthSSO/SCIM** → el core de auth ya soporta OIDC genérico (ver arriba); SCIM (provisioning automático de usuarios desde un IdP) es la pieza que falta.
+- **GLPI-AI** → GLPI no publica el detalle exacto de qué hace; queda como signo de interrogación, no como gap concreto y accionable.
 
 ## Por qué importa para el negocio (instalación on-premise por cliente)
 
