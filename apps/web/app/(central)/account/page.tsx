@@ -38,7 +38,7 @@ export default async function AccountPage() {
         <h2 className="text-sm font-medium opacity-70">{t("tokensHeading")}</h2>
         <p className="max-w-2xl text-sm opacity-70">
           {t.rich("tokensDescription", {
-            endpoint: () => <code className="rounded bg-black/5 px-1 py-0.5 dark:bg-white/10">/api/mcp</code>,
+            endpoint: (chunks) => <code className="rounded bg-black/5 px-1 py-0.5 dark:bg-white/10">{chunks}</code>,
           })}
         </p>
 
