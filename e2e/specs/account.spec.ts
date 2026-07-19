@@ -60,17 +60,21 @@ test.describe("Mi cuenta (/account)", () => {
     const diag = diagnostics(page);
     await page.goto("/account");
 
-    await page.locator('select[name="language"]').selectOption("fr");
-    await page.getByRole("button", { name: "Guardar" }).click();
-    await expect(page.getByText("Guardado.")).toBeVisible();
+    // try/finally: the reset to "es" must run even if an assertion above throws
+    // (e.g. under load) - otherwise admin@itsm.local is left at "fr" for real,
+    // silently breaking test 1's hard-coded "es" assertion on the next run.
+    try {
+      await page.locator('select[name="language"]').selectOption("fr");
+      await page.getByRole("button", { name: "Guardar" }).click();
+      await expect(page.getByText("Guardado.")).toBeVisible();
 
-    await page.reload();
-    await expect(page.locator('select[name="language"]')).toHaveValue("fr");
-
-    // Reset so other tests/manual QA see the default again.
-    await page.locator('select[name="language"]').selectOption("es");
-    await page.getByRole("button", { name: "Guardar" }).click();
-    await expect(page.getByText("Guardado.")).toBeVisible();
+      await page.reload();
+      await expect(page.locator('select[name="language"]')).toHaveValue("fr");
+    } finally {
+      await page.locator('select[name="language"]').selectOption("es");
+      await page.getByRole("button", { name: "Guardar" }).click();
+      await expect(page.getByText("Guardado.")).toBeVisible();
+    }
 
     diag.assertClean();
   });
@@ -86,10 +90,16 @@ test.describe("Mi cuenta (/account)", () => {
     const keyBlock = page.locator("pre");
     await expect(keyBlock).toBeVisible();
     const rawKey = (await keyBlock.textContent())?.trim() ?? "";
-    expect(rawKey).toMatch(/^pat_[0-9a-f]{40,48}$/);
+    // randomBytes(24).toString("hex") is always exactly 48 hex chars - an exact
+    // match (not a range) so a future entropy regression actually fails this test.
+    expect(rawKey).toMatch(/^pat_[0-9a-f]{48}$/);
 
+    // Fresh navigation (not just the client-side state left over from creating
+    // the token) proves the row is really persisted and revalidated server-side.
+    await page.goto("/account");
     const row = page.locator("tbody tr", { hasText: name });
     await expect(row).toContainText("Activo");
+    await expect(row.getByRole("button", { name: "Revocar" })).toBeVisible();
 
     await row.getByRole("button", { name: "Revocar" }).click();
     await page.waitForLoadState("networkidle");
