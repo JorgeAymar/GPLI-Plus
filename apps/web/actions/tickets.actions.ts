@@ -20,6 +20,11 @@ export async function createTicketAction(input: unknown) {
   const parsed = createTicketSchema.parse(input);
   const ticket = await createTicket(parsed, context.user.id);
   revalidatePath("/assistance/tickets");
+  // Also used by the self-service portal's ticket form (portal-ticket-form-client.tsx) -
+  // without this, a ticket created there never showed up in "Mis solicitudes" (which reads
+  // via listTicketsForRequester in a Server Component) until an unrelated navigation happened
+  // to revalidate it.
+  revalidatePath("/portal");
   return ticket;
 }
 
