@@ -110,6 +110,18 @@ function uniqueLabel(tag: string): string {
   return `E2E-TOOLS-${tag}-${RUN_ID}-${seq}`;
 }
 
+/**
+ * Distinct, still-greppable prefix for the self-authored test data added in this QA pass (own
+ * values, not copy-pasted from the E2E-TOOLS-* fixtures above) - kept separate so either
+ * generation can be identified/cleaned up independently. Same construction as uniqueLabel()
+ * above, just a different literal prefix, matching the QA-<SECTION>-<ENTITY>-* convention
+ * introduced in the sibling assistance/assets/management QA pass.
+ */
+function qaUniqueLabel(tag: string): string {
+  seq += 1;
+  return `QA-TOOLS-${tag}-${RUN_ID}-${seq}`;
+}
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 const HOUR_MS = 60 * 60 * 1000;
 
@@ -729,6 +741,426 @@ test.describe.serial("Feeds RSS - flujo E2E", () => {
     await expect(page.getByText("máx. 10 items")).toBeVisible();
     // No refresh has run yet (that's a background job, out of scope here), so the cache is empty.
     await expect(page.getByText("Sin items en caché todavía.")).toBeVisible();
+
+    expectNoCriticalErrors(diagnostics);
+  });
+});
+
+/* ===========================================================================================
+ * QA pass additions below: (1) own, self-authored realistic test data (QA-TOOLS-* prefix, NOT
+ * copy-pasted from the E2E-TOOLS-* fixtures above) with create -> list/detail persistence checks
+ * for every create-form in this module, and (2) data-type/required-field validation that asserts
+ * the REAL observed browser behavior (via .validity, not guessed). Playwright's .fill() throws
+ * outright for non-numeric text on input[type=number] ("Cannot type text into
+ * input[type=number]") - that's not what a real user typing experiences, so those cases use
+ * .pressSequentially() to simulate actual keystrokes instead, verified manually beforehand.
+ * =========================================================================================== */
+
+test.describe.serial("QA - Base de conocimiento: datos propios y validación de requeridos", () => {
+  const qaArticleTitle = qaUniqueLabel("KB");
+  const qaArticleBody = "Los usuarios de Contabilidad reportan que el reporte mensual de gastos no carga desde el día 12.";
+
+  test("crear un artículo con datos propios (sin FAQ, visible en catálogo) lo persiste y aparece en la lista", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/knowledge-base");
+
+    await page.locator('input[name="title"]').fill(qaArticleTitle);
+    await page.locator('textarea[name="body"]').fill(qaArticleBody);
+    await page.locator('input[name="showInServiceCatalog"]').check();
+    await page.getByRole("button", { name: "Crear artículo" }).click();
+
+    const link = page.getByRole("link", { name: qaArticleTitle, exact: true });
+    await expect(link).toBeVisible();
+    // isFaq was left unchecked - the list must NOT show the "(FAQ)" suffix for this one.
+    await expect(page.getByText(`${qaArticleTitle} (FAQ)`)).toHaveCount(0);
+
+    await link.click();
+    await page.waitForURL(/\/tools\/knowledge-base\/[^/]+$/);
+    await expect(page.getByRole("heading", { level: 1, name: qaArticleTitle })).toBeVisible();
+    await expect(page.getByText(qaArticleBody)).toBeVisible();
+
+    expectNoCriticalErrors(diagnostics);
+  });
+
+  test("'title' y 'body' vacíos (uno a la vez) bloquean el envío nativamente y no crean el artículo", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/knowledge-base");
+
+    const bogusTitle = qaUniqueLabel("KB-SHOULD-NOT-EXIST");
+    const titleInput = page.locator('input[name="title"]');
+    const bodyInput = page.locator('textarea[name="body"]');
+
+    // title left empty, body filled.
+    await bodyInput.fill("Contenido de prueba - no debería llegar a crearse ningún artículo.");
+    await page.getByRole("button", { name: "Crear artículo" }).click();
+    const titleValidity = await titleInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(titleValidity).toEqual({ valid: false, valueMissing: true });
+
+    // Mirror image: title filled, body left empty.
+    await titleInput.fill(bogusTitle);
+    await bodyInput.fill("");
+    await page.getByRole("button", { name: "Crear artículo" }).click();
+    const bodyValidity = await bodyInput.evaluate((el: HTMLTextAreaElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(bodyValidity).toEqual({ valid: false, valueMissing: true });
+
+    await expect(page.getByRole("link", { name: bogusTitle })).toHaveCount(0);
+
+    expectNoCriticalErrors(diagnostics);
+  });
+});
+
+test.describe.serial("QA - Recordatorios: datos propios sin fecha y validación de requerido/fecha", () => {
+  const qaReminderTitle = qaUniqueLabel("REMINDER");
+
+  test("crear un recordatorio con datos propios SIN fecha (camino opcional de remindAt) lo muestra en pendientes", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/reminders");
+
+    await page.locator('input[name="title"]').fill(qaReminderTitle);
+    await page.locator('textarea[name="content"]').fill("Confirmar con el proveedor la renovación de la licencia antes de fin de mes.");
+    // remindAt left empty on purpose - optional per createReminderSchema.
+    await page.getByRole("button", { name: "Crear recordatorio" }).click();
+
+    const pendingItem = page.locator("li", { hasText: qaReminderTitle });
+    await expect(pendingItem).toBeVisible();
+    await expect(pendingItem.getByRole("button", { name: "Marcar hecho" })).toBeVisible();
+    // reminders/page.tsx only renders the trailing date <span> when remindAt is actually set.
+    await expect(pendingItem.locator("span.opacity-40")).toHaveCount(0);
+
+    expectNoCriticalErrors(diagnostics);
+  });
+
+  test("'title' vacío bloquea el envío nativamente, y texto no-fecha en 'Recordar el' es descartado (queda vacío, sigue siendo válido)", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/reminders");
+
+    const remindAtInput = page.locator('input[name="remindAt"]');
+    // Real user keystrokes (not .fill(), which Playwright rejects outright for a non-parseable
+    // datetime-local string). Verified manually: the segmented widget has no digit keys to place
+    // from "not-a-date", so it silently discards all of it.
+    await remindAtInput.pressSequentially("not-a-date");
+    expect(await remindAtInput.inputValue()).toBe("");
+    expect(await remindAtInput.evaluate((el: HTMLInputElement) => el.validity.valid)).toBe(true);
+
+    const bogusTitle = qaUniqueLabel("REMINDER-SHOULD-NOT-EXIST");
+    const titleInput = page.locator('input[name="title"]');
+    // title left empty - the only required field.
+    await page.locator('textarea[name="content"]').fill("No debería crearse.");
+    await page.getByRole("button", { name: "Crear recordatorio" }).click();
+    const validity = await titleInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+    await expect(page.locator("li", { hasText: bogusTitle })).toHaveCount(0);
+
+    expectNoCriticalErrors(diagnostics);
+  });
+});
+
+test.describe.serial("QA - Búsquedas guardadas: datos propios de activos y validación de nombre/JSON", () => {
+  const qaSearchName = qaUniqueLabel("SAVEDSEARCH");
+
+  test("crear una búsqueda compartida de activos con criterios propios la persiste y aparece en la lista", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/saved-searches");
+
+    await page.locator('input[name="name"]').fill(qaSearchName);
+    await page.locator('select[name="itemType"]').selectOption("asset");
+    await page.locator("#isPrivate").uncheck();
+    await page.locator('textarea[name="queryJson"]').fill(JSON.stringify({ search: "impresora" }));
+    await page.getByRole("button", { name: "Crear búsqueda guardada" }).click();
+
+    const row = page.locator("li", { hasText: qaSearchName });
+    await expect(row).toBeVisible();
+    await expect(row.getByText("(Activo)")).toBeVisible();
+    await expect(row.getByText("compartida")).toBeVisible();
+
+    expectNoCriticalErrors(diagnostics);
+  });
+
+  test("'name' vacío bloquea el envío nativamente, y un JSON malformado en criterios se rechaza con un mensaje legible antes de llegar al servidor", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/saved-searches");
+
+    const nameInput = page.locator('input[name="name"]');
+    // name left empty - the only required text field.
+    await page.getByRole("button", { name: "Crear búsqueda guardada" }).click();
+    const validity = await nameInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(validity).toEqual({ valid: false, valueMissing: true });
+
+    // Now fill name but break the JSON - saved-search-form.tsx's own action() JSON.parse()s the
+    // textarea client-side and never calls the Server Action at all on a parse failure.
+    const bogusName = qaUniqueLabel("SAVEDSEARCH-SHOULD-NOT-EXIST");
+    await nameInput.fill(bogusName);
+    await page.locator('textarea[name="queryJson"]').fill("{ this is not valid json");
+    await page.getByRole("button", { name: "Crear búsqueda guardada" }).click();
+    await expect(page.getByText("El JSON de criterios no es válido.")).toBeVisible();
+    await expect(page.locator("li", { hasText: bogusName })).toHaveCount(0);
+
+    expectNoCriticalErrors(diagnostics);
+  });
+});
+
+test.describe.serial("QA - Reservas: datos propios y validación de fechas requeridas/orden", () => {
+  const qaAssetName = qaUniqueLabel("ASSET");
+  const qaBeginAt = localDateTimeInput(3 * DAY_MS);
+  const qaEndAt = localDateTimeInput(3 * DAY_MS + HOUR_MS);
+
+  test("crear un activo propio, habilitarlo y reservarlo con datos propios lo muestra en el detalle", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    // Same rationale as the E2E- fixture above: /assets/monitor is outside tools/**, used purely
+    // as setup since reservations require a backing asset instance.
+    await page.goto("/assets/monitor");
+    await page.locator('input[name="name"]').fill(qaAssetName);
+    await page.getByRole("button", { name: "Crear", exact: true }).click();
+    await expect(page.getByText(qaAssetName)).toBeVisible();
+
+    await page.goto("/tools/reservations");
+    await page.locator('select[name="assetId"]').selectOption({ label: qaAssetName });
+    await page.locator('textarea[name="comment"]').fill("Reserva propia de QA para la sala de conferencias B.");
+    await page.getByRole("button", { name: "Habilitar para reserva" }).click();
+    await expect(page.locator("li", { hasText: qaAssetName })).toBeVisible();
+
+    await page.locator("li", { hasText: qaAssetName }).getByRole("link").click();
+    await page.waitForURL(/\/tools\/reservations\/[^/]+$/);
+    await page.locator('input[name="beginAt"]').fill(qaBeginAt);
+    await page.locator('input[name="endAt"]').fill(qaEndAt);
+    await page.locator('textarea[name="comment"]').fill("Turno de QA con datos propios.");
+    await page.getByRole("button", { name: "Crear reserva" }).click();
+
+    await expect(page.getByText("Turno de QA con datos propios.")).toBeVisible();
+
+    expectNoCriticalErrors(diagnostics);
+  });
+
+  test("'beginAt'/'endAt' vacíos bloquean el envío nativamente", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/reservations");
+    await page.locator("li", { hasText: qaAssetName }).getByRole("link").click();
+    await page.waitForURL(/\/tools\/reservations\/[^/]+$/);
+
+    const beginInput = page.locator('input[name="beginAt"]');
+    const endInput = page.locator('input[name="endAt"]');
+    // Both left empty - the only required fields on this form.
+    await page.getByRole("button", { name: "Crear reserva" }).click();
+    const beginValidity = await beginInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(beginValidity).toEqual({ valid: false, valueMissing: true });
+    const endValidity = await endInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(endValidity).toEqual({ valid: false, valueMissing: true });
+
+    expectNoCriticalErrors(diagnostics);
+  });
+
+  test("una reserva con 'endAt' anterior a 'beginAt' es rechazada con un mensaje legible, no un blob JSON crudo (regresión createReservationAction)", async ({
+    page,
+  }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/reservations");
+    await page.locator("li", { hasText: qaAssetName }).getByRole("link").click();
+    await page.waitForURL(/\/tools\/reservations\/[^/]+$/);
+
+    // No native HTML constraint can enforce ordering between two independent datetime-local
+    // inputs, so an inverted range is only ever caught by createReservationSchema's own
+    // .refine() on the server - this is the one path in reservations.actions.ts that can reach a
+    // Zod validation failure through this form's UI.
+    const laterBeginAt = localDateTimeInput(10 * DAY_MS);
+    const earlierEndAt = localDateTimeInput(9 * DAY_MS);
+    await page.locator('input[name="beginAt"]').fill(laterBeginAt);
+    await page.locator('input[name="endAt"]').fill(earlierEndAt);
+    await page.getByRole("button", { name: "Crear reserva" }).click();
+
+    const error = page.locator("form p.text-red-600").first();
+    await expect(error).toBeVisible();
+    const text = (await error.textContent())?.trim() ?? "";
+    expect(text.startsWith("[") || text.startsWith("{"), `error no debería ser JSON crudo: ${text}`).toBe(false);
+    expect(text).toContain("endAt debe ser posterior a beginAt");
+
+    // Same rationale as the overlap-conflict test above: the thrown validation error surfaces as
+    // a non-2xx response at the transport level - not a bug, that's how a thrown Server Action
+    // error propagates in Next.js 16.
+    expectNoCriticalErrors(diagnostics, { allowNetwork: true });
+  });
+});
+
+test.describe.serial("QA - Proyectos: datos propios y validación de 'Monto' del costo", () => {
+  const qaProjectName = qaUniqueLabel("PROJECT");
+  const qaProjectCode = qaUniqueLabel("CODE");
+  const qaTaskName = qaUniqueLabel("TASK");
+
+  test("crear un proyecto con datos propios, una tarea, un miembro y un costo los muestra correctamente", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/projects");
+    await page.locator('input[name="name"]').fill(qaProjectName);
+    await page.locator('input[name="code"]').fill(qaProjectCode);
+    await page.getByRole("button", { name: "Crear proyecto" }).click();
+    const row = page.locator("li", { hasText: qaProjectName });
+    await expect(row).toBeVisible();
+
+    await row.getByRole("link").click();
+    await page.waitForURL(/\/tools\/projects\/[^/]+$/);
+
+    // Not a milestone this time (the E2E- fixture above always checks isMilestone) - exercises
+    // the plain-task path instead.
+    await page.locator('input[name="name"]').fill(qaTaskName);
+    await page.getByRole("button", { name: "Crear tarea" }).click();
+    // Scoped to the "Tareas" list specifically - once created, the task name also appears as a
+    // <option> in this same form's own "Tarea padre" <select> (for a future task) and in the
+    // no-status kanban column below, so an unscoped getByText() is a strict-mode violation.
+    const tasksList = page.getByRole("heading", { level: 2, name: "Tareas" }).locator("xpath=following-sibling::ul[1]");
+    await expect(tasksList.getByText(qaTaskName)).toBeVisible();
+
+    await page.locator('select[name="role"]').selectOption("member");
+    await page.getByRole("button", { name: "Agregar al equipo" }).click();
+    await expect(page.getByText(/\(member\)/)).toBeVisible();
+
+    await page.locator('input[name="amount"]').fill("87.5");
+    await page.locator('input[name="comment"]').fill("Costo propio de QA");
+    await page.getByRole("button", { name: "Agregar costo" }).click();
+    await expect(page.getByText("$87.50")).toBeVisible();
+    await expect(page.getByText("Costo propio de QA")).toBeVisible();
+
+    expectNoCriticalErrors(diagnostics);
+  });
+
+  test("'Monto' del costo: letras tecleadas no se registran, y un valor negativo es bloqueado por la restricción min=0 del input", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/projects");
+    await page.locator("li", { hasText: qaProjectName }).getByRole("link").click();
+    await page.waitForURL(/\/tools\/projects\/[^/]+$/);
+
+    const amountInput = page.locator('input[name="amount"]');
+    // (b) wrong-type: verified manually - letters typed key-by-key into a type=number input
+    // never register.
+    await amountInput.pressSequentially("abc");
+    expect(await amountInput.inputValue()).toBe("");
+
+    await amountInput.fill("-15");
+    const negativeValidity = await amountInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, rangeUnderflow: el.validity.rangeUnderflow }));
+    expect(negativeValidity).toEqual({ valid: false, rangeUnderflow: true });
+
+    // Confirm the blocked value never reaches the server: fill the other required field and
+    // submit with amount=-15 still in place.
+    const bogusComment = qaUniqueLabel("COST-SHOULD-NOT-EXIST");
+    await page.locator('input[name="comment"]').fill(bogusComment);
+    await page.getByRole("button", { name: "Agregar costo" }).click();
+    await expect(page.getByText(bogusComment)).toHaveCount(0);
+
+    expectNoCriticalErrors(diagnostics);
+  });
+});
+
+test.describe.serial("QA - Dashboards: datos propios y validación de requeridos/rango de 'Ancho'", () => {
+  const qaDashboardKey = qaUniqueLabel("dash-key").toLowerCase();
+  const qaDashboardName = qaUniqueLabel("Dashboard");
+
+  test("crear un dashboard con datos propios y una card con posición/tamaño propios funciona", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/dashboards");
+    await page.locator('input[name="key"]').fill(qaDashboardKey);
+    await page.locator('input[name="name"]').fill(qaDashboardName);
+    await page.getByRole("button", { name: "Crear dashboard" }).click();
+    const row = page.locator("li", { hasText: qaDashboardName });
+    await expect(row).toBeVisible();
+
+    await row.getByRole("link").click();
+    await page.waitForURL(/\/tools\/dashboards\/[^/]+$/);
+
+    await page.locator('select[name="cardKey"]').selectOption({ index: 0 });
+    await page.locator('select[name="chartType"]').selectOption("pie");
+    await page.locator('input[name="positionX"]').fill("2");
+    await page.locator('input[name="positionY"]').fill("1");
+    await page.locator('input[name="width"]').fill("6");
+    await page.locator('input[name="height"]').fill("4");
+    await page.getByRole("button", { name: "Agregar card" }).click();
+
+    await expect(page.getByRole("heading", { level: 3 }).first()).toBeVisible();
+
+    expectNoCriticalErrors(diagnostics);
+  });
+
+  test("'key'/'name' vacíos bloquean el envío nativamente, y 'Ancho' fuera de rango (13, máx=12) es bloqueado", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/dashboards");
+
+    const keyInput = page.locator('input[name="key"]');
+    const nameInput = page.locator('input[name="name"]');
+    const bogusName = qaUniqueLabel("Dashboard-SHOULD-NOT-EXIST");
+    // key left empty, name filled.
+    await nameInput.fill(bogusName);
+    await page.getByRole("button", { name: "Crear dashboard" }).click();
+    const keyValidity = await keyInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, valueMissing: el.validity.valueMissing }));
+    expect(keyValidity).toEqual({ valid: false, valueMissing: true });
+    await expect(page.locator("li", { hasText: bogusName })).toHaveCount(0);
+
+    // Now probe the card form's 'width' (max=12) constraint on the QA dashboard created above.
+    await page.goto("/tools/dashboards");
+    await page.locator("li", { hasText: qaDashboardName }).getByRole("link").click();
+    await page.waitForURL(/\/tools\/dashboards\/[^/]+$/);
+
+    const widthInput = page.locator('input[name="width"]');
+    // (b) wrong-type: clear the defaultValue first, then type letters - verified manually that
+    // Chromium discards them at the keyboard-event level, leaving the field empty.
+    await widthInput.fill("");
+    await widthInput.pressSequentially("abc");
+    expect(await widthInput.inputValue()).toBe("");
+
+    await widthInput.fill("13");
+    const overflowValidity = await widthInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, rangeOverflow: el.validity.rangeOverflow }));
+    expect(overflowValidity).toEqual({ valid: false, rangeOverflow: true });
+
+    expectNoCriticalErrors(diagnostics);
+  });
+});
+
+test.describe.serial("QA - Feeds RSS: datos propios y validación de URL/rango numérico", () => {
+  const qaFeedName = qaUniqueLabel("RSS");
+  const qaFeedUrl = `https://example.com/${qaUniqueLabel("feed").toLowerCase()}.xml`;
+
+  test("crear un feed con datos propios (otros valores de actualización/máx. items) lo muestra en su detalle", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/rss-feeds");
+
+    await page.locator('input[name="name"]').fill(qaFeedName);
+    await page.locator('input[name="url"]').fill(qaFeedUrl);
+    await page.locator('input[name="refreshRateMinutes"]').fill("30");
+    await page.locator('input[name="maxItems"]').fill("5");
+    await page.getByRole("button", { name: "Crear feed" }).click();
+
+    await expect(page.getByRole("link", { name: qaFeedName })).toBeVisible();
+
+    await page.getByRole("link", { name: qaFeedName }).click();
+    await page.waitForURL(/\/tools\/rss-feeds\/[^/]+$/);
+    await expect(page.getByText("cada 30 min")).toBeVisible();
+    await expect(page.getByText("máx. 5 items")).toBeVisible();
+
+    expectNoCriticalErrors(diagnostics);
+  });
+
+  test("URL con formato inválido bloquea el envío, y refreshRateMinutes/maxItems fuera de rango son bloqueados por min/max", async ({ page }) => {
+    const diagnostics = attachDiagnostics(page);
+    await page.goto("/tools/rss-feeds");
+
+    const bogusName = qaUniqueLabel("RSS-SHOULD-NOT-EXIST");
+    const urlInput = page.locator('input[name="url"]');
+    await page.locator('input[name="name"]').fill(bogusName);
+    await urlInput.fill("not-a-url");
+    await page.getByRole("button", { name: "Crear feed" }).click();
+    const urlValidity = await urlInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, typeMismatch: el.validity.typeMismatch }));
+    expect(urlValidity).toEqual({ valid: false, typeMismatch: true });
+    await expect(page.getByRole("link", { name: bogusName })).toHaveCount(0);
+
+    const refreshInput = page.locator('input[name="refreshRateMinutes"]');
+    // (b) wrong-type: clear the defaultValue (1440) first, then type letters - discarded.
+    await refreshInput.fill("");
+    await refreshInput.pressSequentially("abc");
+    expect(await refreshInput.inputValue()).toBe("");
+
+    await refreshInput.fill("0");
+    const refreshValidity = await refreshInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, rangeUnderflow: el.validity.rangeUnderflow }));
+    expect(refreshValidity).toEqual({ valid: false, rangeUnderflow: true });
+
+    const maxItemsInput = page.locator('input[name="maxItems"]');
+    await maxItemsInput.fill("101");
+    const maxItemsValidity = await maxItemsInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, rangeOverflow: el.validity.rangeOverflow }));
+    expect(maxItemsValidity).toEqual({ valid: false, rangeOverflow: true });
 
     expectNoCriticalErrors(diagnostics);
   });
