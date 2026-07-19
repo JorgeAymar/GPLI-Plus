@@ -84,6 +84,18 @@ GLPI separa su catálogo de plugins en dos niveles (relevado directamente de [gl
 - **OAuthSSO/SCIM** → el core de auth ya soporta OIDC genérico (ver arriba); SCIM (provisioning automático de usuarios desde un IdP) es la pieza que falta.
 - **GLPI-AI** → GLPI no publica el detalle exacto de qué hace; queda como signo de interrogación, no como gap concreto y accionable.
 
+**Lectura de los plugins "Community" (gratis) — cuáles faltan de verdad vs. cuáles ya están cubiertos de fábrica** (cruzado contra el código real, no solo el nombre):
+
+- **Faltantes con valor de negocio claro**:
+  - *Data Injection* (importación masiva CSV) — no existe hoy. Alto valor: onboarding de un cliente nuevo con inventario/usuarios existentes es 100% manual sin esto.
+  - *Carbon* (huella de carbono de activos) — el módulo `impact` que ya existe (`packages/core/src/impact/`) es análisis de **dependencias** (si A falla, impacta a B), no ambiental — son conceptos distintos, esto sigue siendo un gap real. Ángulo ESG cada vez más pedido en RFPs corporativos.
+  - *PDF* (exportar reportes) — no hay generación de PDF en ningún lado del código; `/tools/reports` solo muestra tablas en pantalla.
+  - *Gantt* — el dato ya existe (`projectTasks` con fechas/estado/dependencias vía `projectTaskLinks`), falta solo la visualización — relativamente barato de agregar sobre lo que ya está.
+- **Ya cubiertos, con otro nombre**: *Fields* (activos dinámicos, más flexible que el plugin), *LDAP Tools* (`auth-sources`), *Database Inventory* (tipo de activo `database`), *Treeview* (entidades ya en `ltree`, falta solo el componente visual).
+- **Alto esfuerzo / bajo ROI para el modelo actual**: SCCM, JAMF, Centreon — integraciones enterprise pesadas, solo valen la pena si un cliente grande concreto las pide.
+
+Prioridad sugerida: **Data Injection primero** (afecta el costo de onboarding de cada cliente, que es el negocio real), después **PDF export** (barato, esperado por cualquier ITSM).
+
 ## Por qué importa para el negocio (instalación on-premise por cliente)
 
 El modelo de negocio de este producto es **vender e instalar** la plataforma en infraestructura de cada cliente (Docker on-prem), no operar un SaaS centralizado. Esto hace que las ventajas de arquitectura de arriba tengan impacto directo en el costo operativo real:
