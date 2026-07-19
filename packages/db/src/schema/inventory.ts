@@ -40,7 +40,6 @@ export const inventoryLockedFields = pgTable(
       .notNull()
       .references(() => assets.id, { onDelete: "cascade" }),
     fieldName: text("field_name").notNull(),
-    lockedAt: timestamp("locked_at", { mode: "date" }).notNull().defaultNow(),
   },
   (table) => [uniqueIndex("inventory_locked_fields_asset_field_unique").on(table.assetId, table.fieldName)],
 );

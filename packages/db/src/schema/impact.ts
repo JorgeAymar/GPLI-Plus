@@ -1,4 +1,4 @@
-import { index, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { assets } from "./assets";
 
 /**
@@ -35,11 +35,11 @@ export type ImpactRelation = typeof impactRelations.$inferSelect;
 export type NewImpactRelation = typeof impactRelations.$inferInsert;
 
 /**
- * Per-root-asset exploration config for the impact map (currently just how
- * many hops deep to walk). v1 has no visual canvas (Cytoscape-style graph
- * drawing is explicitly out of scope - see impact-service.ts), so unlike
- * GLPI's `glpi_impactitems` there's no `positionsJson`/zoom/color state to
- * persist here; if a canvas view is added later, that's where it'd go.
+ * Per-root-asset exploration config for the impact map. v1 has no visual
+ * canvas (Cytoscape-style graph drawing is explicitly out of scope - see
+ * impact-service.ts), so unlike GLPI's `glpi_impactitems` there's no
+ * `positionsJson`/zoom/color state to persist here; if a canvas view is
+ * added later, that's where it'd go.
  */
 export const impactContexts = pgTable("impact_contexts", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -47,7 +47,6 @@ export const impactContexts = pgTable("impact_contexts", {
     .notNull()
     .references(() => assets.id, { onDelete: "cascade" })
     .unique(),
-  maxDepth: integer("max_depth").notNull().default(5),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });

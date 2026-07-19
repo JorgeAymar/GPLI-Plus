@@ -7,6 +7,7 @@ import { ValidationsSection } from "@/components/itil/validations-section";
 import { getProblem, listActors, listCosts, listTimelineItems, listUsers, listValidations } from "@itsm/core";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ProblemEditForm } from "./problem-edit-form";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -34,10 +35,11 @@ export default async function ProblemDetailPage({ params }: { params: Promise<{ 
         <h1 className="text-2xl font-semibold">{problem.title}</h1>
         <StatusSelect id={problem.id} currentStatus={problem.status} updateStatusAction={updateProblemStatusAction} />
       </div>
-      <p className="whitespace-pre-wrap text-sm opacity-80">{problem.content}</p>
-      <p className="text-sm opacity-60">
-        Urgencia: {problem.urgency} · Impacto: {problem.impact} · Prioridad: {problem.priority}
-      </p>
+
+      <div>
+        <h2 className="mb-2 text-sm font-medium opacity-70">Editar problema</h2>
+        <ProblemEditForm problem={problem} />
+      </div>
 
       <div className="grid grid-cols-2 gap-8">
         <ActorsSection itilType="problem" itilId={id} actors={actors} users={users} />

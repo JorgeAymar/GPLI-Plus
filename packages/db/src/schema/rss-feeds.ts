@@ -40,7 +40,6 @@ export const rssFeedCachedItems = pgTable(
     // Pre-sanitized (sanitize-html) at fetch time in rss-feed-service.ts - the web UI still renders
     // this as plain text rather than raw markup, as defense in depth (see tools/rss-feeds/[id]/page.tsx).
     description: text("description"),
-    fetchedAt: timestamp("fetched_at", { mode: "date" }).notNull().defaultNow(),
   },
   (table) => [index("rss_feed_cached_items_feed_idx").on(table.feedId)],
 );

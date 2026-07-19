@@ -1,4 +1,4 @@
-import { db, impactContexts, impactRelations, type ImpactContext, type ImpactRelation } from "@itsm/db";
+import { db, impactRelations, type ImpactRelation } from "@itsm/db";
 import { eq } from "drizzle-orm";
 import { getAsset } from "../assets/asset-service";
 import type { AddImpactRelationInput } from "../validation/impact.zod";
@@ -121,30 +121,4 @@ export async function buildImpactGraph(
   }
 
   return { nodes: Array.from(nodesById.values()), edges };
-}
-
-export async function getOrCreateImpactContext(rootAssetId: string): Promise<ImpactContext> {
-  const [existing] = await db.select().from(impactContexts).where(eq(impactContexts.rootAssetId, rootAssetId));
-  if (existing) return existing;
-
-  // onConflictDoNothing (same pattern as linkContractAsset in contract-service.ts)
-  // makes this race-safe: if two callers get here concurrently for the same
-  // rootAssetId, one insert wins and the other becomes a no-op, then both
-  // re-select and see the winner's row.
-  await db.insert(impactContexts).values({ rootAssetId }).onConflictDoNothing();
-
-  const [context] = await db.select().from(impactContexts).where(eq(impactContexts.rootAssetId, rootAssetId));
-  if (!context) throw new Error(`Failed to get or create impact context for asset ${rootAssetId}`);
-  return context;
-}
-
-export async function updateImpactContextMaxDepth(rootAssetId: string, maxDepth: number): Promise<ImpactContext> {
-  const context = await getOrCreateImpactContext(rootAssetId);
-  const [updated] = await db
-    .update(impactContexts)
-    .set({ maxDepth, updatedAt: new Date() })
-    .where(eq(impactContexts.id, context.id))
-    .returning();
-  if (!updated) throw new Error(`Impact context for asset ${rootAssetId} not found`);
-  return updated;
 }
