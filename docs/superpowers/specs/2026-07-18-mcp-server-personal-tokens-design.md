@@ -99,7 +99,7 @@ Por cada entrada `key` del registro:
 - **`list_<key>`** (ej. `list_tickets`): sin argumentos. Internamente: resolver contexto → `requireRight(context, entry.moduleKey, RIGHT.READ)` → `entry.list(context.activeEntity.id)` (con `includeSubtree: true`, igual que hoy). Devuelve el array como JSON en el `content` de la tool result.
 - **`get_<key>`** (ej. `get_ticket`): un argumento `{ id: string }` (Zod: `z.object({ id: z.string().uuid() })`, usando el mismo `zodToJsonSchema`-style que ya soporta el SDK de MCP para `inputSchema`). Solo se registra si `entry.get` existe (hoy todos los 5 lo tienen). 404 → tool result con `isError: true` y mensaje "no encontrado", no una excepción no controlada.
 
-v1: 5 itemtypes × (list + get) = **9 tools**.
+v1: 5 itemtypes × (list + get) = **10 tools**.
 
 Descripciones de cada tool (campo `description` que ve el modelo cliente) generadas desde una plantilla simple ("Lista los tickets de tu entidad activa (incluye subárbol)." / "Obtiene un ticket por id."), no texto libre por tipo - mantiene el registro como única fuente de verdad.
 
