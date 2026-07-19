@@ -1,9 +1,11 @@
 import "dotenv/config";
 import { db, entities } from "@itsm/db";
 import { isNull } from "drizzle-orm";
+import { ASSET_DEFINITION_KEY } from "../src/assets/asset-definition-keys";
 import { createAssetDefinition, getAssetDefinitionByKey, updateAssetDefinition } from "../src/assets/asset-definition-service";
 import { MODULE } from "../src/auth/modules";
 import { RIGHT } from "../src/auth/permissions";
+import { DROPDOWN_CATEGORY } from "../src/dropdowns/dropdown-categories";
 import { createDropdownCategory, createDropdownItem, getDropdownCategoryByKey, listDropdownItems } from "../src/dropdowns/dropdown-service";
 import { createEntity } from "../src/entities/entity-service";
 import {
@@ -18,36 +20,36 @@ import { createSlaPolicy, listSlaPolicies } from "../src/sla/sla-service";
 import { createUser, findUserByEmail } from "../src/users/user-service";
 
 const CORE_ASSET_DEFINITIONS = [
-  { key: "computer", name: "Computadora", hasExtensionTable: true },
-  { key: "monitor", name: "Monitor", hasExtensionTable: false },
-  { key: "network_equipment", name: "Equipo de red", hasExtensionTable: true },
-  { key: "printer", name: "Impresora", hasExtensionTable: false },
-  { key: "phone", name: "Teléfono", hasExtensionTable: false },
-  { key: "peripheral", name: "Periférico", hasExtensionTable: false },
-  { key: "datacenter", name: "Datacenter", hasExtensionTable: false },
-  { key: "domain", name: "Dominio", hasExtensionTable: false },
-  { key: "line", name: "Línea", hasExtensionTable: false },
-  { key: "database", name: "Base de datos", hasExtensionTable: false },
-  { key: "rack", name: "Rack", hasExtensionTable: false },
-  { key: "enclosure", name: "Chasis/Enclosure", hasExtensionTable: false },
-  { key: "pdu", name: "PDU", hasExtensionTable: false },
-  { key: "cluster", name: "Cluster", hasExtensionTable: false },
-  { key: "unmanaged_device", name: "Dispositivo no gestionado", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.COMPUTER, name: "Computadora", hasExtensionTable: true },
+  { key: ASSET_DEFINITION_KEY.MONITOR, name: "Monitor", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.NETWORK_EQUIPMENT, name: "Equipo de red", hasExtensionTable: true },
+  { key: ASSET_DEFINITION_KEY.PRINTER, name: "Impresora", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.PHONE, name: "Teléfono", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.PERIPHERAL, name: "Periférico", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.DATACENTER, name: "Datacenter", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.DOMAIN, name: "Dominio", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.LINE, name: "Línea", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.DATABASE, name: "Base de datos", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.RACK, name: "Rack", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.ENCLOSURE, name: "Chasis/Enclosure", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.PDU, name: "PDU", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.CLUSTER, name: "Cluster", hasExtensionTable: false },
+  { key: ASSET_DEFINITION_KEY.UNMANAGED_DEVICE, name: "Dispositivo no gestionado", hasExtensionTable: false },
 ] as const;
 
 const BASELINE_DROPDOWN_CATEGORIES = [
-  { key: "status", name: "Estado" },
-  { key: "manufacturer", name: "Fabricante" },
-  { key: "location", name: "Ubicación" },
-  { key: "os", name: "Sistema operativo" },
-  { key: "os_version", name: "Versión de SO" },
-  { key: "network_equipment_type", name: "Tipo de equipo de red" },
-  { key: "software_category", name: "Categoría de software" },
-  { key: "itil_category", name: "Categoría de ticket/problema/cambio" },
-  { key: "project_state", name: "Estado de proyecto" },
-  { key: "project_type", name: "Tipo de proyecto" },
-  { key: "project_task_state", name: "Estado de tarea de proyecto" },
-  { key: "cable_type", name: "Tipo de cable" },
+  { key: DROPDOWN_CATEGORY.STATUS, name: "Estado" },
+  { key: DROPDOWN_CATEGORY.MANUFACTURER, name: "Fabricante" },
+  { key: DROPDOWN_CATEGORY.LOCATION, name: "Ubicación" },
+  { key: DROPDOWN_CATEGORY.OS, name: "Sistema operativo" },
+  { key: DROPDOWN_CATEGORY.OS_VERSION, name: "Versión de SO" },
+  { key: DROPDOWN_CATEGORY.NETWORK_EQUIPMENT_TYPE, name: "Tipo de equipo de red" },
+  { key: DROPDOWN_CATEGORY.SOFTWARE_CATEGORY, name: "Categoría de software" },
+  { key: DROPDOWN_CATEGORY.ITIL_CATEGORY, name: "Categoría de ticket/problema/cambio" },
+  { key: DROPDOWN_CATEGORY.PROJECT_STATE, name: "Estado de proyecto" },
+  { key: DROPDOWN_CATEGORY.PROJECT_TYPE, name: "Tipo de proyecto" },
+  { key: DROPDOWN_CATEGORY.PROJECT_TASK_STATE, name: "Estado de tarea de proyecto" },
+  { key: DROPDOWN_CATEGORY.CABLE_TYPE, name: "Tipo de cable" },
 ] as const;
 
 const BASELINE_STATUS_ITEMS = ["En uso", "En stock", "Fuera de servicio"];
@@ -127,7 +129,7 @@ async function main() {
   }
   console.log(`Dropdown categories: ${BASELINE_DROPDOWN_CATEGORIES.length} ensured`);
 
-  const statusCategory = await getDropdownCategoryByKey("status");
+  const statusCategory = await getDropdownCategoryByKey(DROPDOWN_CATEGORY.STATUS);
   if (statusCategory) {
     const existingItems = await listDropdownItems(statusCategory.id, root.id);
     const existingNames = new Set(existingItems.map((i) => i.name));

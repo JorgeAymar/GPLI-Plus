@@ -8,6 +8,7 @@ import {
   type AssetFieldType,
 } from "@itsm/db";
 import { MODULE } from "../auth/modules";
+import { ASSET_DEFINITION_KEY } from "./asset-definition-keys";
 
 export async function createAssetDefinition(input: {
   key: string;
@@ -96,16 +97,16 @@ export async function deleteAssetFieldDefinition(id: string): Promise<void> {
 export function moduleKeyForAssetDefinition(def: Pick<AssetDefinition, "key" | "isSystem">): string {
   if (!def.isSystem) return MODULE.ASSETS_GENERIC;
   const known: Record<string, string> = {
-    computer: MODULE.ASSETS_COMPUTER,
-    network_equipment: MODULE.ASSETS_NETWORK_EQUIPMENT,
-    monitor: MODULE.ASSETS_MONITOR,
-    printer: MODULE.ASSETS_PRINTER,
-    phone: MODULE.ASSETS_PHONE,
-    peripheral: MODULE.ASSETS_PERIPHERAL,
-    datacenter: MODULE.MANAGEMENT_DATACENTER,
-    domain: MODULE.MANAGEMENT_DOMAIN,
-    line: MODULE.MANAGEMENT_LINE,
-    database: MODULE.MANAGEMENT_DATABASE,
+    [ASSET_DEFINITION_KEY.COMPUTER]: MODULE.ASSETS_COMPUTER,
+    [ASSET_DEFINITION_KEY.NETWORK_EQUIPMENT]: MODULE.ASSETS_NETWORK_EQUIPMENT,
+    [ASSET_DEFINITION_KEY.MONITOR]: MODULE.ASSETS_MONITOR,
+    [ASSET_DEFINITION_KEY.PRINTER]: MODULE.ASSETS_PRINTER,
+    [ASSET_DEFINITION_KEY.PHONE]: MODULE.ASSETS_PHONE,
+    [ASSET_DEFINITION_KEY.PERIPHERAL]: MODULE.ASSETS_PERIPHERAL,
+    [ASSET_DEFINITION_KEY.DATACENTER]: MODULE.MANAGEMENT_DATACENTER,
+    [ASSET_DEFINITION_KEY.DOMAIN]: MODULE.MANAGEMENT_DOMAIN,
+    [ASSET_DEFINITION_KEY.LINE]: MODULE.MANAGEMENT_LINE,
+    [ASSET_DEFINITION_KEY.DATABASE]: MODULE.MANAGEMENT_DATABASE,
   };
   return known[def.key] ?? MODULE.ASSETS_GENERIC;
 }

@@ -9,6 +9,7 @@ import {
   type InventorySubmission,
 } from "@itsm/db";
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { ASSET_DEFINITION_KEY } from "../assets/asset-definition-keys";
 import { getAssetDefinitionByKey, listAssetFieldDefinitions } from "../assets/asset-definition-service";
 import { createAsset, updateAsset } from "../assets/asset-service";
 import { createComputer } from "../assets/computer-service";
@@ -127,7 +128,7 @@ export async function submitInventory(
       assetId = existingAsset.id;
       created = false;
     } else {
-      const definition = await getAssetDefinitionByKey("computer");
+      const definition = await getAssetDefinitionByKey(ASSET_DEFINITION_KEY.COMPUTER);
       if (!definition) throw new Error('Asset definition "computer" not found - run the seed script first');
 
       // Only send customFields keys the "computer" type actually defines - anything else is silently dropped.
@@ -181,7 +182,7 @@ export async function acceptSubmissionAsUnmanaged(
   if (!submission) throw new Error(`Inventory submission ${submissionId} not found`);
   if (submission.status === "processed") throw new Error("Esta submission ya fue procesada");
 
-  const definition = await getAssetDefinitionByKey("unmanaged_device");
+  const definition = await getAssetDefinitionByKey(ASSET_DEFINITION_KEY.UNMANAGED_DEVICE);
   if (!definition) throw new Error('Asset definition "unmanaged_device" not found - run the seed script first');
 
   const hostname = (submission.rawPayload as { hostname?: string } | null)?.hostname ?? "Dispositivo sin nombre";
