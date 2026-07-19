@@ -100,7 +100,50 @@ Detalle completo de cada fase (incluyendo decisiones tomadas sobre la marcha y c
 
 ## Producción (instalación on-premise vía Docker)
 
-`apps/web/Dockerfile` es un build multi-stage con salida `standalone` de Next.js: instala dependencias del workspace, compila, y en el arranque del contenedor corre las migraciones de Drizzle antes de levantar el servidor (`apps/web/docker-entrypoint.sh`).
+`apps/web/Dockerfile` es un build multi-stage con salida `standalone` de Next.js: instala dependencias del workspace, compila, y en el arranque del contenedor corre las migraciones de Drizzle antes de levantar el servidor (`apps/web/docker-entrypoint.sh`). La imagen también trae un `HEALTHCHECK` (`GET /api/health`) — es la pieza que hace posible el update sin downtime de abajo.
+
+Instalación recomendada: **Docker Swarm en modo single-node** (`docker-compose.prod.yml`). Swarm viene incluido en cualquier instalación de Docker Engine — no hay que instalar nada extra en la máquina del cliente — y su mecanismo de rolling update (`start-first`) da updates sin downtime real incluso con un solo contenedor (`replicas: 1`): al desplegar, arranca el contenedor nuevo primero y no apaga el viejo hasta que el nuevo pasa el `HEALTHCHECK`; el puerto publicado se mantiene estable todo el tiempo. Encaja con el modelo de este producto (una imagen por cliente, on-premise, un solo nodo) sin necesitar Kubernetes ni infraestructura multi-nodo.
+
+El stack (`docker-compose.prod.yml`) tiene tres servicios: `postgres`, `web` (la app, con `deploy.replicas: 1` y volumen `itsm_documents_data` en `/app/.data/documents` para que los adjuntos de tickets/assets sobrevivan a cada deploy — `STORAGE_DRIVER=local` es el único adapter implementado hoy, ver `packages/core/src/storage/storage-adapter.ts`) y `worker` (`apps/worker/Dockerfile`, corre los jobs de pg-boss: escalamiento de SLA, notificaciones, tickets recurrentes, webhooks, refresh de RSS y alertas de saved-search — `apps/worker/src/index.ts`). El worker no usa la semántica `start-first` de `web`: pg-boss persiste los jobs encolados en Postgres, así que un breve gap durante su propio reinicio no pierde nada, solo se retoma cuando el contenedor vuelve.
+
+### Setup inicial (una sola vez)
+
+```bash
+docker swarm init
+```
+
+Esto activa el modo Swarm en el daemon local de Docker — es un cambio de estado local, reversible en cualquier momento con `docker swarm leave --force` (vuelve a modo Docker normal, no afecta nada fuera de esa máquina).
+
+```bash
+cp .env.production.example .env.production   # ajustar credenciales/URLs reales
+```
+
+### Primera instalación
+
+```bash
+./scripts/deploy.sh
+```
+
+El script construye la imagen (`itsm-web:<sha corto de git>`), la despliega con `docker stack deploy -c docker-compose.prod.yml itsm`, y **espera activamente** a que el rollout converja (task nuevo `Running`, task viejo eliminado) antes de reportar éxito — que `docker stack deploy` vuelva sin error no significa que el update ya haya terminado, y el script no asume lo contrario.
+
+### Actualizar sin downtime
+
+Mismo comando, siempre:
+
+```bash
+git pull   # o el mecanismo que traiga el código nuevo a esta máquina
+./scripts/deploy.sh
+```
+
+Lo que hace el rolling update sin downtime es `docker-compose.prod.yml`'s `deploy.update_config: { order: start-first, failure_action: rollback }`: Swarm arranca el contenedor con la imagen nueva mientras el viejo sigue sirviendo tráfico, espera a que el nuevo pase el `HEALTHCHECK` de `apps/web/Dockerfile`, y solo entonces apaga el viejo — la malla de enrutamiento de Swarm mantiene el puerto publicado activo durante toda la transición, así que ninguna request en vuelo o nueva golpea un contenedor caído. Si el contenedor nuevo nunca se pone healthy, `failure_action: rollback` revierte automáticamente al que ya funcionaba.
+
+Verificado en vivo con un test real: loop de `curl /api/health` cada 0.2s durante un update de punta a punta — cero requests no-200.
+
+**Caveat de migraciones (inherente a cualquier deploy sin downtime, no es trabajo nuevo):** durante el rolling update hay una ventana en la que el contenedor viejo (schema pre-migración) puede seguir sirviendo las últimas requests mientras el contenedor nuevo ya corrió las migraciones de Drizzle contra el schema nuevo. Esto significa que los cambios de schema tienen que ser retro-compatibles por al menos una versión (agregar columnas nullable, no renombrar/eliminar en el mismo deploy que se dejan de usar, etc.) — la misma restricción que aplica a cualquier sistema con updates sin downtime. Presupuesto de tiempo a tener en cuenta: el `HEALTHCHECK` de `apps/web/Dockerfile` usa `start_period=20s`, `interval=30s`, `retries=3`, así que Swarm tarda hasta ~110s en marcar el contenedor nuevo como unhealthy y disparar `failure_action: rollback` — si las migraciones de Drizzle (que corren antes de levantar el server, ver `docker-entrypoint.sh`) tardan más que eso, el deploy se reporta como fallido/revertido aunque en realidad solo era una migración lenta todavía corriendo, no un rollback real por bug.
+
+### Instalación manual simple (sin Swarm, con downtime en cada update)
+
+Sigue existiendo para pruebas rápidas o si no se quiere usar Swarm:
 
 ```bash
 docker build -f apps/web/Dockerfile -t itsm-web .
@@ -110,5 +153,7 @@ docker run -p 3000:3000 \
   -e AUTH_URL=https://cliente.example.com \
   itsm-web
 ```
+
+Actualizar con este método implica parar el contenedor y levantar uno nuevo — downtime real durante la transición. Para producción, usar `./scripts/deploy.sh`.
 
 No hay CI configurado en GitHub Actions (se agregó un workflow en un momento del proyecto y se removió a pedido explícito del usuario) — el repo no corre un pipeline automático en cada push. `pnpm lint`/`typecheck`/`test`/`build` deben correrse a mano antes de mergear.
