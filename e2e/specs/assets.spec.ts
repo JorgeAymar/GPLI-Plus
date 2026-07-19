@@ -641,12 +641,13 @@ test.describe.serial("QA - Network equipment: datos propios y validación de por
     await assertNoInlineFormError(page);
     // network-equipment has no detail page (only alta + listado, see file header comment) - the
     // list row itself is the only place to confirm persistence, including the ipAddress value.
-    const row = page.locator("li", { hasText: qaEquipmentName });
+    // Migrated to a real <table> (DataTable component) - match by row role, not <li>.
+    const row = page.getByRole("row", { name: new RegExp(qaEquipmentName) });
     await expect(row).toBeVisible();
     await expect(row).toContainText("10.20.30.40");
 
     await page.reload();
-    const rowAfterReload = page.locator("li", { hasText: qaEquipmentName });
+    const rowAfterReload = page.getByRole("row", { name: new RegExp(qaEquipmentName) });
     await expect(rowAfterReload).toBeVisible();
     await expect(rowAfterReload).toContainText("10.20.30.40");
 
@@ -681,7 +682,7 @@ test.describe.serial("QA - Network equipment: datos propios y validación de por
     await page.getByRole("button", { name: "Crear equipo de red" }).click();
 
     await expect(page).toHaveURL(/\/assets\/network-equipment$/);
-    await expect(page.locator("li", { hasText: bogusName })).toHaveCount(0);
+    await expect(page.getByRole("row", { name: new RegExp(bogusName) })).toHaveCount(0);
 
     health.assertHealthy();
   });

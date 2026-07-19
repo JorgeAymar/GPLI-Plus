@@ -172,8 +172,9 @@ test.describe("Users (/administration/users) - page", () => {
     await expect(page.locator("tbody tr", { hasText: "admin@itsm.local" })).toBeVisible();
 
     await expect(page.getByLabel("Email")).toHaveAttribute("type", "email");
-    await expect(page.getByLabel("Contraseña")).toHaveAttribute("type", "password");
-    await expect(page.getByLabel("Contraseña")).toHaveAttribute("minlength", "8");
+    await expect(page.getByLabel("Contraseña", { exact: true })).toHaveAttribute("type", "password");
+    await expect(page.getByLabel("Contraseña", { exact: true })).toHaveAttribute("minlength", "8");
+    await expect(page.getByLabel("Confirmar contraseña")).toHaveAttribute("type", "password");
     await expect(page.getByRole("button", { name: "Crear usuario" })).toBeVisible();
   });
 });
@@ -195,7 +196,8 @@ test.describe.serial("Users - create flow (E2E-ADMIN)", () => {
     await page.getByLabel("Nombre para mostrar").fill(displayName);
     await page.getByLabel("Usuario").fill(username);
     await page.getByLabel("Email").fill(email);
-    await page.getByLabel("Contraseña").fill(password);
+    await page.getByLabel("Contraseña", { exact: true }).fill(password);
+    await page.getByLabel("Confirmar contraseña").fill(password);
     await page.getByLabel("Entidad por defecto").selectOption({ label: "Global" });
     await page.getByRole("button", { name: "Crear usuario" }).click();
 
@@ -462,7 +464,8 @@ test.describe.serial("QA - Users: datos propios y validación de tipos/requerido
     await page.getByLabel("Nombre para mostrar").fill(qaDisplayName);
     await page.getByLabel("Usuario").fill(qaUsername);
     await page.getByLabel("Email").fill(qaEmail);
-    await page.getByLabel("Contraseña").fill(qaPassword);
+    await page.getByLabel("Contraseña", { exact: true }).fill(qaPassword);
+    await page.getByLabel("Confirmar contraseña").fill(qaPassword);
     await page.getByLabel("Entidad por defecto").selectOption({ label: "Global" });
     await page.getByRole("button", { name: "Crear usuario" }).click();
     await expect(page.locator("tbody tr", { hasText: qaUsername })).toBeVisible();
@@ -481,7 +484,7 @@ test.describe.serial("QA - Users: datos propios y validación de tipos/requerido
     await page.getByLabel("Nombre para mostrar").fill("QA sin email válido");
     await page.getByLabel("Usuario").fill(bogusUsername);
     await emailInput.fill("not-an-email");
-    await page.getByLabel("Contraseña").fill(qaPassword);
+    await page.getByLabel("Contraseña", { exact: true }).fill(qaPassword);
     await page.getByRole("button", { name: "Crear usuario" }).click();
 
     const validity = await emailInput.evaluate((el: HTMLInputElement) => ({ valid: el.validity.valid, typeMismatch: el.validity.typeMismatch }));
@@ -492,7 +495,7 @@ test.describe.serial("QA - Users: datos propios y validación de tipos/requerido
   test("una contraseña de menos de 8 caracteres bloquea el envío nativamente (minlength) y no crea el usuario", async ({ page }) => {
     await page.goto("/administration/users");
     const bogusUsername = `qa-admin-user-shortpwd-${uniqueSuffix()}`;
-    const passwordInput = page.getByLabel("Contraseña");
+    const passwordInput = page.getByLabel("Contraseña", { exact: true });
     await page.getByLabel("Nombre para mostrar").fill("QA contraseña corta");
     await page.getByLabel("Usuario").fill(bogusUsername);
     await page.getByLabel("Email").fill(`${bogusUsername}@example.test`);
@@ -515,7 +518,8 @@ test.describe.serial("QA - Users: datos propios y validación de tipos/requerido
     await page.getByLabel("Nombre para mostrar").fill("QA usuario con espacios");
     await page.getByLabel("Usuario").fill(bogusUsername);
     await page.getByLabel("Email").fill(bogusEmail);
-    await page.getByLabel("Contraseña").fill(qaPassword);
+    await page.getByLabel("Contraseña", { exact: true }).fill(qaPassword);
+    await page.getByLabel("Confirmar contraseña").fill(qaPassword);
     await page.getByRole("button", { name: "Crear usuario" }).click();
 
     const error = page.locator("form p.text-red-600").first();
@@ -570,7 +574,8 @@ test.describe.serial("QA - Profiles: perfil propio con permisos en cero y su apl
     await page.getByLabel("Nombre para mostrar").fill(qaDisplayName);
     await page.getByLabel("Usuario").fill(qaUsername);
     await page.getByLabel("Email").fill(qaEmail);
-    await page.getByLabel("Contraseña").fill(qaPassword);
+    await page.getByLabel("Contraseña", { exact: true }).fill(qaPassword);
+    await page.getByLabel("Confirmar contraseña").fill(qaPassword);
     await page.getByLabel("Entidad por defecto").selectOption({ label: "Global" });
     await page.getByRole("button", { name: "Crear usuario" }).click();
     await expect(page.locator("tbody tr", { hasText: qaUsername })).toBeVisible();
