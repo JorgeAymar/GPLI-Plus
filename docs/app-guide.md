@@ -68,13 +68,28 @@ Login de prueba: `admin@itsm.local` / `ChangeMe123!` (cambiar antes de un despli
 
 Shell separado (interfaz "Simplified") para usuarios finales: catálogo de servicios, formulario simplificado de creación de ticket (con campos custom del Form Builder si están definidos), y "Mis solicitudes".
 
+## Mi cuenta (`/account`)
+
+Página personal de cualquier usuario logueado (no requiere permiso RBAC específico — es autogestión de la propia cuenta):
+
+- **Datos**: nombre, email, entidad/perfil activos (solo lectura).
+- **Idioma**: selector (`es`/`en`/`pt`/`fr`/`it`/`de`) que guarda la preferencia en `users.language`. Nota: hoy **solo guarda el valor** — todavía no hay motor de traducción que efectivamente cambie el idioma de la interfaz (queda documentado como próximo proyecto separado en `architecture-plan.md`).
+- **Tokens MCP**: crear/listar/revocar tokens de acceso personal (prefijo `pat_`) para conectar clientes MCP (Claude Desktop, Claude Code, etc.) contra `/api/mcp`. La key cruda se muestra una sola vez al crearla — igual que en `/setup/api-clients`, no se puede volver a mostrar. Un token personal actúa con los mismos permisos RBAC del usuario dueño, no con una lista de scopes elegida a mano.
+
 ## API pública (`/api/v1/...`)
 
-Bearer token (no sesión de navegador). `GET /api/v1/[itemtype]` y `GET /api/v1/[itemtype]/[id]` para tickets/assets/computers/problems/changes, con scopes por cliente API. `GET /api/documents/[id]` para descargar adjuntos (requiere sesión).
+Bearer token de **entidad** (no sesión de navegador, no intercambiable con un token personal — un token personal usado acá devuelve 401). `GET /api/v1/[itemtype]` y `GET /api/v1/[itemtype]/[id]` para tickets/assets/computers/problems/changes, con scopes por cliente API (gestionados en `/setup/api-clients`). `GET /api/documents/[id]` para descargar adjuntos (requiere sesión).
+
+## Servidor MCP (`/api/mcp`)
+
+Endpoint MCP (Model Context Protocol) real, para que un cliente MCP (Claude Desktop, Claude Code, u otro) se conecte directamente a la instancia. Autenticado con un **token personal** (creado en `/account`, no un token de entidad — un token de entidad usado acá devuelve 401). Expone 10 tools de solo lectura, generadas automáticamente desde el mismo registro que respalda `/api/v1` (`list_tickets`, `get_tickets`, `list_assets`, `get_assets`, `list_computers`, `get_computers`, `list_problems`, `get_problems`, `list_changes`, `get_changes`) — cada llamada aplica el RBAC real del usuario dueño del token, nunca más permisos de los que ese usuario ya tiene logueado normalmente. Escritura (crear/editar vía MCP) queda deliberadamente fuera de alcance por ahora.
+
+**Advertencia de seguridad conocida**: las tools `get_*` no verifican que el registro devuelto pertenezca a la entidad activa del que llama (mismo hueco preexistente en `/api/v1/[itemtype]/[id]`) — un id válido de otra entidad se devuelve igual si existe. La descripción de cada tool `get_*` incluye esta advertencia explícitamente para que un agente que la invoque lo tenga en cuenta. Detalle completo y plan de cierre en `architecture-plan.md`, sección "Tercera ronda".
 
 ## Testing
 
-- **Unitarios/integración** (Vitest, `pnpm test`): 679 tests en `packages/core`, contra Postgres real (sin mocks), un archivo por servicio + validación Zod.
-- **End-to-end** (Playwright, `pnpm e2e` / `npx playwright test`): 149 tests en `e2e/specs/`, uno por sección del sidebar, con login real vía UI y datos generados en cada corrida. Reporte HTML: `pnpm e2e:report`.
+- **Unitarios/integración** (Vitest, `pnpm test`): 690 tests en `packages/core`, contra Postgres real (sin mocks), un archivo por servicio + validación Zod.
+- **End-to-end** (Playwright, `pnpm e2e` / `npx playwright test`): 152 tests en `e2e/specs/`, uno por sección del sidebar, con login real vía UI y datos generados en cada corrida. Reporte HTML: `pnpm e2e:report`.
+- **Integración MCP real** (`apps/web/app/api/mcp/mcp-route.integration.test.ts`): usa el SDK cliente de MCP de verdad (no solo curl) contra un `npm run dev` corriendo. Separado del `pnpm test` por defecto — correr con `pnpm --filter @itsm/web test:mcp-integration`.
 
 Ver [`qa-report.md`](qa-report.md) para el detalle completo de bugs encontrados/corregidos, auditoría de índices, valores hardcodeados, campos de base de datos sin uso y código muerto.

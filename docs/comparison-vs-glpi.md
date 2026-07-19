@@ -12,7 +12,7 @@ Este documento compara la reimplementación (Next.js 16 + TypeScript + PostgreSQ
 | Multi-tenancy | Entidades con jerarquía por adyacencia simple | Entidades con `ltree` (jerarquía indexada nativamente por Postgres, queries de subárbol O(índice) en vez de recursión en aplicación) |
 | Extensibilidad | Sistema de plugins con carga dinámica de código de terceros en el mismo proceso | Webhooks firmados (HMAC-SHA256) + API REST con bearer token — mismo caso de uso cubierto sin superficie de RCE |
 | Autenticación empresarial | SAML/LDAP/OIDC hardcodeados por proveedor (Google/Azure) | OIDC genérico (cualquier IdP compatible) vía 3 variables de entorno; LDAP con escape de filtro explícito |
-| Testing | Sin suite de tests automatizados conocida en el core | 672 tests unitarios/integración (Vitest) + 149 tests E2E (Playwright) sobre datos reales |
+| Testing | Sin suite de tests automatizados conocida en el core | 690 tests unitarios/integración (Vitest) + 152 tests E2E (Playwright) sobre datos reales |
 | Despliegue | Instalación PHP clásica (Apache/nginx + PHP-FPM + MySQL) | Imagen Docker `standalone` de Next.js, migra su propio schema al arrancar, pensada para instalación on-prem por cliente |
 
 ## Ventajas arquitectónicas concretas
@@ -58,8 +58,8 @@ GLPI hardcodea la integración con proveedores específicos (Google Workspace, A
 ### 7. Cobertura de tests real (GLPI no la tiene documentada en su core público)
 
 Esta plataforma cerró esta sesión con:
-- **672 tests unitarios/de integración** (Vitest) sobre `packages/core` — cada servicio de negocio (RBAC, ITIL, Assets, Management, Tools, Plataforma) probado contra Postgres real, no mocks.
-- **149 tests E2E** (Playwright, Chromium) que recorren cada menú/pantalla/formulario/botón de la aplicación real, con un usuario admin autenticado de verdad (no un stub de sesión).
+- **690 tests unitarios/de integración** (Vitest) sobre `packages/core` — cada servicio de negocio (RBAC, ITIL, Assets, Management, Tools, Plataforma) probado contra Postgres real, no mocks.
+- **152 tests E2E** (Playwright, Chromium) que recorren cada menú/pantalla/formulario/botón de la aplicación real, con un usuario admin autenticado de verdad (no un stub de sesión).
 - El propio proceso de escribir estos tests **encontró y corrigió bugs reales de producción** (ver `docs/architecture-plan.md`, sección de testing): un bug de coerción de booleanos en dos validadores de campos dinámicos, una tarjeta de dashboard que nunca mostraba datos por un mismatch de forma, un módulo entero (Configuración) mostrando errores de validación como JSON crudo en vez de mensajes legibles, y el módulo de Administración nunca escribiendo al log de auditoría pese a que otros módulos sí lo hacían.
 
 ## Dónde GLPI todavía tiene más superficie (honestidad, no marketing)
