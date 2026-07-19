@@ -963,9 +963,26 @@ test.describe.serial("QA: Ticket Field - datos propios y validación de formato 
     await page.locator('select[name="ticketType"]').selectOption("incident");
     await page.locator('input[name="key"]').fill(qaKey);
     await page.locator('input[name="label"]').fill(qaLabel);
-    await page.locator('input[name="isRequired"]').check();
+
+    // Verify the "isRequired" checkbox is a real, interactive control - but do NOT submit
+    // with it checked. This field has no delete/update UI anywhere in the app (confirmed:
+    // zero delete actions exist for any entity), and ticketType only has two real values
+    // ("incident"/"request"), both actively used elsewhere (the self-service portal always
+    // creates "incident" tickets). A permanently-required custom field on either type blocks
+    // every future ticket creation of that type app-wide until manually deleted from the DB -
+    // this exact scenario broke the unrelated portal.spec.ts suite when an earlier version of
+    // this test left several such fields behind. Confirm the checkbox works, then leave it
+    // unchecked for the actual submission so this test's data never has that side effect.
+    const requiredCheckbox = page.locator('input[name="isRequired"]');
+    await requiredCheckbox.check();
+    expect(await requiredCheckbox.isChecked()).toBe(true);
+    await requiredCheckbox.uncheck();
+    expect(await requiredCheckbox.isChecked()).toBe(false);
+
     await page.getByRole("button", { name: "Crear campo" }).click();
     await expect(page.getByText(qaLabel)).toBeVisible();
+    // Confirm it was NOT created as required (the list appends ", requerido" when isRequired is true).
+    await expect(page.locator("li", { hasText: qaLabel })).not.toContainText("requerido");
     diag.assertClean();
   });
 
