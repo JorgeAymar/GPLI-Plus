@@ -43,9 +43,9 @@ export default async function RackDetailPage({ params }: { params: Promise<{ ass
         Rack · {slots.length} posición(es) ocupada(s) (altura sugerida: {SUGGESTED_RACK_HEIGHT_U}U)
       </p>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div className="min-w-0">
-          <h2 className="mb-2 text-sm font-medium opacity-70">Posiciones ocupadas</h2>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="min-w-0 rounded-md border border-black/10 p-6 dark:border-white/10 lg:col-span-8">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Posiciones ocupadas</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -82,8 +82,8 @@ export default async function RackDetailPage({ params }: { params: Promise<{ ass
             </table>
           </div>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Ubicar un activo</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10 lg:col-span-4">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Ubicar un activo</h2>
           <PlaceInRackForm rackAssetId={assetId} assets={placeableAssets.map((a) => ({ id: a.id, name: a.name }))} />
         </div>
       </div>

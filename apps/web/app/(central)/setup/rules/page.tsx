@@ -25,7 +25,7 @@ export default async function RulesPage() {
         <div className="space-y-4">
           {[...byType.entries()].map(([ruleType, list]) => (
             <div key={ruleType}>
-              <h2 className="mb-2 text-sm font-medium opacity-70">{ruleType}</h2>
+              <h2 className="mb-2 text-sm font-semibold">{ruleType}</h2>
               <ul className="space-y-1">
                 {list.map((r) => (
                   <li key={r.id} className="text-sm">
@@ -44,7 +44,7 @@ export default async function RulesPage() {
           {rules.length === 0 ? <p className="text-sm opacity-50">Sin reglas todavía.</p> : null}
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nueva regla</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nueva regla</h2>
           <RuleForm entityId={context.activeEntity.id} />
         </div>
       </div>

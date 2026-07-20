@@ -13,8 +13,8 @@ export function SlaSection({
   policies: SlaPolicy[];
 }) {
   return (
-    <div>
-      <h2 className="mb-2 text-sm font-medium opacity-70">SLA</h2>
+    <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+      <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">SLA</h2>
       <ul className="mb-3 space-y-1">
         {assignments.map((a) => (
           <li key={a.id} className="text-sm">

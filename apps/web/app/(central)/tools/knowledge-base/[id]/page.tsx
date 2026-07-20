@@ -40,10 +40,13 @@ export default async function KbArticleDetailPage({ params }: { params: Promise<
         </p>
       </div>
 
-      <pre className="whitespace-pre-wrap text-sm opacity-80">{article.body}</pre>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Contenido</h2>
+        <pre className="whitespace-pre-wrap text-sm opacity-80">{article.body}</pre>
+      </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Comentarios</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Comentarios</h2>
         <ul className="mb-3 space-y-2">
           {comments.map((c) => (
             <li key={c.id} className="rounded-md border border-black/10 p-2 text-sm dark:border-white/10">
@@ -59,8 +62,8 @@ export default async function KbArticleDetailPage({ params }: { params: Promise<
         <KbCommentForm articleId={id} />
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Historial de revisiones</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Historial de revisiones</h2>
         <ul className="space-y-2">
           {revisions.map((r, index) => (
             <li

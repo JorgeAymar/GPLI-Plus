@@ -25,18 +25,22 @@ export default async function ContractDetailPage({ params }: { params: Promise<{
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">{contract.name}</h1>
-      <dl className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
-        <dt className="opacity-60">Tipo</dt>
-        <dd>{contract.contractType}</dd>
-        <dt className="opacity-60">Facturación</dt>
-        <dd>{contract.billingFrequency}</dd>
-        <dt className="opacity-60">Costo</dt>
-        <dd>{contract.costCents ? `$${(contract.costCents / 100).toFixed(2)}` : "-"}</dd>
-      </dl>
+
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Información general</h2>
+        <dl className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+          <dt className="opacity-60">Tipo</dt>
+          <dd>{contract.contractType}</dd>
+          <dt className="opacity-60">Facturación</dt>
+          <dd>{contract.billingFrequency}</dd>
+          <dt className="opacity-60">Costo</dt>
+          <dd>{contract.costCents ? `$${(contract.costCents / 100).toFixed(2)}` : "-"}</dd>
+        </dl>
+      </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Activos cubiertos</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Activos cubiertos</h2>
           <ul className="space-y-1">
             {linkedAssets.map((a) => (
               <li key={a.id} className="text-sm">
@@ -46,8 +50,8 @@ export default async function ContractDetailPage({ params }: { params: Promise<{
             {linkedAssets.length === 0 ? <li className="text-sm opacity-50">Sin activos vinculados.</li> : null}
           </ul>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Vincular activo</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Vincular activo</h2>
           <LinkAssetForm contractId={id} assets={allAssets} />
         </div>
       </div>

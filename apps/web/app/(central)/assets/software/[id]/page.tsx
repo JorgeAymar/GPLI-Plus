@@ -28,8 +28,8 @@ export default async function SoftwareDetailPage({ params }: { params: Promise<{
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold">{softwareItem.name}</h1>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Versiones</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Versiones</h2>
         <ul className="mb-3 space-y-1">
           {versions.map((v) => (
             <li key={v.id} className="text-sm">
@@ -42,8 +42,8 @@ export default async function SoftwareDetailPage({ params }: { params: Promise<{
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Licencias</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Licencias</h2>
           <ul className="space-y-1">
             {licenses.map((l) => (
               <li key={l.id} className="text-sm">
@@ -54,8 +54,8 @@ export default async function SoftwareDetailPage({ params }: { params: Promise<{
             {licenses.length === 0 ? <li className="text-sm opacity-50">Sin licencias todavía.</li> : null}
           </ul>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nueva licencia</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Nueva licencia</h2>
           <SoftwareLicenseForm entityId={context.activeEntity.id} softwareId={id} versions={versions} />
         </div>
       </div>

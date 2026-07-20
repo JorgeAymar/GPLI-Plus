@@ -30,7 +30,7 @@ export default async function KnowledgeBasePage({ searchParams }: { searchParams
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Artículos</h2>
+          <h2 className="mb-2 text-sm font-semibold">Artículos</h2>
           <ul className="space-y-1">
             {articles.map((a) => (
               <li key={a.id}>
@@ -45,7 +45,7 @@ export default async function KnowledgeBasePage({ searchParams }: { searchParams
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo artículo</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo artículo</h2>
           <KbArticleForm entityId={context.activeEntity.id} authorUserId={context.user.id} />
         </div>
       </div>

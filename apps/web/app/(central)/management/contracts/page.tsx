@@ -19,7 +19,7 @@ export default async function ContractsPage() {
       <h1 className="text-2xl font-semibold">Contratos</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Existentes</h2>
           <ul className="space-y-1">
             {contracts.map((c) => (
               <li key={c.id}>
@@ -32,7 +32,7 @@ export default async function ContractsPage() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo contrato</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo contrato</h2>
           <ContractForm entityId={context.activeEntity.id} suppliers={suppliers} />
         </div>
       </div>

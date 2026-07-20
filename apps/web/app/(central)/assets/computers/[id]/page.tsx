@@ -50,8 +50,8 @@ export default async function ComputerDetailPage({ params }: { params: Promise<{
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">{asset.name}</h1>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Editar activo</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Editar activo</h2>
         {/* No key derived from the editable fields here on purpose - the field-based
             remount key that picks up fresh defaultValues after a save lives on the
             <form> INSIDE AssetEditForm, not on this component instance. Keying this
@@ -67,8 +67,8 @@ export default async function ComputerDetailPage({ params }: { params: Promise<{
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Componentes</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Componentes</h2>
           <ul className="space-y-1">
             {components.map((c) => (
               <li key={c.id} className="text-sm">
@@ -83,14 +83,14 @@ export default async function ComputerDetailPage({ params }: { params: Promise<{
             {components.length === 0 ? <li className="text-sm opacity-50">Sin componentes todavía.</li> : null}
           </ul>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo componente</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Nuevo componente</h2>
           <ComponentForm assetId={asset.id} />
         </div>
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Software instalado</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Software instalado</h2>
         <ul className="mb-3 space-y-1">
           {installations.map((i) => (
             <li key={i.id} className="text-sm">

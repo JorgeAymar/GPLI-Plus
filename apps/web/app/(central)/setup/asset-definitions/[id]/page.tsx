@@ -21,8 +21,8 @@ export default async function AssetDefinitionDetailPage({ params }: { params: Pr
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">{definition.name}</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Campos personalizados</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Campos personalizados</h2>
           <ul className="space-y-1">
             {fields.map((f) => (
               <li key={f.id} className="text-sm">
@@ -32,8 +32,8 @@ export default async function AssetDefinitionDetailPage({ params }: { params: Pr
             {fields.length === 0 ? <li className="text-sm opacity-50">Sin campos todavía.</li> : null}
           </ul>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo campo</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Nuevo campo</h2>
           <FieldDefinitionForm assetDefinitionId={id} dropdownCategories={dropdownCategories} />
         </div>
       </div>

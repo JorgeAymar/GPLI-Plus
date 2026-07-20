@@ -15,8 +15,8 @@ export function ActorsSection({
   const userById = new Map(users.map((u) => [u.id, u]));
 
   return (
-    <div>
-      <h2 className="mb-2 text-sm font-medium opacity-70">Actores</h2>
+    <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+      <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Actores</h2>
       <ul className="mb-3 space-y-1">
         {actors.map((a) => (
           <li key={a.id} className="text-sm">

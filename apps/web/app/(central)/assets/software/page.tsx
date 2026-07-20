@@ -32,7 +32,7 @@ export default async function SoftwarePage({ searchParams }: { searchParams: Pro
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="min-w-0">
-          <h2 className="mb-2 text-sm font-medium opacity-70">Existente</h2>
+          <h2 className="mb-2 text-sm font-semibold">Existente</h2>
           <DataTable
             columns={[
               {
@@ -51,7 +51,7 @@ export default async function SoftwarePage({ searchParams }: { searchParams: Pro
           />
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo software</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo software</h2>
           <SoftwareForm entityId={context.activeEntity.id} />
         </div>
       </div>

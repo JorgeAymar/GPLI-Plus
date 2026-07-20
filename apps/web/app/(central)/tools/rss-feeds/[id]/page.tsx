@@ -34,8 +34,8 @@ export default async function RssFeedDetailPage({ params }: { params: Promise<{ 
         </p>
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Items en caché</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Items en caché</h2>
         <ul className="space-y-3">
           {items.map((item) => (
             <li key={item.id} className="rounded-md border border-black/10 p-3 text-sm dark:border-white/10">

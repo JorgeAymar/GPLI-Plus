@@ -40,7 +40,7 @@ export default async function SavedSearchesPage() {
       <h1 className="text-2xl font-semibold">Búsquedas guardadas</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Guardadas</h2>
+          <h2 className="mb-2 text-sm font-semibold">Guardadas</h2>
           <ul className="space-y-1">
             {savedSearchList.map((s) => (
               <li key={s.id} className="flex items-center justify-between gap-2 text-sm">
@@ -60,7 +60,7 @@ export default async function SavedSearchesPage() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nueva búsqueda guardada</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nueva búsqueda guardada</h2>
           <SavedSearchForm ownerUserId={context.user.id} entityId={context.activeEntity.id} />
         </div>
       </div>

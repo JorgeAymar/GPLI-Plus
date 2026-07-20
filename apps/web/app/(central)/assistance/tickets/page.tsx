@@ -74,7 +74,7 @@ export default async function TicketsPage({ searchParams }: { searchParams: Prom
       <h1 className="text-2xl font-semibold">Tickets</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Existentes</h2>
 
           <form className="mb-3 flex flex-wrap items-end gap-2">
             <input
@@ -131,7 +131,7 @@ export default async function TicketsPage({ searchParams }: { searchParams: Prom
           </div>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo ticket</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo ticket</h2>
           <TicketForm
             entityId={context.activeEntity.id}
             fields={fields}

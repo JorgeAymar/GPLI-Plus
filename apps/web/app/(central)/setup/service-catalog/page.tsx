@@ -23,7 +23,7 @@ export default async function ServiceCatalogPage() {
       <h1 className="text-2xl font-semibold">Catálogo de servicios</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Existentes</h2>
           <ul className="space-y-1">
             {items.map((item) => (
               <li key={item.id} className="text-sm">
@@ -38,7 +38,7 @@ export default async function ServiceCatalogPage() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo tipo de solicitud</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo tipo de solicitud</h2>
           <ServiceCatalogItemForm entityId={context.activeEntity.id} />
         </div>
       </div>
