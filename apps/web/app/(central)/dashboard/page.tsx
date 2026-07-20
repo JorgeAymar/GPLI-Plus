@@ -105,7 +105,7 @@ export default async function DashboardPage() {
         </div>
       ) : null}
 
-      {process.env.AI_ASSISTANT_URL ? (
+      {process.env.AI_URL ? (
         <div className="rounded-md border border-black/10 p-4 dark:border-white/10">
           <h2 className="text-sm font-medium opacity-70">{t("assistantHeading")}</h2>
           <p className="mt-1 text-sm opacity-70">{t("assistantDescription")}</p>

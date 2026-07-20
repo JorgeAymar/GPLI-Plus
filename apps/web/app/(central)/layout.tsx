@@ -12,7 +12,7 @@ export default async function CentralLayout({ children }: { children: React.Reac
   return (
     <ToastProvider>
       <div className="flex min-h-screen flex-1">
-        <NavSidebar aiAssistantEnabled={Boolean(process.env.AI_ASSISTANT_URL)} />
+        <NavSidebar aiAssistantEnabled={Boolean(process.env.AI_URL)} />
         <div className="flex flex-1 flex-col">
           <header className="sticky top-0 z-10 flex items-center justify-between border-b border-black/10 bg-background px-6 py-3 dark:border-white/10">
             <span className="text-sm font-medium">{context.user.displayName}</span>

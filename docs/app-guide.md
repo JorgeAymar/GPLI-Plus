@@ -71,7 +71,9 @@ Shell separado (interfaz "Simplified") para usuarios finales: catálogo de servi
 
 ## Asistente IA (`/assistant`)
 
-Primer ítem del sidebar (visible solo si `AI_ASSISTANT_URL` está configurado en el entorno). Chat embebido dentro de la propia app — mismo sistema de diseño, no un iframe ni una pestaña externa — que proxea contra una app hermana (IA-asistente, repo separado) vía `/api/assistant/chat` (streaming SSE) y `/api/assistant/conversations[/[id]]`. Tiene acceso en vivo, por MCP, a tickets/activos/computadoras/problemas/cambios reales de la instancia (mismas 10 tools que expone `/api/mcp`). Historial de conversaciones persistido server-side (base de datos de la app hermana) y cacheado en `localStorage` del navegador para resumir sin perder contexto tras un refresh. Conversación nueva muestra preguntas sugeridas basadas en las herramientas realmente disponibles.
+Primer ítem del sidebar (visible solo si `AI_URL` está configurado en el entorno). Chat 100% nativo — no proxea a ninguna app externa; corre en el mismo proceso de `apps/web` (`/api/assistant/chat`, streaming SSE, y `/api/assistant/conversations[/[id]]`). El tool-calling contra Ollama resuelve las herramientas llamando directo a `ITEMTYPE_REGISTRY` (el mismo registro que expone `/api/mcp`) con el `AuthContext` real del usuario logueado — cada quien ve solo lo que sus permisos/entidad activa realmente permiten, sin token compartido de por medio. Historial de conversaciones persistido en la propia base de datos de GLPI-Plus (`assistant_conversations`/`assistant_messages`, packages/db) y cacheado en `localStorage` del navegador para resumir sin perder contexto tras un refresh. Conversación nueva muestra preguntas sugeridas basadas en las herramientas realmente disponibles.
+
+Variables de entorno: `AI_URL` (servidor Ollama, remoto o local), `AI_API_KEY` (opcional, si el servidor lo requiere), `AI_MODEL` (modelo a usar). Sin `AI_URL` seteado, el link del sidebar y la tarjeta del dashboard quedan ocultos.
 
 ## Mi cuenta (`/account`)
 
