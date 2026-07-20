@@ -11,6 +11,7 @@ Login de prueba: `admin@itsm.local` / `ChangeMe123!` (cambiar antes de un despli
 - **Interfaz Central vs. Simplified**: un perfil decide si el usuario ve el shell completo de administración (Central) o el portal de autoservicio (Simplified, `/portal`). El redirect de `/` decide según el perfil activo del usuario logueado.
 - **Auditoría**: cada creación/edición relevante queda en `audit_log` (visible en `/administration/audit-log`, filtrable por tipo de objeto/usuario/fecha, con timestamp automático). Cobertura actual: tickets, cambios, problemas, base de conocimiento, SLA, computadoras, equipo de red. Todavía sin instrumentar: proyectos, contratos, presupuestos, certificados, consumibles, proveedores/contactos, usuarios/grupos/perfiles/entidades.
 - **Idioma de interfaz**: selector de 6 idiomas (es/en/pt/fr/it/de) en `/account` y en el login. Cubre el sidebar de navegación completo, `/dashboard` y `/account` — el resto de la app (~72 pantallas) sigue en español fijo (Fase 2 pendiente, ver `architecture-plan.md`).
+- **2FA por email (opt-in, por usuario)**: cada usuario activa/desactiva su propia verificación en dos pasos desde `/account` (`users.two_factor_enabled`, apagado por defecto — no es un ajuste global de la app). Con 2FA activo, tras verificar email+contraseña (local o LDAP) se envía un código de 4 dígitos por correo (vence en 10 min, máximo 5 intentos, un solo código activo por vez) antes de crear la sesión. `packages/core/src/auth/two-factor-service.ts` + `primary-factor.ts`. En dev/e2e (`E2E_TEST_MODE=true`, nunca en producción) el código se pre-rellena en el formulario para poder automatizar el flujo real sin leer un inbox.
 
 ## Asistencia (Helpdesk / ITIL)
 
@@ -81,6 +82,7 @@ Página personal de cualquier usuario logueado (no requiere permiso RBAC especí
 
 - **Datos**: nombre, email, entidad/perfil activos (solo lectura).
 - **Idioma**: selector (`es`/`en`/`pt`/`fr`/`it`/`de`), guarda la preferencia en `users.language` y cambia efectivamente el idioma del sidebar + `/dashboard` + `/account` (Fase 1 del motor de i18n vía `next-intl`; el resto de la app aún no está traducido, ver nota en "Conceptos transversales").
+- **Verificación en dos pasos**: toggle activar/desactivar el código de login por email (ver "Conceptos transversales"). Apagado por defecto.
 - **Tokens MCP**: crear/listar/revocar tokens de acceso personal (prefijo `pat_`) para conectar clientes MCP (Claude Desktop, Claude Code, etc.) contra `/api/mcp`. La key cruda se muestra una sola vez al crearla — igual que en `/setup/api-clients`, no se puede volver a mostrar. Un token personal actúa con los mismos permisos RBAC del usuario dueño, no con una lista de scopes elegida a mano.
 
 ## API pública (`/api/v1/...`)

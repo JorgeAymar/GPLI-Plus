@@ -7,7 +7,24 @@ import { useActionState, useState } from "react";
 export function ResetPasswordForm({ token }: { token: string }) {
   const [state, formAction, isPending] = useActionState(resetPasswordAction, undefined);
   const [showPassword, setShowPassword] = useState(false);
+  const [mismatchError, setMismatchError] = useState<string | null>(null);
   const inputClass = "w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15";
+
+  // Checked here, before the action runs - React resets a form's uncontrolled
+  // fields whenever its action completes (success or error), so letting a
+  // simple mismatch reach resetPasswordAction would wipe both password
+  // fields the user just typed instead of just flagging the one that's wrong.
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    const form = e.currentTarget;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+    const confirmPassword = (form.elements.namedItem("confirmPassword") as HTMLInputElement).value;
+    if (password !== confirmPassword) {
+      e.preventDefault();
+      setMismatchError("Las contraseñas no coinciden.");
+      return;
+    }
+    setMismatchError(null);
+  }
 
   if (state?.success) {
     return (
@@ -22,7 +39,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
   }
 
   return (
-    <form action={formAction} className="w-full max-w-sm space-y-6 rounded-md border border-black/10 p-8 dark:border-white/10">
+    <form action={formAction} onSubmit={handleSubmit} className="w-full max-w-sm space-y-6 rounded-md border border-black/10 p-8 dark:border-white/10">
       <div className="space-y-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-md bg-accent text-sm font-semibold text-white">G+</div>
         <div>
@@ -75,7 +92,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         </div>
       </div>
 
-      {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
+      {mismatchError ?? state?.error ? <p className="text-sm text-red-600">{mismatchError ?? state?.error}</p> : null}
 
       <button
         type="submit"

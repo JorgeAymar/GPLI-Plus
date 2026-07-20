@@ -85,10 +85,11 @@ Un solo `.env` en la raíz (ver Quickstart) - las demás rutas son symlinks al m
 | `STORAGE_LOCAL_PATH` | si `STORAGE_DRIVER=local` | Carpeta local para adjuntos |
 | `STORAGE_S3_ENDPOINT` / `STORAGE_S3_BUCKET` / `STORAGE_S3_ACCESS_KEY_ID` / `STORAGE_S3_SECRET_ACCESS_KEY` | si `STORAGE_DRIVER=s3` | Credenciales del bucket S3-compatible |
 | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | no (defaults en `seed.ts`) | Cuenta admin que crea `pnpm --filter @itsm/core seed` |
-| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | no (sin esto, las notificaciones se loguean por consola en vez de enviarse) | Envío de correo saliente (notificaciones, recuperación de contraseña) |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | no (sin esto, las notificaciones se loguean por consola en vez de enviarse) | Envío de correo saliente (notificaciones, recuperación de contraseña, código de login 2FA) |
 | `AI_URL` | no | Servidor Ollama (remoto o local) para el Asistente IA. Sin esta variable, el asistente queda oculto en el sidebar y el dashboard - el resto de la app funciona igual |
 | `AI_API_KEY` | no | Bearer token del servidor Ollama, si lo requiere |
 | `AI_MODEL` | no (recomendado si `AI_URL` está seteado) | Modelo a usar en las llamadas a Ollama |
+| `E2E_TEST_MODE` | no - solo dev/e2e, nunca producción | Pre-rellena el código de 2FA real en el formulario de login para que Playwright pueda completar el flujo sin leer un inbox (ver Quickstart) |
 
 ## Scripts
 

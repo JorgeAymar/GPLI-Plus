@@ -9,6 +9,7 @@ import {
   revokeMyApiClient,
   updateLanguageSchema,
   updateUserLanguage,
+  updateUserTwoFactorEnabled,
 } from "@itsm/core";
 import type { ApiClient, User } from "@itsm/db";
 import { revalidatePath } from "next/cache";
@@ -61,6 +62,14 @@ export async function updateMyLanguageAction(input: unknown): Promise<User> {
   const parsed = parseInput(updateLanguageSchema, input);
   const user = await updateUserLanguage(context.user.id, parsed.language);
   await unstable_update({ language: parsed.language });
+  revalidatePath("/account");
+  return user;
+}
+
+/** Self-service - no requireRight check, same reasoning as createMyApiClientAction: this only ever touches the caller's own account. */
+export async function updateMyTwoFactorAction(enabled: boolean): Promise<User> {
+  const context = await requireAuthContext();
+  const user = await updateUserTwoFactorEnabled(context.user.id, enabled);
   revalidatePath("/account");
   return user;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { createApiClientAction } from "@/actions/api-clients.actions";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 interface FormState {
   error?: string;
@@ -24,7 +24,24 @@ function makeAction(entityId: string) {
 
 export function ApiClientForm({ entityId, scopeOptions }: { entityId: string; scopeOptions: string[] }) {
   const [state, formAction, isPending] = useActionState(makeAction(entityId), undefined);
+  const [scopeError, setScopeError] = useState<string | null>(null);
   const inputClass = "mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15";
+
+  // Checked here, before the action runs - React resets a form's uncontrolled
+  // fields whenever its action completes (success or error), so letting an
+  // empty-scopes submission reach createApiClientAction would wipe the name
+  // (and every scope checkbox) the admin just filled in. Kept in the zod
+  // schema too (scopes.min(1)) as a defense-in-depth backstop.
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    if (formData.getAll("scopes").length === 0) {
+      e.preventDefault();
+      setScopeError("Seleccioná al menos un permiso.");
+      return;
+    }
+    setScopeError(null);
+  }
 
   return (
     <div className="space-y-4">
@@ -37,7 +54,7 @@ export function ApiClientForm({ entityId, scopeOptions }: { entityId: string; sc
         </div>
       ) : null}
 
-      <form action={formAction} className="space-y-3">
+      <form action={formAction} onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label htmlFor="api-client-name" className="text-sm font-medium">Nombre</label>
           <input id="api-client-name" name="name" required placeholder="Script de integración X" className={inputClass} />
@@ -53,7 +70,7 @@ export function ApiClientForm({ entityId, scopeOptions }: { entityId: string; sc
             ))}
           </div>
         </div>
-        {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
+        {scopeError ?? state?.error ? <p className="text-sm text-red-600">{scopeError ?? state?.error}</p> : null}
         <button
           type="submit"
           disabled={isPending}

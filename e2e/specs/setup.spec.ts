@@ -242,17 +242,21 @@ test.describe("Configuración - errores de validación son legibles (no JSON cru
     diag.assertNoConsoleErrors();
   });
 
-  test("api-clients: crear sin seleccionar ningún scope muestra el mensaje de Zod, no un blob JSON", async ({ page }) => {
+  test("api-clients: crear sin seleccionar ningún scope bloquea el envío client-side con un mensaje legible, no un blob JSON", async ({ page }) => {
     const diag = diagnostics(page);
     await page.goto("/setup/api-clients");
-    await page.locator('input[name="name"]').fill(`E2E-SETUP-noscopes-${randomSlug()}`);
+    const name = `E2E-SETUP-noscopes-${randomSlug()}`;
+    await page.locator('input[name="name"]').fill(name);
     await page.getByRole("button", { name: "Crear cliente API" }).click();
 
     const error = page.locator("form p.text-red-600").first();
     await expect(error).toBeVisible();
     const text = (await error.textContent())?.trim() ?? "";
     expect(text.startsWith("[") || text.startsWith("{"), `error no debería ser JSON crudo: ${text}`).toBe(false);
-    expect(text).toBe("Array must contain at least 1 element(s)");
+    expect(text).toBe("Seleccioná al menos un permiso.");
+    // The check now runs client-side (onSubmit, before the action ever fires) precisely so a
+    // trivial validation failure doesn't wipe the rest of the form - confirm "name" survived.
+    await expect(page.locator('input[name="name"]')).toHaveValue(name);
     diag.assertNoConsoleErrors();
   });
 });

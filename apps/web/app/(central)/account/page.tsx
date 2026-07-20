@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { LanguageForm } from "./language-form";
 import { RevokeTokenButton } from "./revoke-token-button";
 import { TokenForm } from "./token-form";
+import { TwoFactorForm } from "./two-factor-form";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("account");
@@ -38,6 +39,12 @@ export default async function AccountPage() {
         <h2 className="text-sm font-medium opacity-70">{t("languageHeading")}</h2>
         <LanguageForm currentLanguage={context.user.language} options={SUPPORTED_LANGUAGES} />
         <p className="max-w-md text-xs opacity-50">{t("languageDisclaimer")}</p>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-sm font-medium opacity-70">{t("twoFactorHeading")}</h2>
+        <p className="max-w-md text-xs opacity-50">{t("twoFactorDescription")}</p>
+        <TwoFactorForm initialEnabled={context.user.twoFactorEnabled} />
       </section>
 
       <section className="space-y-4">

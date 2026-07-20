@@ -98,3 +98,5 @@ export * from "./assistant/ollama-client";
 export * from "./assistant/glpi-tools";
 export * from "./assistant/system-prompt";
 export * from "./assistant/conversation-service";
+export * from "./auth/primary-factor";
+export * from "./auth/two-factor-service";
