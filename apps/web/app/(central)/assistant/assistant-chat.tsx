@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import Markdown from "react-markdown";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -259,10 +260,33 @@ export function AssistantChat() {
                   className={
                     m.role === "user"
                       ? "max-w-[75%] rounded-md bg-black/5 px-3 py-2 text-sm dark:bg-white/10"
-                      : "max-w-[75%] whitespace-pre-wrap rounded-md border border-black/10 px-3 py-2 text-sm dark:border-white/10"
+                      : "max-w-[75%] space-y-2 rounded-md border border-black/10 px-3 py-2 text-sm dark:border-white/10"
                   }
                 >
-                  {m.content ? m.content : isSending && i === messages.length - 1 ? <TypingIndicator /> : ""}
+                  {m.content ? (
+                    m.role === "assistant" ? (
+                      <Markdown
+                        components={{
+                          h1: (p) => <h3 className="text-base font-semibold" {...p} />,
+                          h2: (p) => <h3 className="text-sm font-semibold" {...p} />,
+                          h3: (p) => <h4 className="text-sm font-semibold" {...p} />,
+                          p: (p) => <p className="leading-relaxed" {...p} />,
+                          ul: (p) => <ul className="list-disc space-y-1 pl-5" {...p} />,
+                          ol: (p) => <ol className="list-decimal space-y-1 pl-5" {...p} />,
+                          strong: (p) => <strong className="font-semibold" {...p} />,
+                          code: (p) => <code className="rounded bg-black/5 px-1 py-0.5 font-mono text-xs dark:bg-white/10" {...p} />,
+                        }}
+                      >
+                        {m.content}
+                      </Markdown>
+                    ) : (
+                      <span className="whitespace-pre-wrap">{m.content}</span>
+                    )
+                  ) : isSending && i === messages.length - 1 ? (
+                    <TypingIndicator />
+                  ) : (
+                    ""
+                  )}
                 </div>
               </div>
             ))

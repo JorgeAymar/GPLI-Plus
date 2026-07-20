@@ -49,11 +49,11 @@ export default async function RackDetailPage({ params }: { params: Promise<{ ass
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left opacity-60">
-                  <th className="pb-2">U</th>
-                  <th className="pb-2">Altura</th>
-                  <th className="pb-2">Orientación</th>
-                  <th className="pb-2">Ocupante</th>
+                <tr className="text-left">
+                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">U</th>
+                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Altura</th>
+                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Orientación</th>
+                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Ocupante</th>
                   <th className="pb-2"></th>
                 </tr>
               </thead>

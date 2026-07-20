@@ -15,8 +15,8 @@ export default async function GroupsPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Grupos</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-sm font-semibold">Existentes</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Existentes</h2>
           <ul className="space-y-1">
             {groups.map((g) => (
               <li key={g.id} className="text-sm">
@@ -28,8 +28,8 @@ export default async function GroupsPage() {
             {groups.length === 0 ? <li className="text-sm opacity-50">Sin grupos todavía.</li> : null}
           </ul>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo grupo</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-medium opacity-60 dark:border-white/10">Nuevo grupo</h2>
           <GroupForm entityId={context.activeEntity.id} />
         </div>
       </div>

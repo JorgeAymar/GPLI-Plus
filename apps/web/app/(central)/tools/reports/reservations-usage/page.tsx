@@ -18,9 +18,9 @@ export default async function ReservationsUsageReportPage() {
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left opacity-60">
-            <th className="pb-2">Activo</th>
-            <th className="pb-2">Reservas</th>
+          <tr className="text-left">
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Activo</th>
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Reservas</th>
           </tr>
         </thead>
         <tbody>

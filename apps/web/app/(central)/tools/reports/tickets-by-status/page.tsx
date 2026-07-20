@@ -28,9 +28,9 @@ export default async function TicketsByStatusReportPage() {
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left opacity-60">
-            <th className="pb-2">Estado</th>
-            <th className="pb-2">Cantidad</th>
+          <tr className="text-left">
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Estado</th>
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Cantidad</th>
           </tr>
         </thead>
         <tbody>

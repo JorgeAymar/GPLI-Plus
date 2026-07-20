@@ -30,21 +30,20 @@ export default async function NetworkEquipmentPage({ searchParams }: { searchPar
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Equipos de red</h1>
 
-      <form className="flex gap-2">
-        <input
-          name="q"
-          defaultValue={q ?? ""}
-          placeholder="Buscar por nombre, serie o inventario..."
-          className="w-full max-w-md rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
-        />
-        <button type="submit" className="rounded-md border border-black/15 px-3 py-2 text-sm dark:border-white/15">
-          Buscar
-        </button>
-      </form>
-
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div className="min-w-0">
-          <h2 className="mb-2 text-sm font-semibold">Existentes</h2>
+        <div className="min-w-0 rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Existentes</h2>
+          <form className="mb-4 flex gap-2">
+            <input
+              name="q"
+              defaultValue={q ?? ""}
+              placeholder="Buscar por nombre, serie o inventario..."
+              className="w-full max-w-md rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
+            />
+            <button type="submit" className="rounded-md border border-black/15 px-3 py-2 text-sm dark:border-white/15">
+              Buscar
+            </button>
+          </form>
           <DataTable
             columns={[
               { key: "name", label: "Nombre" },
@@ -55,8 +54,8 @@ export default async function NetworkEquipmentPage({ searchParams }: { searchPar
             emptyMessage="Sin equipos todavía."
           />
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo equipo de red</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-medium opacity-60 dark:border-white/10">Nuevo equipo de red</h2>
           <NetworkEquipmentForm entityId={context.activeEntity.id} deviceTypeOptions={deviceTypeOptions} />
         </div>
       </div>
