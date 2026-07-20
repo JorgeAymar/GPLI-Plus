@@ -42,3 +42,4 @@ export * from "./service-catalog";
 export * from "./reminders";
 export * from "./ticket-field-definitions";
 export * from "./password-reset-tokens";
+export * from "./assistant";

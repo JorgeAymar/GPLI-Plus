@@ -1,25 +1,20 @@
 import { requireAuthContext } from "@/lib/session";
+import { deleteConversation, getConversationWithMessages } from "@itsm/core";
 
-/** Proxies to IA-asistente's own /api/conversations/[id] - same rationale as /api/assistant/chat. */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  await requireAuthContext();
+  const context = await requireAuthContext();
   const { id } = await params;
 
-  const assistantUrl = process.env.AI_ASSISTANT_URL;
-  if (!assistantUrl) return new Response("Not configured", { status: 503 });
+  const conversation = await getConversationWithMessages(id, context.user.id);
+  if (!conversation) return new Response("Not found", { status: 404 });
 
-  const upstream = await fetch(`${assistantUrl}/api/conversations/${id}`, { cache: "no-store" });
-  const body = await upstream.text();
-  return new Response(body, { status: upstream.status, headers: { "Content-Type": "application/json" } });
+  return Response.json(conversation);
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  await requireAuthContext();
+  const context = await requireAuthContext();
   const { id } = await params;
 
-  const assistantUrl = process.env.AI_ASSISTANT_URL;
-  if (!assistantUrl) return new Response("Not configured", { status: 503 });
-
-  const upstream = await fetch(`${assistantUrl}/api/conversations/${id}`, { method: "DELETE" });
-  return new Response(null, { status: upstream.status });
+  await deleteConversation(id, context.user.id);
+  return new Response(null, { status: 204 });
 }

@@ -53,6 +53,12 @@ lib/auth.ts, lib/session.ts   Auth.js (Credentials + OIDC opcional) + resolució
 
 ```bash
 cp .env.example .env                      # ajustar si es necesario
+# apps/web, apps/worker, packages/db y packages/core leen su propio .env local
+# (cada herramienta resuelve dotenv relativo a su propio cwd) - symlinks a la
+# raíz para tener una única fuente de verdad, en vez de 5 copias que divergen:
+for d in apps/web apps/worker packages/db packages/core; do
+  ln -sf ../../.env "$d/.env"
+done
 docker compose up -d                      # Postgres en localhost:5436
 pnpm install
 pnpm db:migrate                           # aplica migraciones (incluye CREATE EXTENSION ltree)
@@ -65,6 +71,24 @@ pnpm --filter @itsm/worker dev            # opcional: SLA (5min), notificaciones
 Login de prueba: **admin@itsm.local** / **ChangeMe123!** (cambiar via `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD` antes de sembrar en un entorno real).
 
 > Nota: el puerto de Postgres (5436) y el del dev server (3210) se eligieron para no chocar con otros proyectos en la misma máquina. Ajustar en `docker-compose.yml`/`.env`/`apps/web/package.json` si es necesario.
+
+## Variables de entorno
+
+Un solo `.env` en la raíz (ver Quickstart) - las demás rutas son symlinks al mismo archivo, no copias.
+
+| Variable | Requerida | Qué es |
+|---|---|---|
+| `DATABASE_URL` | sí | Connection string de Postgres (`postgres://usuario:password@host:puerto/db`) |
+| `AUTH_SECRET` | sí | Firma de las sesiones JWT (Auth.js) - `openssl rand -base64 32` |
+| `AUTH_URL` | sí | URL pública de la app (`http://localhost:3210` en dev) |
+| `STORAGE_DRIVER` | sí | `local` o `s3` |
+| `STORAGE_LOCAL_PATH` | si `STORAGE_DRIVER=local` | Carpeta local para adjuntos |
+| `STORAGE_S3_ENDPOINT` / `STORAGE_S3_BUCKET` / `STORAGE_S3_ACCESS_KEY_ID` / `STORAGE_S3_SECRET_ACCESS_KEY` | si `STORAGE_DRIVER=s3` | Credenciales del bucket S3-compatible |
+| `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | no (defaults en `seed.ts`) | Cuenta admin que crea `pnpm --filter @itsm/core seed` |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | no (sin esto, las notificaciones se loguean por consola en vez de enviarse) | Envío de correo saliente (notificaciones, recuperación de contraseña) |
+| `AI_URL` | no | Servidor Ollama (remoto o local) para el Asistente IA. Sin esta variable, el asistente queda oculto en el sidebar y el dashboard - el resto de la app funciona igual |
+| `AI_API_KEY` | no | Bearer token del servidor Ollama, si lo requiere |
+| `AI_MODEL` | no (recomendado si `AI_URL` está seteado) | Modelo a usar en las llamadas a Ollama |
 
 ## Scripts
 

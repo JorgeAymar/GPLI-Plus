@@ -1,13 +1,8 @@
 import { requireAuthContext } from "@/lib/session";
+import { listConversations } from "@itsm/core";
 
-/** Proxies to IA-asistente's own /api/conversations - same rationale as /api/assistant/chat. */
 export async function GET() {
-  await requireAuthContext();
-
-  const assistantUrl = process.env.AI_ASSISTANT_URL;
-  if (!assistantUrl) return Response.json([]);
-
-  const upstream = await fetch(`${assistantUrl}/api/conversations`, { cache: "no-store" });
-  const data = await upstream.json();
-  return Response.json(data, { status: upstream.status });
+  const context = await requireAuthContext();
+  const conversations = await listConversations(context.user.id);
+  return Response.json(conversations);
 }

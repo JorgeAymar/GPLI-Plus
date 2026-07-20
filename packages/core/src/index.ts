@@ -94,3 +94,7 @@ export * from "./validation/consumable.zod";
 export * from "./validation/service-catalog.zod";
 export * from "./validation/reminder.zod";
 export * from "./validation/ticket-field.zod";
+export * from "./assistant/ollama-client";
+export * from "./assistant/glpi-tools";
+export * from "./assistant/system-prompt";
+export * from "./assistant/conversation-service";

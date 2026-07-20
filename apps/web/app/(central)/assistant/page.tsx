@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AssistantPage() {
   const t = await getTranslations("assistant");
-  const configured = Boolean(process.env.AI_ASSISTANT_URL);
+  const configured = Boolean(process.env.AI_URL);
 
   return (
     <div className="flex h-[calc(100vh-6.5rem)] flex-col">
