@@ -25,7 +25,7 @@ describe("rss-feed.zod createRssFeedSchema", () => {
     expect(createRssFeedSchema.safeParse({ ...base, ownerUserId: "nope" }).success).toBe(false);
   });
 
-  it("note: the zod schema itself does not enforce the anti-SSRF/private-IP rules from isSafeRssUrl", () => {
+  it("note: the zod schema itself does not enforce the anti-SSRF/private-IP rules from isSafeExternalUrl", () => {
     // Documents a real gap: this schema is pure shape/URL-format validation. A syntactically valid
     // URL pointing at a private/loopback address (e.g. the cloud metadata endpoint) passes zod fine -
     // the actual SSRF guard only runs later, inside rss-feed-service.ts's refreshRssFeed().

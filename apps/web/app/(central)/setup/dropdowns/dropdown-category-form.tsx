@@ -8,15 +8,11 @@ interface FormState {
 }
 
 async function action(_prev: FormState | undefined, formData: FormData): Promise<FormState> {
-  try {
-    await createDropdownCategoryAction({
-      key: formData.get("key") as string,
-      name: formData.get("name") as string,
-    });
-    return {};
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : "Error desconocido" };
-  }
+  const result = await createDropdownCategoryAction({
+    key: formData.get("key") as string,
+    name: formData.get("name") as string,
+  });
+  return result.error ? { error: result.error } : {};
 }
 
 export function DropdownCategoryForm() {

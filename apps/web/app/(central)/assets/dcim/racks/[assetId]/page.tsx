@@ -43,7 +43,7 @@ export default async function RackDetailPage({ params }: { params: Promise<{ ass
         Rack · {slots.length} posición(es) ocupada(s) (altura sugerida: {SUGGESTED_RACK_HEIGHT_U}U)
       </p>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="min-w-0">
           <h2 className="mb-2 text-sm font-medium opacity-70">Posiciones ocupadas</h2>
           <div className="overflow-x-auto">

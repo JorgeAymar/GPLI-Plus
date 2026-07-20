@@ -8,17 +8,13 @@ interface FormState {
 }
 
 async function action(_prev: FormState | undefined, formData: FormData): Promise<FormState> {
-  try {
-    await createNotificationTemplateAction({
-      key: formData.get("key") as string,
-      name: formData.get("name") as string,
-      subjectTemplate: formData.get("subjectTemplate") as string,
-      bodyTemplate: formData.get("bodyTemplate") as string,
-    });
-    return {};
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : "Error desconocido" };
-  }
+  const result = await createNotificationTemplateAction({
+    key: formData.get("key") as string,
+    name: formData.get("name") as string,
+    subjectTemplate: formData.get("subjectTemplate") as string,
+    bodyTemplate: formData.get("bodyTemplate") as string,
+  });
+  return result.error ? { error: result.error } : {};
 }
 
 export function NotificationTemplateForm() {

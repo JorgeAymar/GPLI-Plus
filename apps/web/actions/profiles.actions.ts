@@ -12,18 +12,38 @@ import {
   requireRight,
   setModuleRight,
 } from "@itsm/core";
+import type { Profile } from "@itsm/db";
 import { revalidatePath } from "next/cache";
 
+export interface CreateProfileResult {
+  profile?: Profile;
+  error?: string;
+}
+
+/**
+ * Returns `{error}` instead of throwing on a uniqueness failure - Next.js
+ * redacts thrown Server Action errors in production (see users.actions.ts's
+ * createUserAction for the full explanation). `createProfileSchema.parse` is
+ * deliberately left outside the try: it can throw a raw ZodError (a
+ * pre-existing, separate issue in this file), and catching it here would
+ * newly surface that unrelated raw message instead of Next's redaction.
+ */
 export async function createProfileAction(input: {
   name: string;
   interface: "central" | "simplified";
   description?: string | null;
   isDefault?: boolean;
-}) {
+}): Promise<CreateProfileResult> {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ADMINISTRATION_PROFILE, RIGHT.CREATE);
   const parsed = createProfileSchema.parse(input);
-  const profile = await createProfile(parsed);
+
+  let profile: Profile;
+  try {
+    profile = await createProfile(parsed);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "No se pudo crear el perfil." };
+  }
   await recordAuditLog({
     entityId: context.activeEntity.id,
     actorUserId: context.user.id,
@@ -33,7 +53,7 @@ export async function createProfileAction(input: {
     after: profile,
   });
   revalidatePath("/administration/profiles");
-  return profile;
+  return { profile };
 }
 
 export async function setModuleRightAction(profileId: string, moduleKey: string, rights: number) {

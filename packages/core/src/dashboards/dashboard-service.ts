@@ -11,15 +11,29 @@ import type { AuthContext } from "../auth/get-auth-context";
 import { addVisibilityRule, isResourceVisibleTo } from "../visibility/visibility-service";
 
 export async function createDashboard(input: { key: string; name: string; ownerUserId: string }): Promise<Dashboard> {
-  const [created] = await db
-    .insert(dashboards)
-    .values({
-      key: input.key,
-      name: input.name,
-      ownerUserId: input.ownerUserId,
-    })
-    .returning();
-  if (!created) throw new Error("Failed to insert dashboard");
+  let created: Dashboard | undefined;
+  try {
+    [created] = await db
+      .insert(dashboards)
+      .values({
+        key: input.key,
+        name: input.name,
+        ownerUserId: input.ownerUserId,
+      })
+      .returning();
+  } catch (err) {
+    // See user-service.ts's createUser for why this must be caught here:
+    // Drizzle wraps the real node-postgres error (with raw query text) in
+    // `.cause`; `23505` is Postgres's unique_violation SQLSTATE.
+    const cause = err instanceof Error ? err.cause : undefined;
+    if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
+      const constraint = "constraint" in cause ? cause.constraint : undefined;
+      if (constraint === "dashboards_key_unique") throw new Error("Ya existe un dashboard con esa clave.");
+      throw new Error("Ya existe un dashboard con esos datos.");
+    }
+    throw new Error("No se pudo crear el dashboard.");
+  }
+  if (!created) throw new Error("No se pudo crear el dashboard.");
   return created;
 }
 

@@ -10,6 +10,7 @@ import {
   createAssetFieldDefinitionSchema,
   requireRight,
 } from "@itsm/core";
+import type { AssetDefinition, AssetFieldDefinition } from "@itsm/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -28,21 +29,43 @@ function parseInput<Schema extends z.ZodTypeAny>(schema: Schema, input: unknown)
   return result.data;
 }
 
+export interface CreateAssetDefinitionResult {
+  definition?: AssetDefinition;
+  error?: string;
+}
+
+/**
+ * Returns `{error}` instead of throwing on a validation/uniqueness failure -
+ * Next.js redacts thrown Server Action errors in production (see
+ * users.actions.ts's createUserAction for the full explanation).
+ */
 export async function createAssetDefinitionAction(input: {
   key: string;
   name: string;
   icon?: string | null;
   isSystem?: boolean;
   hasExtensionTable?: boolean;
-}) {
+}): Promise<CreateAssetDefinitionResult> {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.SETUP_ASSET_DEFINITION, RIGHT.CREATE);
-  const parsed = parseInput(createAssetDefinitionSchema, input);
-  const definition = await createAssetDefinition(parsed);
+
+  let definition: AssetDefinition;
+  try {
+    const parsed = parseInput(createAssetDefinitionSchema, input);
+    definition = await createAssetDefinition(parsed);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "No se pudo crear el tipo de activo." };
+  }
   revalidatePath("/setup/asset-definitions");
-  return definition;
+  return { definition };
 }
 
+export interface CreateAssetFieldDefinitionResult {
+  field?: AssetFieldDefinition;
+  error?: string;
+}
+
+/** Same {error}-as-data pattern as createAssetDefinitionAction above. */
 export async function createAssetFieldDefinitionAction(input: {
   assetDefinitionId: string;
   key: string;
@@ -52,11 +75,17 @@ export async function createAssetFieldDefinitionAction(input: {
   isRequired?: boolean;
   defaultValue?: string | null;
   sortOrder?: number;
-}) {
+}): Promise<CreateAssetFieldDefinitionResult> {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.SETUP_ASSET_DEFINITION, RIGHT.CREATE);
-  const parsed = parseInput(createAssetFieldDefinitionSchema, input);
-  const field = await createAssetFieldDefinition(parsed);
-  revalidatePath(`/setup/asset-definitions/${parsed.assetDefinitionId}`);
-  return field;
+
+  let field: AssetFieldDefinition;
+  try {
+    const parsed = parseInput(createAssetFieldDefinitionSchema, input);
+    field = await createAssetFieldDefinition(parsed);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "No se pudo crear el campo." };
+  }
+  revalidatePath(`/setup/asset-definitions/${input.assetDefinitionId}`);
+  return { field };
 }

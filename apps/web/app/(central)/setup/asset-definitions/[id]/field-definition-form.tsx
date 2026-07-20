@@ -12,20 +12,16 @@ const FIELD_TYPES = ["text", "textarea", "number", "boolean", "date", "dropdown"
 
 function makeAction(assetDefinitionId: string) {
   return async (_prev: FormState | undefined, formData: FormData): Promise<FormState> => {
-    try {
-      const fieldType = formData.get("fieldType") as (typeof FIELD_TYPES)[number];
-      await createAssetFieldDefinitionAction({
-        assetDefinitionId,
-        key: formData.get("key") as string,
-        label: formData.get("label") as string,
-        fieldType,
-        dropdownCategoryId: fieldType === "dropdown" ? (formData.get("dropdownCategoryId") as string) || null : null,
-        isRequired: formData.get("isRequired") === "on",
-      });
-      return {};
-    } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
-    }
+    const fieldType = formData.get("fieldType") as (typeof FIELD_TYPES)[number];
+    const result = await createAssetFieldDefinitionAction({
+      assetDefinitionId,
+      key: formData.get("key") as string,
+      label: formData.get("label") as string,
+      fieldType,
+      dropdownCategoryId: fieldType === "dropdown" ? (formData.get("dropdownCategoryId") as string) || null : null,
+      isRequired: formData.get("isRequired") === "on",
+    });
+    return result.error ? { error: result.error } : {};
   };
 }
 

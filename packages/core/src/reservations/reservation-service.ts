@@ -3,14 +3,30 @@ import { and, asc, eq, gt, inArray, isNull, lt } from "drizzle-orm";
 import { listSubtree } from "../entities/entity-service";
 
 export async function createReservationItem(input: { assetId: string; comment?: string | null }): Promise<ReservationItem> {
-  const [created] = await db
-    .insert(reservationItems)
-    .values({
-      assetId: input.assetId,
-      comment: input.comment ?? null,
-    })
-    .returning();
-  if (!created) throw new Error("Failed to insert reservation item");
+  let created: ReservationItem | undefined;
+  try {
+    [created] = await db
+      .insert(reservationItems)
+      .values({
+        assetId: input.assetId,
+        comment: input.comment ?? null,
+      })
+      .returning();
+  } catch (err) {
+    // See user-service.ts's createUser for why this must be caught here:
+    // Drizzle wraps the real node-postgres error (with raw query text) in
+    // `.cause`; `23505` is Postgres's unique_violation SQLSTATE. Reachable in
+    // practice via a race: two admins loading /tools/reservations before
+    // either submits can both pick the same not-yet-reserved asset.
+    const cause = err instanceof Error ? err.cause : undefined;
+    if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
+      const constraint = "constraint" in cause ? cause.constraint : undefined;
+      if (constraint === "reservation_items_asset_id_unique") throw new Error("Este activo ya está habilitado para reserva.");
+      throw new Error("Ya existe un ítem de reserva con esos datos.");
+    }
+    throw new Error("No se pudo habilitar el activo para reserva.");
+  }
+  if (!created) throw new Error("No se pudo habilitar el activo para reserva.");
   return created;
 }
 

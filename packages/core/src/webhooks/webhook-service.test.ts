@@ -4,7 +4,7 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { db, entities, queuedWebhooks, webhooks } from "@itsm/db";
 import { eq } from "drizzle-orm";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { createEntity } from "../entities/entity-service";
 import { createWebhookSchema } from "../validation/webhook.zod";
 import {
@@ -14,6 +14,13 @@ import {
   listWebhooks,
   raiseWebhookEvent,
 } from "./webhook-service";
+
+// This suite tests real delivery mechanics (HMAC signing, retries, status
+// tracking) against a local 127.0.0.1 test server - the anti-SSRF guard
+// itself (isSafeExternalUrl) has its own dedicated suite in
+// ../url-safety.test.ts, so it's mocked out here rather than testing it
+// twice with a guard that would otherwise reject this suite's own fixture.
+vi.mock("../url-safety", () => ({ isSafeExternalUrl: () => true }));
 
 const PREFIX = "__vitest_platform__";
 const RETRY_BACKOFF_MINUTES = 5; // Mirrors webhook-service.ts's private RETRY_BACKOFF_MINUTES constant.

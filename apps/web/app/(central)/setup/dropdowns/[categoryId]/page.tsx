@@ -26,7 +26,7 @@ export default async function DropdownCategoryPage({ params }: { params: Promise
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">{category.name}</h1>
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
           <h2 className="mb-2 text-sm font-medium opacity-70">Items existentes</h2>
           <ul className="space-y-1">

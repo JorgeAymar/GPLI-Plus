@@ -1,5 +1,5 @@
 import { db, itilActors, tickets, type ItilStatus, type Ticket } from "@itsm/db";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
 import { recordAuditLog } from "../audit/audit-service";
 import { listSubtree } from "../entities/entity-service";
 import { getNotificationTemplateByKey, queueNotification } from "../notifications/notification-service";
@@ -50,18 +50,50 @@ export async function getTicket(id: string): Promise<Ticket | undefined> {
   return row;
 }
 
+interface TicketListOptions {
+  status?: ItilStatus;
+  includeSubtree?: boolean;
+  /** Matched (case-insensitive, substring) against title and content. */
+  search?: string;
+}
+
+async function buildTicketListConditions(entityId: string, options?: TicketListOptions): Promise<SQL[]> {
+  const entityIds = options?.includeSubtree ? (await listSubtree(entityId)).map((e) => e.id) : [entityId];
+  const conditions: SQL[] = [inArray(tickets.entityId, entityIds)];
+  if (options?.status) conditions.push(eq(tickets.status, options.status));
+  if (options?.search) {
+    const pattern = `%${options.search}%`;
+    const searchCondition = or(ilike(tickets.title, pattern), ilike(tickets.content, pattern));
+    if (searchCondition) conditions.push(searchCondition);
+  }
+  return conditions;
+}
+
+/** Newest first. `limit`/`offset` are optional so existing unpaginated callers (public API, tests) keep getting the full result set. */
 export async function listTickets(
   entityId: string,
-  options?: { status?: ItilStatus; includeSubtree?: boolean },
+  options?: TicketListOptions & { limit?: number; offset?: number },
 ): Promise<Ticket[]> {
-  const entityIds = options?.includeSubtree ? (await listSubtree(entityId)).map((e) => e.id) : [entityId];
-  const conditions = [inArray(tickets.entityId, entityIds)];
-  if (options?.status) conditions.push(eq(tickets.status, options.status));
-  return db
+  const conditions = await buildTicketListConditions(entityId, options);
+  let query = db
     .select()
     .from(tickets)
     .where(and(...conditions))
-    .orderBy(tickets.createdAt);
+    .orderBy(desc(tickets.createdAt))
+    .$dynamic();
+  if (options?.limit !== undefined) query = query.limit(options.limit);
+  if (options?.offset !== undefined) query = query.offset(options.offset);
+  return query;
+}
+
+/** Same filters as listTickets, for computing total page count instead of fetching rows. */
+export async function countTickets(entityId: string, options?: TicketListOptions): Promise<number> {
+  const conditions = await buildTicketListConditions(entityId, options);
+  const [row] = await db
+    .select({ value: count() })
+    .from(tickets)
+    .where(and(...conditions));
+  return row?.value ?? 0;
 }
 
 export async function updateTicket(

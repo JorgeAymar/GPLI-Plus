@@ -11,6 +11,7 @@ import {
   createReservationSchema,
   requireRight,
 } from "@itsm/core";
+import type { ReservationItem } from "@itsm/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -32,13 +33,29 @@ function parseInput<Schema extends z.ZodTypeAny>(schema: Schema, input: unknown)
   return result.data;
 }
 
-export async function createReservationItemAction(input: unknown) {
+export interface CreateReservationItemResult {
+  item?: ReservationItem;
+  error?: string;
+}
+
+/**
+ * Returns `{error}` instead of throwing on a validation/uniqueness failure -
+ * Next.js redacts thrown Server Action errors in production (see
+ * users.actions.ts's createUserAction for the full explanation).
+ */
+export async function createReservationItemAction(input: unknown): Promise<CreateReservationItemResult> {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.TOOLS_RESERVATION, RIGHT.CREATE);
-  const parsed = parseInput(createReservationItemSchema, input);
-  const item = await createReservationItem(parsed);
+
+  let item: ReservationItem;
+  try {
+    const parsed = parseInput(createReservationItemSchema, input);
+    item = await createReservationItem(parsed);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "No se pudo habilitar el activo para reserva." };
+  }
   revalidatePath("/tools/reservations");
-  return item;
+  return { item };
 }
 
 export async function createReservationAction(input: unknown) {

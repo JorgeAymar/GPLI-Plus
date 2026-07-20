@@ -8,16 +8,12 @@ interface FormState {
 }
 
 async function action(_prev: FormState | undefined, formData: FormData): Promise<FormState> {
-  try {
-    await createAssetDefinitionAction({
-      key: formData.get("key") as string,
-      name: formData.get("name") as string,
-      icon: (formData.get("icon") as string) || null,
-    });
-    return {};
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : "Error desconocido" };
-  }
+  const result = await createAssetDefinitionAction({
+    key: formData.get("key") as string,
+    name: formData.get("name") as string,
+    icon: (formData.get("icon") as string) || null,
+  });
+  return result.error ? { error: result.error } : {};
 }
 
 export function AssetDefinitionForm() {

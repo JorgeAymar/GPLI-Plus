@@ -7,8 +7,10 @@ import {
   createNotificationTransport,
   createPasswordResetToken,
   findUserByEmail,
+  isLoginRateLimited,
   isPasswordResetTokenValid,
   queueNotification,
+  recordLoginAttempt,
   verifyPrimaryFactor,
 } from "@itsm/core";
 import { AuthError } from "next-auth";
@@ -51,7 +53,15 @@ export async function loginAction(_prevState: LoginState | undefined, formData: 
   }
 
   // Phase 1: check the password only, without ever calling signIn (no session yet).
+  // Rate-limited per email (not IP - a nonexistent email must still count, or
+  // an attacker just probes random addresses to dodge the limiter) so a
+  // credential-stuffing script can't brute-force one account indefinitely.
+  if (await isLoginRateLimited(email)) {
+    return { error: "Demasiados intentos fallidos. Esperá unos minutos e intentá de nuevo." };
+  }
+
   const user = await verifyPrimaryFactor(email, password);
+  await recordLoginAttempt(email, Boolean(user));
   if (!user) return { error: GENERIC_LOGIN_ERROR };
 
   // 2FA is opt-in per user (users.two_factor_enabled) - most users sign in

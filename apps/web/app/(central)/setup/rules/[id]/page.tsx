@@ -46,7 +46,7 @@ export default async function RuleDetailPage({ params }: { params: Promise<{ id:
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
           <h2 className="mb-2 text-sm font-medium opacity-70">Criterios</h2>
           <ul className="mb-4 space-y-1">

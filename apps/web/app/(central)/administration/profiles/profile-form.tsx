@@ -8,17 +8,13 @@ interface FormState {
 }
 
 async function action(_prev: FormState | undefined, formData: FormData): Promise<FormState> {
-  try {
-    await createProfileAction({
-      name: formData.get("name") as string,
-      interface: formData.get("interface") as "central" | "simplified",
-      description: (formData.get("description") as string) || null,
-      isDefault: formData.get("isDefault") === "on",
-    });
-    return {};
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : "Error desconocido" };
-  }
+  const result = await createProfileAction({
+    name: formData.get("name") as string,
+    interface: formData.get("interface") as "central" | "simplified",
+    description: (formData.get("description") as string) || null,
+    isDefault: formData.get("isDefault") === "on",
+  });
+  return result.error ? { error: result.error } : {};
 }
 
 export function ProfileForm() {

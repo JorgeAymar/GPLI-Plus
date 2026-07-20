@@ -169,6 +169,13 @@
       "when": 1784511833124,
       "tag": "0023_bright_shocker",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1784518810536,
+      "tag": "0024_wild_mesmero",
+      "breakpoints": true
     }
   ]
 }

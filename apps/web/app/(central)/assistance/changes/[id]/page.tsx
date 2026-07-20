@@ -41,7 +41,7 @@ export default async function ChangeDetailPage({ params }: { params: Promise<{ i
         <ChangeEditForm change={change} />
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <ActorsSection itilType="change" itilId={id} actors={actors} users={users} />
         <ValidationsSection itilType="change" itilId={id} validations={validations} users={users} />
       </div>

@@ -7,29 +7,32 @@ import { test, expect, type Page } from "@playwright/test";
  * tests (apps/web/app/(central)/assets/**):
  *
  * - Los tipos "core" sin tabla de extensión (monitor, printer, phone, rack,
- *   etc.) sólo tienen alta + listado en /assets/[assetType] - NO existe
- *   página de detalle ni edición para ellos en esta versión. Por eso el
- *   flujo del activo genérico ("Monitor") termina en el listado, no entra a
- *   ningún detalle.
- * - Computer y Software sí tienen página de detalle propia
- *   (/assets/computers/[id], /assets/software/[id]). Computer expone edición
- *   de sus campos base (nombre/serie/inventario/comentario) vía AssetEditForm
- *   (updateAssetAction) - ver sección "Editar activo" en el detalle. Software
- *   todavía NO expone edición ni borrado, y ninguno de los dos expone borrado
- *   en esta versión - sólo alta de sub-recursos (componentes, instalaciones,
- *   versiones, licencias). `softDeleteAssetAction`/`restoreAssetAction`/
- *   `purgeAssetAction` existen en actions/assets.actions.ts pero no están
- *   conectados a ninguna UI (ver hallazgos reportados aparte).
+ *   etc.) ahora SÍ tienen una página de detalle/edición propia en
+ *   /assets/[assetType]/[id] (GenericAssetEditForm -> updateAssetAction),
+ *   además de alta + listado en /assets/[assetType]. Tanto el listado propio
+ *   del tipo como el índice general (/assets) enlazan cada fila a ese
+ *   detalle. Computer y Software siguen con su propia página de detalle
+ *   dedicada (/assets/computers/[id], /assets/software/[id]) - no comparten
+ *   la ruta genérica.
+ * - Computer expone edición de sus campos base (nombre/serie/inventario/
+ *   comentario) vía AssetEditForm (updateAssetAction) - ver sección "Editar
+ *   activo" en el detalle; el genérico expone lo mismo más los customFields
+ *   dinámicos de su tipo. Software todavía NO expone edición ni borrado, y
+ *   ninguno de los tres (Computer/Software/genérico) expone borrado desde su
+ *   propia página de detalle en esta versión - `softDeleteAssetAction`/
+ *   `restoreAssetAction`/`purgeAssetAction` existen en actions/assets.actions.ts
+ *   pero sólo el botón de borrado del listado /assets/[assetType] (ConfirmDeleteButton)
+ *   está conectado a la UI (ver hallazgos reportados aparte).
  * - Sí hay borrado real en la UI para relaciones/posiciones: quitar un
  *   activo de un rack (RemoveFromRackButton) y quitar una relación de
  *   impacto (RemoveImpactRelationButton) - ambos se prueban de punta a
  *   punta, incluida la limpieza.
  * - La ruta /assets/dcim/racks/[assetId] no valida que el asset sea
  *   realmente de tipo "rack" (getAsset(assetId) genérico, ver hallazgos),
- *   así que reutilizamos los Computer creados en este archivo (que sí
- *   exponen su id vía URL de detalle) como "contenedor" y "ocupante" para
- *   ejercitar el flujo de slots sin depender de acceso directo a la base de
- *   datos ni de un tipo genérico que no tiene id visible en la UI.
+ *   así que reutilizamos los Computer creados en este archivo (que ya
+ *   exponían su id vía URL de detalle antes de este cambio) como
+ *   "contenedor" y "ocupante" para ejercitar el flujo de slots sin depender
+ *   de acceso directo a la base de datos.
  *
  * Datos de dropdowns (os, network_equipment_type, cable_type, manufacturer,
  * location) NO tienen items sembrados en un entorno fresco - sólo "status"
@@ -600,7 +603,7 @@ test.describe.serial("Activo genérico (Monitor) - alta y listado", () => {
     health.assertHealthy();
   });
 
-  test("aparece en el índice general de activos al buscarlo por nombre", async ({ page }) => {
+  test("aparece en el índice general de activos al buscarlo por nombre, con enlace a su detalle", async ({ page }) => {
     const health = watchPageHealth(page);
     await page.goto(`/assets?q=${encodeURIComponent(monitorName)}`);
 
@@ -610,9 +613,36 @@ test.describe.serial("Activo genérico (Monitor) - alta y listado", () => {
     await expect(row).toContainText(monitorSerial);
     await expect(row).toContainText(monitorInventory);
 
-    // No existe página de detalle para tipos genéricos en esta versión - no
-    // hay ningún enlace desde este listado (hallazgo reportado aparte).
-    await expect(row.getByRole("link")).toHaveCount(0);
+    // Ahora SÍ existe página de detalle para tipos genéricos - el nombre en
+    // este índice general enlaza a /assets/monitor/[id] (ver assetDetailHref
+    // en apps/web/app/(central)/assets/page.tsx).
+    const link = row.getByRole("link");
+    await expect(link).toHaveCount(1);
+    await expect(link).toHaveAttribute("href", /\/assets\/monitor\/[^/]+$/);
+
+    health.assertHealthy();
+  });
+
+  test("entra al detalle desde el índice general, edita el número de serie y persiste tras recargar", async ({ page }) => {
+    const health = watchPageHealth(page);
+    await page.goto(`/assets?q=${encodeURIComponent(monitorName)}`);
+
+    const row = page.getByRole("row", { name: new RegExp(monitorName) });
+    await row.getByRole("link").click();
+    await page.waitForURL(/\/assets\/monitor\/[^/]+$/);
+    await expect(page.getByRole("heading", { name: monitorName, level: 1 })).toBeVisible();
+    // Cabecera muestra también el tipo, junto al nombre.
+    await expect(page.getByText("Monitor", { exact: true })).toBeVisible();
+    await expect(page.locator("#asset-edit-serial-number")).toHaveValue(monitorSerial);
+
+    const editedSerial = uniqueName("SN-MON-EDITED");
+    await page.locator("#asset-edit-serial-number").fill(editedSerial);
+    await page.getByRole("button", { name: "Guardar cambios" }).click();
+    await expect(page.getByText("Activo actualizado.")).toBeVisible();
+    await assertNoInlineFormError(page);
+
+    await page.reload();
+    await expect(page.locator("#asset-edit-serial-number")).toHaveValue(editedSerial);
 
     health.assertHealthy();
   });
@@ -871,9 +901,10 @@ test.describe.serial("QA - DCIM (rack): datos propios vía el formulario genéri
     await assertNoInlineFormError(page);
     await expect(page.getByText(qaRackName)).toBeVisible();
 
-    // Generic asset types have no detail page (see file header comment), but the DCIM index page
-    // links every "rack"-typed asset by name - confirms this create-form's output actually flows
-    // into the DCIM module, not just into the generic /assets/rack listing.
+    // The DCIM index page independently links every "rack"-typed asset by name (its own
+    // dcim/page.tsx, unrelated to the generic /assets/[assetType]/[id] detail page) - confirms
+    // this create-form's output actually flows into the DCIM module, not just into the generic
+    // /assets/rack listing.
     await page.goto("/assets/dcim");
     await expect(page.getByRole("link", { name: qaRackName })).toBeVisible();
 

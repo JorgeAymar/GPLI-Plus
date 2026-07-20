@@ -2,7 +2,7 @@
 
 import { updateTicketAction } from "@/actions/tickets.actions";
 import { useFormSuccessToast } from "@/components/toast";
-import type { Ticket } from "@itsm/db";
+import type { DropdownItem, Ticket } from "@itsm/db";
 import { useActionState, useRef } from "react";
 
 interface FormState {
@@ -17,6 +17,8 @@ function makeAction(ticketId: string) {
       await updateTicketAction(ticketId, {
         title: formData.get("title") as string,
         content: formData.get("content") as string,
+        ticketType: formData.get("ticketType") as "incident" | "request",
+        categoryDropdownItemId: (formData.get("categoryDropdownItemId") as string) || null,
         urgency: Number(formData.get("urgency")),
         impact: Number(formData.get("impact")),
         priority: Number(formData.get("priority")),
@@ -28,7 +30,7 @@ function makeAction(ticketId: string) {
   };
 }
 
-export function TicketEditForm({ ticket }: { ticket: Ticket }) {
+export function TicketEditForm({ ticket, categoryOptions }: { ticket: Ticket; categoryOptions: DropdownItem[] }) {
   const [state, formAction, isPending] = useActionState(makeAction(ticket.id), undefined);
   const formRef = useRef<HTMLFormElement>(null);
   useFormSuccessToast(state, formRef, "Ticket actualizado.");
@@ -47,8 +49,15 @@ export function TicketEditForm({ ticket }: { ticket: Ticket }) {
       ref={formRef}
       action={formAction}
       className="space-y-3"
-      key={`${ticket.title}-${ticket.content}-${ticket.urgency}-${ticket.impact}-${ticket.priority}`}
+      key={`${ticket.title}-${ticket.content}-${ticket.ticketType}-${ticket.categoryDropdownItemId}-${ticket.urgency}-${ticket.impact}-${ticket.priority}`}
     >
+      <div>
+        <label htmlFor="ticket-edit-type" className="text-sm font-medium">Tipo</label>
+        <select id="ticket-edit-type" name="ticketType" defaultValue={ticket.ticketType} required className={inputClass}>
+          <option value="incident">Incidente</option>
+          <option value="request">Solicitud</option>
+        </select>
+      </div>
       <div>
         <label htmlFor="ticket-edit-title" className="text-sm font-medium">Título</label>
         <input id="ticket-edit-title" name="title" required defaultValue={ticket.title} className={inputClass} />
@@ -63,6 +72,22 @@ export function TicketEditForm({ ticket }: { ticket: Ticket }) {
           defaultValue={ticket.content}
           className={inputClass}
         />
+      </div>
+      <div>
+        <label htmlFor="ticket-edit-category" className="text-sm font-medium">Categoría</label>
+        <select
+          id="ticket-edit-category"
+          name="categoryDropdownItemId"
+          defaultValue={ticket.categoryDropdownItemId ?? ""}
+          className={inputClass}
+        >
+          <option value="">(ninguna)</option>
+          {categoryOptions.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.name}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div>

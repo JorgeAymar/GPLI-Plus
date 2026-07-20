@@ -17,7 +17,7 @@ export default async function RemindersPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Recordatorios</h1>
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="space-y-6">
           <div>
             <h2 className="mb-2 text-sm font-medium opacity-70">Pendientes</h2>

@@ -4,6 +4,7 @@ import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { getAssetDefinitionByKey, listAssetFieldDefinitions, listAssets, listDropdownItems } from "@itsm/core";
 import type { DropdownItem } from "@itsm/db";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GenericAssetForm } from "./generic-asset-form";
 
@@ -39,15 +40,15 @@ export default async function AssetTypePage({ params }: { params: Promise<{ asse
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">{definition.name}</h1>
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
           <h2 className="mb-2 text-sm font-medium opacity-70">Instancias existentes</h2>
           <ul className="space-y-1">
             {assets.map((a) => (
               <li key={a.id} className="flex items-center justify-between gap-2 text-sm">
-                <span>
+                <Link href={`/assets/${assetType}/${a.id}`} className="hover:underline">
                   {a.name} {a.serialNumber ? <span className="opacity-40">({a.serialNumber})</span> : null}
-                </span>
+                </Link>
                 <ConfirmDeleteButton
                   id={a.id}
                   action={softDeleteAssetAction}

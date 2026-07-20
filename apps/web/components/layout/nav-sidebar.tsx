@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useState, type SVGProps } from "react";
+import { useSidebar } from "./sidebar-context";
 
 interface NavLeaf {
   href: string;
@@ -207,11 +208,22 @@ function findActiveHref(pathname: string): string | undefined {
   return activeHref;
 }
 
-function NavLink({ href, label, active }: { href: string; label: string; active: boolean }) {
+function NavLink({
+  href,
+  label,
+  active,
+  onNavigate,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+  onNavigate?: () => void;
+}) {
   return (
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
+      onClick={onNavigate}
       className={
         active
           ? "block rounded-md bg-accent/10 px-3 py-2 text-sm font-semibold text-accent"
@@ -241,70 +253,90 @@ export function NavSidebar({
   // the active page is always forced back open below rather than possibly
   // hiding the page you're actually on.
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  // Below `md` the sidebar is an off-canvas overlay toggled from the header
+  // (see SidebarToggleButton); at `md` and up `md:flex` below always wins
+  // over `open`, so it's simply always shown there, matching the old
+  // behavior exactly.
+  const { open, close } = useSidebar();
 
   return (
-    <nav className="sticky top-0 flex h-screen w-56 shrink-0 flex-col border-r border-black/10 dark:border-white/10">
-      <div className="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
-        {aiAssistantEnabled ? (
-          <Link
-            href="/assistant"
-            aria-current={pathname === "/assistant" ? "page" : undefined}
-            className={
-              pathname === "/assistant"
-                ? "rounded-md bg-accent/10 px-3 py-2 text-sm font-semibold text-accent"
-                : "rounded-md px-3 py-2 text-sm font-semibold hover:bg-black/5 dark:hover:bg-white/5"
-            }
-          >
-            {t("aiAssistant")}
-          </Link>
-        ) : null}
+    <>
+      {/* z-20/z-30 below the header's z-40 (see (central)/layout.tsx) so the
+          header - and the toggle button inside it - stays clickable and
+          visible even while the drawer is open. */}
+      {open ? <div aria-hidden="true" onClick={close} className="fixed inset-0 z-20 bg-black/30 md:hidden" /> : null}
+      <nav
+        className={`${open ? "flex" : "hidden"} fixed inset-y-0 left-0 z-30 h-screen w-56 shrink-0 flex-col border-r border-black/10 bg-background md:sticky md:top-0 md:z-auto md:flex dark:border-white/10`}
+      >
+        <div className="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
+          {aiAssistantEnabled ? (
+            <Link
+              href="/assistant"
+              aria-current={pathname === "/assistant" ? "page" : undefined}
+              onClick={close}
+              className={
+                pathname === "/assistant"
+                  ? "rounded-md bg-accent/10 px-3 py-2 text-sm font-semibold text-accent"
+                  : "rounded-md px-3 py-2 text-sm font-semibold hover:bg-black/5 dark:hover:bg-white/5"
+              }
+            >
+              {t("aiAssistant")}
+            </Link>
+          ) : null}
 
-        {TOP_LEVEL.map((item) => (
-          <NavLink key={item.href} href={item.href} label={t(item.labelKey)} active={item.href === activeHref} />
-        ))}
+          {TOP_LEVEL.map((item) => (
+            <NavLink key={item.href} href={item.href} label={t(item.labelKey)} active={item.href === activeHref} onNavigate={close} />
+          ))}
 
-        {GROUPS.map((group) => (
-          <div key={group.groupLabelKey} className="mt-4 first:mt-0">
-            <div className="px-3 pb-1 text-xs font-medium uppercase tracking-wide opacity-50">{t(group.groupLabelKey)}</div>
-            {group.categories.map((category) => {
-              const hasActiveItem = category.items.some((i) => i.href === activeHref);
-              const expanded = hasActiveItem || !collapsed[category.key];
-              const Icon = category.icon;
-              return (
-                <div key={category.key}>
-                  <button
-                    type="button"
-                    onClick={() => setCollapsed((prev) => ({ ...prev, [category.key]: !prev[category.key] }))}
-                    aria-expanded={expanded}
-                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-black/5 dark:hover:bg-white/5"
-                  >
-                    <Icon className="h-4 w-4 shrink-0 opacity-70" />
-                    <span className="flex-1">{t(category.labelKey)}</span>
-                    <ChevronIcon expanded={expanded} className="h-4 w-4 shrink-0 opacity-50" />
-                  </button>
-                  {expanded ? (
-                    <div className="ml-3 space-y-0.5 border-l border-black/10 pl-3 dark:border-white/10">
-                      {category.items.map((item) => (
-                        <NavLink key={item.href} href={item.href} label={t(item.labelKey)} active={item.href === activeHref} />
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
+          {GROUPS.map((group) => (
+            <div key={group.groupLabelKey} className="mt-4 first:mt-0">
+              <div className="px-3 pb-1 text-xs font-medium uppercase tracking-wide opacity-50">{t(group.groupLabelKey)}</div>
+              {group.categories.map((category) => {
+                const hasActiveItem = category.items.some((i) => i.href === activeHref);
+                const expanded = hasActiveItem || !collapsed[category.key];
+                const Icon = category.icon;
+                return (
+                  <div key={category.key}>
+                    <button
+                      type="button"
+                      onClick={() => setCollapsed((prev) => ({ ...prev, [category.key]: !prev[category.key] }))}
+                      aria-expanded={expanded}
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-black/5 dark:hover:bg-white/5"
+                    >
+                      <Icon className="h-4 w-4 shrink-0 opacity-70" />
+                      <span className="flex-1">{t(category.labelKey)}</span>
+                      <ChevronIcon expanded={expanded} className="h-4 w-4 shrink-0 opacity-50" />
+                    </button>
+                    {expanded ? (
+                      <div className="ml-3 space-y-0.5 border-l border-black/10 pl-3 dark:border-white/10">
+                        {category.items.map((item) => (
+                          <NavLink
+                            key={item.href}
+                            href={item.href}
+                            label={t(item.labelKey)}
+                            active={item.href === activeHref}
+                            onNavigate={close}
+                          />
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2 border-t border-black/10 p-4 dark:border-white/10">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-white">
+            {userDisplayName.slice(0, 1).toUpperCase()}
           </div>
-        ))}
-      </div>
-
-      <div className="flex items-center gap-2 border-t border-black/10 p-4 dark:border-white/10">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-white">
-          {userDisplayName.slice(0, 1).toUpperCase()}
+          <div className="min-w-0">
+            <div className="truncate text-sm font-medium">{userDisplayName}</div>
+            <div className="truncate text-xs opacity-60">{profileLabel}</div>
+          </div>
         </div>
-        <div className="min-w-0">
-          <div className="truncate text-sm font-medium">{userDisplayName}</div>
-          <div className="truncate text-xs opacity-60">{profileLabel}</div>
-        </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 }

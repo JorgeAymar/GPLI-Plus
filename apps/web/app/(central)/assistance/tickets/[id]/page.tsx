@@ -8,9 +8,12 @@ import { StatusSelect } from "@/components/itil/status-select";
 import { TimelineSection } from "@/components/itil/timeline-section";
 import { ValidationsSection } from "@/components/itil/validations-section";
 import {
+  DROPDOWN_CATEGORY,
+  getDropdownCategoryByKey,
   getTicket,
   listActors,
   listCosts,
+  listDropdownItems,
   listSlaAssignments,
   listSlaPolicies,
   listTimelineItems,
@@ -44,6 +47,11 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
     listSlaPolicies(context.activeEntity.id, { includeSubtree: true }),
   ]);
 
+  // itil_category is the shared category dropdown for tickets/problems/changes (see seed.ts
+  // and the identical fetch in ../page.tsx's "Nuevo ticket" form).
+  const categoryCategory = await getDropdownCategoryByKey(DROPDOWN_CATEGORY.ITIL_CATEGORY);
+  const categoryOptions = categoryCategory ? await listDropdownItems(categoryCategory.id, context.activeEntity.id) : [];
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -53,10 +61,10 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
 
       <div>
         <h2 className="mb-2 text-sm font-medium opacity-70">Editar ticket</h2>
-        <TicketEditForm ticket={ticket} />
+        <TicketEditForm ticket={ticket} categoryOptions={categoryOptions} />
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <ActorsSection itilType="ticket" itilId={id} actors={actors} users={users} />
         <ValidationsSection itilType="ticket" itilId={id} validations={validations} users={users} />
       </div>

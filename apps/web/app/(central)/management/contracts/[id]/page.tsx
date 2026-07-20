@@ -34,7 +34,7 @@ export default async function ContractDetailPage({ params }: { params: Promise<{
         <dd>{contract.costCents ? `$${(contract.costCents / 100).toFixed(2)}` : "-"}</dd>
       </dl>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
           <h2 className="mb-2 text-sm font-medium opacity-70">Activos cubiertos</h2>
           <ul className="space-y-1">

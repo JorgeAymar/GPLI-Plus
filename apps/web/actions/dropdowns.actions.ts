@@ -10,6 +10,7 @@ import {
   createDropdownItemSchema,
   requireRight,
 } from "@itsm/core";
+import type { DropdownCategory } from "@itsm/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -28,13 +29,33 @@ function parseInput<Schema extends z.ZodTypeAny>(schema: Schema, input: unknown)
   return result.data;
 }
 
-export async function createDropdownCategoryAction(input: { key: string; name: string; isSystem?: boolean }) {
+export interface CreateDropdownCategoryResult {
+  category?: DropdownCategory;
+  error?: string;
+}
+
+/**
+ * Returns `{error}` instead of throwing on a validation/uniqueness failure -
+ * Next.js redacts thrown Server Action errors in production (see
+ * users.actions.ts's createUserAction for the full explanation).
+ */
+export async function createDropdownCategoryAction(input: {
+  key: string;
+  name: string;
+  isSystem?: boolean;
+}): Promise<CreateDropdownCategoryResult> {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.SETUP_DROPDOWN, RIGHT.CREATE);
-  const parsed = parseInput(createDropdownCategorySchema, input);
-  const category = await createDropdownCategory(parsed);
+
+  let category: DropdownCategory;
+  try {
+    const parsed = parseInput(createDropdownCategorySchema, input);
+    category = await createDropdownCategory(parsed);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "No se pudo crear la categoría." };
+  }
   revalidatePath("/setup/dropdowns");
-  return category;
+  return { category };
 }
 
 export async function createDropdownItemAction(input: {

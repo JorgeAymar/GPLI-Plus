@@ -100,3 +100,4 @@ export * from "./assistant/system-prompt";
 export * from "./assistant/conversation-service";
 export * from "./auth/primary-factor";
 export * from "./auth/two-factor-service";
+export * from "./auth/rate-limit-service";

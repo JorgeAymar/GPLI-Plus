@@ -8,6 +8,7 @@ import {
   addConsumableUnitsSchema,
   createConsumableItem,
   createConsumableItemSchema,
+  recordAuditLog,
   requireRight,
   retireConsumable,
   useConsumable as markConsumableInUse,
@@ -20,6 +21,14 @@ export async function createConsumableItemAction(input: unknown) {
   await requireRight(context, MODULE.MANAGEMENT_CONSUMABLE, RIGHT.CREATE);
   const parsed = createConsumableItemSchema.parse(input);
   const item = await createConsumableItem(parsed);
+  await recordAuditLog({
+    entityId: item.entityId,
+    actorUserId: context.user.id,
+    action: "create",
+    objectType: "consumable",
+    objectId: item.id,
+    after: item,
+  });
   revalidatePath("/management/consumables");
   return item;
 }
