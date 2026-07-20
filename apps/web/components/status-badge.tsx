@@ -17,7 +17,7 @@ export const STATUS_LABELS: Record<string, string> = {
   closed: "Cerrado",
 };
 
-type StatusVariant = "neutral" | "warning" | "success";
+type StatusVariant = "neutral" | "warning" | "success" | "danger";
 
 const STATUS_VARIANTS: Record<string, StatusVariant> = {
   new: "neutral",
@@ -32,6 +32,7 @@ const VARIANT_CLASSES: Record<StatusVariant, string> = {
   neutral: "bg-black/10 text-black/70 dark:bg-white/15 dark:text-white/70",
   warning: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
   success: "bg-green-500/10 text-green-700 dark:text-green-400",
+  danger: "bg-red-500/10 text-red-700 dark:text-red-400",
 };
 
 export function statusLabel(status: string): string {
@@ -42,7 +43,7 @@ export function StatusBadge({ status, className }: { status: string; className?:
   const variant = STATUS_VARIANTS[status] ?? "neutral";
   return (
     <span
-      className={`rounded px-1.5 py-0.5 text-xs whitespace-nowrap ${VARIANT_CLASSES[variant]}${className ? ` ${className}` : ""}`}
+      className={`rounded-md px-1.5 py-0.5 text-xs whitespace-nowrap ${VARIANT_CLASSES[variant]}${className ? ` ${className}` : ""}`}
     >
       {statusLabel(status)}
     </span>

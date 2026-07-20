@@ -40,9 +40,9 @@ export function StatTile({
   variant?: StatTileVariant;
 }) {
   return (
-    <div className={`rounded-md border p-4 ${VARIANT_CLASSES[variant]}`}>
-      <h2 className="text-sm font-medium opacity-70">{label}</h2>
-      <p className={`mt-1 text-3xl font-semibold ${VALUE_CLASSES[variant]}`}>{value}</p>
+    <div className={`group rounded-md border p-4 transition-colors hover:border-accent ${VARIANT_CLASSES[variant]}`}>
+      <p className={`text-3xl leading-none font-semibold ${VALUE_CLASSES[variant]}`}>{value}</p>
+      <h2 className="mt-1 text-[11px] font-bold tracking-wider opacity-60 uppercase">{label}</h2>
       <Link href={href} className="mt-3 inline-block rounded-md bg-accent px-3 py-2 text-sm text-white hover:bg-accent-hover">
         {cta}
       </Link>
