@@ -30,9 +30,9 @@ export function DataTable<T>({
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left opacity-60">
+          <tr className="text-left">
             {columns.map((col) => (
-              <th key={col.key} className="pb-2">
+              <th key={col.key} className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">
                 {col.label}
               </th>
             ))}
@@ -40,7 +40,10 @@ export function DataTable<T>({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={rowKey(row)} className="border-t border-black/5 dark:border-white/5">
+            <tr
+              key={rowKey(row)}
+              className="border-t border-black/5 hover:bg-black/[0.02] dark:border-white/5 dark:hover:bg-white/[0.03]"
+            >
               {columns.map((col) => (
                 <td key={col.key} className={col.className ? `py-2 ${col.className}` : "py-2"}>
                   {col.render ? col.render(row) : String((row as Record<string, unknown>)[col.key] ?? "-")}

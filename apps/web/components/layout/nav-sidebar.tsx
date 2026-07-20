@@ -269,6 +269,11 @@ export function NavSidebar({
         className={`${open ? "flex" : "hidden"} fixed inset-y-0 left-0 z-30 h-screen w-56 shrink-0 flex-col border-r border-black/10 bg-background md:sticky md:top-0 md:z-auto md:flex dark:border-white/10`}
       >
         <div className="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
+          <div className="px-1 pb-4">
+            <p className="text-lg leading-tight font-semibold">GLPI-Plus</p>
+            <p className="text-xs opacity-60">IT Asset Management</p>
+          </div>
+
           {aiAssistantEnabled ? (
             <Link
               href="/assistant"
