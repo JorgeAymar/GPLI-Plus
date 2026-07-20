@@ -28,7 +28,7 @@ export default async function KnowledgeBasePage({ searchParams }: { searchParams
         </button>
       </form>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
           <h2 className="mb-2 text-sm font-medium opacity-70">Artículos</h2>
           <ul className="space-y-1">

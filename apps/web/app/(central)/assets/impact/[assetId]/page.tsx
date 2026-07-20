@@ -66,7 +66,7 @@ export default async function ImpactPage({ params }: { params: Promise<{ assetId
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Análisis de impacto: {asset.name}</h1>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <ImpactList title="De qué depende este activo" nodes={dependsOnNodes} emptyLabel="Sin dependencias registradas todavía." />
         <ImpactList title="Qué depende de este activo" nodes={impactsNodes} emptyLabel="Nada depende de este activo todavía." />
       </div>

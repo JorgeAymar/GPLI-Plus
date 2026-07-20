@@ -41,7 +41,7 @@ export default async function ProblemDetailPage({ params }: { params: Promise<{ 
         <ProblemEditForm problem={problem} />
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <ActorsSection itilType="problem" itilId={id} actors={actors} users={users} />
         <ValidationsSection itilType="problem" itilId={id} validations={validations} users={users} />
       </div>

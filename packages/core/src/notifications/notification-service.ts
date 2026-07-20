@@ -15,8 +15,22 @@ export async function createNotificationTemplate(input: {
   subjectTemplate: string;
   bodyTemplate: string;
 }): Promise<NotificationTemplate> {
-  const [created] = await db.insert(notificationTemplates).values(input).returning();
-  if (!created) throw new Error("Failed to insert notification template");
+  let created: NotificationTemplate | undefined;
+  try {
+    [created] = await db.insert(notificationTemplates).values(input).returning();
+  } catch (err) {
+    // See user-service.ts's createUser for why this must be caught here:
+    // Drizzle wraps the real node-postgres error (with raw query text) in
+    // `.cause`; `23505` is Postgres's unique_violation SQLSTATE.
+    const cause = err instanceof Error ? err.cause : undefined;
+    if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
+      const constraint = "constraint" in cause ? cause.constraint : undefined;
+      if (constraint === "notification_templates_key_unique") throw new Error("Ya existe una plantilla con esa clave (key).");
+      throw new Error("Ya existe una plantilla con esos datos.");
+    }
+    throw new Error("No se pudo crear la plantilla.");
+  }
+  if (!created) throw new Error("No se pudo crear la plantilla.");
   return created;
 }
 

@@ -13,15 +13,11 @@ interface AssetOption {
 }
 
 async function action(_prev: FormState | undefined, formData: FormData): Promise<FormState> {
-  try {
-    await createReservationItemAction({
-      assetId: formData.get("assetId") as string,
-      comment: (formData.get("comment") as string) || null,
-    });
-    return {};
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : "Error desconocido" };
-  }
+  const result = await createReservationItemAction({
+    assetId: formData.get("assetId") as string,
+    comment: (formData.get("comment") as string) || null,
+  });
+  return result.error ? { error: result.error } : {};
 }
 
 export function ReservationItemForm({ assets }: { assets: AssetOption[] }) {

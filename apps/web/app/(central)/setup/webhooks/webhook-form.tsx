@@ -8,21 +8,17 @@ interface FormState {
 }
 
 async function action(_prev: FormState | undefined, formData: FormData): Promise<FormState> {
-  try {
-    const maxRetriesRaw = formData.get("maxRetries") as string;
-    await createWebhookAction({
-      entityId: formData.get("entityId") as string,
-      name: formData.get("name") as string,
-      itemType: formData.get("itemType") as string,
-      event: formData.get("event") as "create" | "update" | "delete",
-      url: formData.get("url") as string,
-      secret: formData.get("secret") as string,
-      maxRetries: maxRetriesRaw ? Number(maxRetriesRaw) : undefined,
-    });
-    return {};
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : "Error desconocido" };
-  }
+  const maxRetriesRaw = formData.get("maxRetries") as string;
+  const result = await createWebhookAction({
+    entityId: formData.get("entityId") as string,
+    name: formData.get("name") as string,
+    itemType: formData.get("itemType") as string,
+    event: formData.get("event") as "create" | "update" | "delete",
+    url: formData.get("url") as string,
+    secret: formData.get("secret") as string,
+    maxRetries: maxRetriesRaw ? Number(maxRetriesRaw) : undefined,
+  });
+  return result.error ? { error: result.error } : {};
 }
 
 export function WebhookForm({ entityId }: { entityId: string }) {

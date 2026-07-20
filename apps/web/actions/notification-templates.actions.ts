@@ -2,6 +2,7 @@
 
 import { requireAuthContext } from "@/lib/session";
 import { MODULE, RIGHT, createNotificationTemplate, createNotificationTemplateSchema, requireRight } from "@itsm/core";
+import type { NotificationTemplate } from "@itsm/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -20,11 +21,27 @@ function parseInput<Schema extends z.ZodTypeAny>(schema: Schema, input: unknown)
   return result.data;
 }
 
-export async function createNotificationTemplateAction(input: unknown) {
+export interface CreateNotificationTemplateResult {
+  template?: NotificationTemplate;
+  error?: string;
+}
+
+/**
+ * Returns `{error}` instead of throwing on a validation/uniqueness failure -
+ * Next.js redacts thrown Server Action errors in production (see
+ * users.actions.ts's createUserAction for the full explanation).
+ */
+export async function createNotificationTemplateAction(input: unknown): Promise<CreateNotificationTemplateResult> {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.SETUP_NOTIFICATION_TEMPLATE, RIGHT.CREATE);
-  const parsed = parseInput(createNotificationTemplateSchema, input);
-  const template = await createNotificationTemplate(parsed);
+
+  let template: NotificationTemplate;
+  try {
+    const parsed = parseInput(createNotificationTemplateSchema, input);
+    template = await createNotificationTemplate(parsed);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "No se pudo crear la plantilla." };
+  }
   revalidatePath("/setup/notification-templates");
-  return template;
+  return { template };
 }

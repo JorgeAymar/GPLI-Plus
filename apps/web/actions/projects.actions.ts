@@ -15,6 +15,7 @@ import {
   createProjectTaskSchema,
   createProjectTeamMemberSchema,
   getProject,
+  recordAuditLog,
   requireRight,
   requireRightOnEntity,
   updateProject,
@@ -27,6 +28,14 @@ export async function createProjectAction(input: unknown) {
   await requireRight(context, MODULE.TOOLS_PROJECT, RIGHT.CREATE);
   const parsed = createProjectSchema.parse(input);
   const project = await createProject(parsed);
+  await recordAuditLog({
+    entityId: project.entityId,
+    actorUserId: context.user.id,
+    action: "create",
+    objectType: "project",
+    objectId: project.id,
+    after: project,
+  });
   revalidatePath("/tools/projects");
   return project;
 }
@@ -45,9 +54,19 @@ async function requireProjectRight(projectId: string, required: number) {
 }
 
 export async function updateProjectAction(id: string, input: unknown) {
-  await requireProjectRight(id, RIGHT.UPDATE);
+  const context = await requireProjectRight(id, RIGHT.UPDATE);
+  const before = await getProject(id);
   const parsed = updateProjectSchema.parse(input);
   const project = await updateProject(id, parsed);
+  await recordAuditLog({
+    entityId: project.entityId,
+    actorUserId: context.user.id,
+    action: "update",
+    objectType: "project",
+    objectId: project.id,
+    before,
+    after: project,
+  });
   revalidatePath("/tools/projects");
   revalidatePath(`/tools/projects/${id}`);
   return project;

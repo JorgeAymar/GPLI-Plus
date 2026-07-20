@@ -3,6 +3,7 @@ import { db, rssFeedCachedItems, rssFeeds, type RssFeed, type RssFeedCachedItem 
 import Parser from "rss-parser";
 import sanitizeHtml from "sanitize-html";
 import type { AuthContext } from "../auth/get-auth-context";
+import { isSafeExternalUrl } from "../url-safety";
 import { isResourceVisibleTo } from "../visibility/visibility-service";
 
 export async function createRssFeed(input: {
@@ -12,6 +13,12 @@ export async function createRssFeed(input: {
   refreshRateMinutes?: number;
   maxItems?: number;
 }): Promise<RssFeed> {
+  // Checked here too (not just in refreshRssFeed) so an unsafe URL is
+  // rejected immediately at creation instead of silently failing on the
+  // next scheduled refresh - the zod schema layer only validates URL
+  // *shape*, not safety (see validation/rss-feed.zod.test.ts).
+  if (!isSafeExternalUrl(input.url)) throw new Error("La URL del feed no es válida o apunta a una dirección no permitida.");
+
   const [created] = await db
     .insert(rssFeeds)
     .values({
@@ -51,44 +58,6 @@ export async function listCachedItems(feedId: string): Promise<RssFeedCachedItem
     .orderBy(desc(rssFeedCachedItems.publishedAt));
 }
 
-const PRIVATE_IPV4_PATTERN = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-
-/**
- * Anti-SSRF guard (this is the actual reason this function exists): RSS feed
- * URLs are user-supplied and then fetched server-side by refreshRssFeed(),
- * so without this check a feed could be pointed at cloud-metadata endpoints,
- * internal services, or loopback addresses. Rejects non-http(s) schemes and
- * common private/loopback/link-local hostnames/ranges. Not exhaustive
- * DNS-rebinding protection, but stops the obvious cases with plain parsing -
- * no extra dependency needed for this.
- */
-export function isSafeRssUrl(urlString: string): boolean {
-  let parsed: URL;
-  try {
-    parsed = new URL(urlString);
-  } catch {
-    return false;
-  }
-
-  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return false;
-
-  const hostname = parsed.hostname.toLowerCase();
-  if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]") return false;
-
-  const ipv4Match = hostname.match(PRIVATE_IPV4_PATTERN);
-  if (ipv4Match) {
-    const first = Number(ipv4Match[1]);
-    const second = Number(ipv4Match[2]);
-    if (first === 10) return false; // 10.0.0.0/8
-    if (first === 127) return false; // 127.0.0.0/8 loopback
-    if (first === 169 && second === 254) return false; // 169.254.0.0/16 link-local
-    if (first === 172 && second >= 16 && second <= 31) return false; // 172.16.0.0/12
-    if (first === 192 && second === 168) return false; // 192.168.0.0/16
-  }
-
-  return true;
-}
-
 const ALLOWED_DESCRIPTION_TAGS = ["b", "i", "em", "strong", "a", "p", "br"];
 
 /**
@@ -102,7 +71,7 @@ export async function refreshRssFeed(feedId: string): Promise<{ fetched: number 
   const feed = await getRssFeed(feedId);
   if (!feed) throw new Error(`RSS feed ${feedId} not found`);
 
-  if (!isSafeRssUrl(feed.url)) {
+  if (!isSafeExternalUrl(feed.url)) {
     await db.update(rssFeeds).set({ haveError: true, updatedAt: new Date() }).where(eq(rssFeeds.id, feedId));
     throw new Error(`RSS feed ${feedId} has an unsafe URL: ${feed.url}`);
   }

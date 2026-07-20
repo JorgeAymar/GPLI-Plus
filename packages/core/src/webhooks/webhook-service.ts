@@ -10,6 +10,7 @@ import {
 } from "@itsm/db";
 import { and, desc, eq, inArray, lte } from "drizzle-orm";
 import { listAncestors, listSubtree } from "../entities/entity-service";
+import { isSafeExternalUrl } from "../url-safety";
 
 /** Simple linear backoff: nextAttemptAt = now + attempt * 5 minutes. */
 const RETRY_BACKOFF_MINUTES = 5;
@@ -24,6 +25,14 @@ export async function createWebhook(input: {
   customHeaders?: Record<string, string>;
   maxRetries?: number;
 }): Promise<Webhook> {
+  // Anti-SSRF guard: webhook URLs are user-supplied and later POSTed to
+  // server-side by dispatchPendingWebhooks() on every matching event, so
+  // without this a webhook could be pointed at cloud-metadata endpoints,
+  // internal services, or loopback addresses - and unlike RSS feeds (which
+  // only fetch on a schedule), an active webhook fires on every matching
+  // event, making an unnoticed unsafe URL here more actively exploitable.
+  if (!isSafeExternalUrl(input.url)) throw new Error("La URL del webhook no es válida o apunta a una dirección no permitida.");
+
   const [created] = await db
     .insert(webhooks)
     .values({
@@ -139,6 +148,15 @@ export async function dispatchPendingWebhooks(): Promise<{ sent: number; failed:
         .update(queuedWebhooks)
         .set({ status: "failed", lastError: `Webhook ${queued.webhookId} not found` })
         .where(eq(queuedWebhooks.id, queued.id));
+      failed++;
+      continue;
+    }
+
+    // Defense-in-depth, not the primary guard (createWebhook already rejects
+    // an unsafe URL at creation time) - covers a webhook row written before
+    // this check existed, or a URL edited directly at the DB level.
+    if (!isSafeExternalUrl(webhook.url)) {
+      await recordFailedAttempt(queued, webhook, null, "Webhook URL no permitida (SSRF guard).");
       failed++;
       continue;
     }

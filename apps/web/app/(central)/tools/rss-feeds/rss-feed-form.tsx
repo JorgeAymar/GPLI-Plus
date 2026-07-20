@@ -9,20 +9,16 @@ interface FormState {
 
 function makeAction(ownerUserId: string) {
   return async (_prev: FormState | undefined, formData: FormData): Promise<FormState> => {
-    try {
-      const refreshRateMinutes = formData.get("refreshRateMinutes") as string;
-      const maxItems = formData.get("maxItems") as string;
-      await createRssFeedAction({
-        name: formData.get("name") as string,
-        ownerUserId,
-        url: formData.get("url") as string,
-        refreshRateMinutes: refreshRateMinutes ? Number(refreshRateMinutes) : undefined,
-        maxItems: maxItems ? Number(maxItems) : undefined,
-      });
-      return {};
-    } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
-    }
+    const refreshRateMinutes = formData.get("refreshRateMinutes") as string;
+    const maxItems = formData.get("maxItems") as string;
+    const result = await createRssFeedAction({
+      name: formData.get("name") as string,
+      ownerUserId,
+      url: formData.get("url") as string,
+      refreshRateMinutes: refreshRateMinutes ? Number(refreshRateMinutes) : undefined,
+      maxItems: maxItems ? Number(maxItems) : undefined,
+    });
+    return result.error ? { error: result.error } : {};
   };
 }
 

@@ -17,17 +17,31 @@ export async function createAssetDefinition(input: {
   isSystem?: boolean;
   hasExtensionTable?: boolean;
 }): Promise<AssetDefinition> {
-  const [created] = await db
-    .insert(assetDefinitions)
-    .values({
-      key: input.key,
-      name: input.name,
-      icon: input.icon ?? null,
-      isSystem: input.isSystem ?? false,
-      hasExtensionTable: input.hasExtensionTable ?? false,
-    })
-    .returning();
-  if (!created) throw new Error("Failed to insert asset definition");
+  let created: AssetDefinition | undefined;
+  try {
+    [created] = await db
+      .insert(assetDefinitions)
+      .values({
+        key: input.key,
+        name: input.name,
+        icon: input.icon ?? null,
+        isSystem: input.isSystem ?? false,
+        hasExtensionTable: input.hasExtensionTable ?? false,
+      })
+      .returning();
+  } catch (err) {
+    // See user-service.ts's createUser for why this must be caught here:
+    // Drizzle wraps the real node-postgres error (with raw query text) in
+    // `.cause`; `23505` is Postgres's unique_violation SQLSTATE.
+    const cause = err instanceof Error ? err.cause : undefined;
+    if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
+      const constraint = "constraint" in cause ? cause.constraint : undefined;
+      if (constraint === "asset_definitions_key_unique") throw new Error("Ya existe un tipo de activo con esa clave (key).");
+      throw new Error("Ya existe un tipo de activo con esos datos.");
+    }
+    throw new Error("No se pudo crear el tipo de activo.");
+  }
+  if (!created) throw new Error("No se pudo crear el tipo de activo.");
   return created;
 }
 
@@ -64,20 +78,34 @@ export async function createAssetFieldDefinition(input: {
   defaultValue?: string | null;
   sortOrder?: number;
 }): Promise<AssetFieldDefinition> {
-  const [created] = await db
-    .insert(assetFieldDefinitions)
-    .values({
-      assetDefinitionId: input.assetDefinitionId,
-      key: input.key,
-      label: input.label,
-      fieldType: input.fieldType,
-      dropdownCategoryId: input.dropdownCategoryId ?? null,
-      isRequired: input.isRequired ?? false,
-      defaultValue: input.defaultValue ?? null,
-      sortOrder: input.sortOrder ?? 0,
-    })
-    .returning();
-  if (!created) throw new Error("Failed to insert asset field definition");
+  let created: AssetFieldDefinition | undefined;
+  try {
+    [created] = await db
+      .insert(assetFieldDefinitions)
+      .values({
+        assetDefinitionId: input.assetDefinitionId,
+        key: input.key,
+        label: input.label,
+        fieldType: input.fieldType,
+        dropdownCategoryId: input.dropdownCategoryId ?? null,
+        isRequired: input.isRequired ?? false,
+        defaultValue: input.defaultValue ?? null,
+        sortOrder: input.sortOrder ?? 0,
+      })
+      .returning();
+  } catch (err) {
+    // `asset_field_def_unique_key` is a unique INDEX (not a named table
+    // constraint), but Postgres still reports unique_violation (23505)
+    // against it the same way - see migrations/0001_narrow_vargas.sql.
+    const cause = err instanceof Error ? err.cause : undefined;
+    if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
+      const constraint = "constraint" in cause ? cause.constraint : undefined;
+      if (constraint === "asset_field_def_unique_key") throw new Error("Ya existe un campo con esa clave (key) en este tipo de activo.");
+      throw new Error("Ya existe un campo con esos datos.");
+    }
+    throw new Error("No se pudo crear el campo.");
+  }
+  if (!created) throw new Error("No se pudo crear el campo.");
   return created;
 }
 

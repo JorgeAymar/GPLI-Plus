@@ -13,6 +13,14 @@ function assetTypeHref(key: string): string {
   return DEDICATED_ROUTES[key] ?? `/assets/${key}`;
 }
 
+// Individual asset instance detail page: dedicated types resolve to their static
+// /[id] route (e.g. /assets/computers/<id>), everything else to the dynamic
+// /assets/[assetType]/[id] route.
+function assetDetailHref(key: string, id: string): string {
+  const dedicated = DEDICATED_ROUTES[key];
+  return dedicated ? `${dedicated}/${id}` : `/assets/${key}/${id}`;
+}
+
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Todos los activos" };
@@ -53,14 +61,25 @@ export default async function AssetsPage({ searchParams }: { searchParams: Promi
           </tr>
         </thead>
         <tbody>
-          {assets.map((a) => (
-            <tr key={a.id} className="border-t border-black/5 dark:border-white/5">
-              <td className="py-2">{a.name}</td>
-              <td className="py-2 opacity-70">{definitionById.get(a.assetDefinitionId)?.name ?? "?"}</td>
-              <td className="py-2 opacity-70">{a.serialNumber ?? "-"}</td>
-              <td className="py-2 opacity-70">{a.inventoryNumber ?? "-"}</td>
-            </tr>
-          ))}
+          {assets.map((a) => {
+            const definition = definitionById.get(a.assetDefinitionId);
+            return (
+              <tr key={a.id} className="border-t border-black/5 dark:border-white/5">
+                <td className="py-2">
+                  {definition ? (
+                    <Link href={assetDetailHref(definition.key, a.id)} className="hover:underline">
+                      {a.name}
+                    </Link>
+                  ) : (
+                    a.name
+                  )}
+                </td>
+                <td className="py-2 opacity-70">{definition?.name ?? "?"}</td>
+                <td className="py-2 opacity-70">{a.serialNumber ?? "-"}</td>
+                <td className="py-2 opacity-70">{a.inventoryNumber ?? "-"}</td>
+              </tr>
+            );
+          })}
           {assets.length === 0 ? (
             <tr>
               <td colSpan={4} className="py-2 opacity-50">

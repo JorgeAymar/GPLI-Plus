@@ -7,16 +7,30 @@ export async function createProfile(input: {
   description?: string | null;
   isDefault?: boolean;
 }): Promise<Profile> {
-  const [created] = await db
-    .insert(profiles)
-    .values({
-      name: input.name,
-      interface: input.interface,
-      description: input.description ?? null,
-      isDefault: input.isDefault ?? false,
-    } satisfies NewProfile)
-    .returning();
-  if (!created) throw new Error("Failed to insert profile");
+  let created: Profile | undefined;
+  try {
+    [created] = await db
+      .insert(profiles)
+      .values({
+        name: input.name,
+        interface: input.interface,
+        description: input.description ?? null,
+        isDefault: input.isDefault ?? false,
+      } satisfies NewProfile)
+      .returning();
+  } catch (err) {
+    // See user-service.ts's createUser for why this must be caught here:
+    // Drizzle wraps the real node-postgres error (with raw query text) in
+    // `.cause`; `23505` is Postgres's unique_violation SQLSTATE.
+    const cause = err instanceof Error ? err.cause : undefined;
+    if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
+      const constraint = "constraint" in cause ? cause.constraint : undefined;
+      if (constraint === "profiles_name_unique") throw new Error("Ya existe un perfil con ese nombre.");
+      throw new Error("Ya existe un perfil con esos datos.");
+    }
+    throw new Error("No se pudo crear el perfil.");
+  }
+  if (!created) throw new Error("No se pudo crear el perfil.");
   return created;
 }
 

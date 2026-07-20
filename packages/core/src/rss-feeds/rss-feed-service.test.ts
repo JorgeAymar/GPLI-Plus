@@ -12,46 +12,11 @@ import {
   deleteTestUsers,
 } from "../__vitest_tools__/fixtures";
 import { addVisibilityRule } from "../visibility/visibility-service";
-import { createRssFeed, getRssFeed, isSafeRssUrl, listActiveRssFeedsForRefresh, listCachedItems, listRssFeeds } from "./rss-feed-service";
+import { createRssFeed, getRssFeed, listActiveRssFeedsForRefresh, listCachedItems, listRssFeeds } from "./rss-feed-service";
 
+// The anti-SSRF guard itself (isSafeExternalUrl) is shared with webhook-service.ts
+// and tested once in ../url-safety.test.ts, not duplicated here.
 describe("rss-feed-service", () => {
-  describe("isSafeRssUrl (pure function, anti-SSRF guard)", () => {
-    it("accepts a normal public https URL", () => {
-      expect(isSafeRssUrl("https://example.com/feed.xml")).toBe(true);
-    });
-
-    it("accepts a normal public http URL", () => {
-      expect(isSafeRssUrl("http://example.com/feed.xml")).toBe(true);
-    });
-
-    it("rejects non-http(s) schemes", () => {
-      expect(isSafeRssUrl("file:///etc/passwd")).toBe(false);
-      expect(isSafeRssUrl("ftp://example.com/feed.xml")).toBe(false);
-    });
-
-    it("rejects an unparsable URL", () => {
-      expect(isSafeRssUrl("not a url")).toBe(false);
-    });
-
-    it("rejects localhost and loopback hostnames", () => {
-      expect(isSafeRssUrl("http://localhost/feed.xml")).toBe(false);
-      expect(isSafeRssUrl("http://127.0.0.1/feed.xml")).toBe(false);
-      expect(isSafeRssUrl("http://[::1]/feed.xml")).toBe(false);
-    });
-
-    it("rejects private IPv4 ranges (10/8, 172.16/12, 192.168/16, 169.254/16)", () => {
-      expect(isSafeRssUrl("http://10.0.0.5/feed.xml")).toBe(false);
-      expect(isSafeRssUrl("http://172.16.0.5/feed.xml")).toBe(false);
-      expect(isSafeRssUrl("http://172.31.255.255/feed.xml")).toBe(false);
-      expect(isSafeRssUrl("http://192.168.1.1/feed.xml")).toBe(false);
-      expect(isSafeRssUrl("http://169.254.169.254/feed.xml")).toBe(false); // cloud metadata endpoint
-    });
-
-    it("does not false-positive on a public IP that merely starts with a private-looking octet (e.g. 172.32.x.x is outside 172.16/12)", () => {
-      expect(isSafeRssUrl("http://172.32.0.1/feed.xml")).toBe(true);
-    });
-  });
-
   describe("with a real database", () => {
     let owner: User;
     let otherUser: User;

@@ -13,7 +13,7 @@ export default async function ProfilesPage() {
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold">Perfiles</h1>
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="min-w-0">
           <h2 className="mb-2 text-sm font-medium opacity-70">Perfiles existentes</h2>
           <div className="overflow-x-auto">

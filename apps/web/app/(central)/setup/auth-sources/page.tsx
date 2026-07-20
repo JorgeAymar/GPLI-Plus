@@ -19,7 +19,7 @@ export default async function AuthSourcesPage() {
 
       <section className="space-y-4">
         <h2 className="text-lg font-medium">LDAP</h2>
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <div>
             <h3 className="mb-2 text-sm font-medium opacity-70">Servidores configurados</h3>
             <ul className="space-y-2">

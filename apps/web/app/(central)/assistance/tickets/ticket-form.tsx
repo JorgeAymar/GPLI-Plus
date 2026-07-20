@@ -3,10 +3,13 @@
 import { createTicketAction } from "@/actions/tickets.actions";
 import { useFormSuccessToast } from "@/components/toast";
 import type { DropdownItem, TicketFieldDefinition } from "@itsm/db";
-import { useActionState, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 interface FormState {
   error?: string;
+  /** Set on success so the component can navigate to the new ticket's detail page - see the effect below. */
+  ticketId?: string;
 }
 
 const LEVELS = [1, 2, 3, 4, 5];
@@ -35,7 +38,7 @@ function makeAction(entityId: string, fields: TicketFieldDefinition[]) {
   return async (_prev: FormState | undefined, formData: FormData): Promise<FormState> => {
     try {
       const ticketType = formData.get("ticketType") as "incident" | "request";
-      await createTicketAction({
+      const ticket = await createTicketAction({
         entityId,
         title: formData.get("title") as string,
         content: formData.get("content") as string,
@@ -46,7 +49,7 @@ function makeAction(entityId: string, fields: TicketFieldDefinition[]) {
         categoryDropdownItemId: (formData.get("categoryDropdownItemId") as string) || null,
         customFields: buildCustomFields(formData, fieldsForType(fields, ticketType)),
       });
-      return {};
+      return { ticketId: ticket.id };
     } catch (err) {
       return { error: err instanceof Error ? err.message : "Error desconocido" };
     }
@@ -111,10 +114,20 @@ export function TicketForm({
   dropdownOptions: Record<string, DropdownItem[]>;
   categoryOptions: DropdownItem[];
 }) {
+  const router = useRouter();
   const [ticketType, setTicketType] = useState<"incident" | "request">("incident");
   const [state, formAction, isPending] = useActionState(makeAction(entityId, fields), undefined);
   const formRef = useRef<HTMLFormElement>(null);
   useFormSuccessToast(state, formRef, "Ticket creado.");
+  // Land the user on the new ticket's detail page instead of leaving them on the
+  // (unpaginated-until-now) list - see apps/web/app/(central)/assistance/tickets/page.tsx.
+  // The ToastProvider lives in (central)/layout.tsx, above this navigation, so the
+  // "Ticket creado." toast fired by useFormSuccessToast above still survives the push.
+  useEffect(() => {
+    if (state?.ticketId) {
+      router.push(`/assistance/tickets/${state.ticketId}`);
+    }
+  }, [state, router]);
   const inputClass = "mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15";
   const visibleFields = fieldsForType(fields, ticketType);
 
