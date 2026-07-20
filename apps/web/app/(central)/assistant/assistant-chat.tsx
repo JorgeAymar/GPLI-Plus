@@ -72,8 +72,14 @@ export function AssistantChat() {
   // Loaded on mount (not during SSR, where localStorage doesn't exist) so a page
   // refresh resumes the same conversation instead of starting over - per explicit
   // instruction, the user's assistant configuration/history stays in the browser.
+  // A lazy useState(loadStoredChat) initializer would run during SSR's render
+  // pass too (returning the empty default there) but then ALSO run again on the
+  // client's very first hydration pass with a real window - producing a
+  // hydration mismatch (server: empty, client: populated) instead of the clean
+  // "render empty, then swap in the real data" this effect deliberately does.
   useEffect(() => {
     const stored = loadStoredChat();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional post-hydration sync from localStorage, not derived render state; see comment above.
     setMessages(stored.messages);
     setConversationId(stored.conversationId);
     hydratedRef.current = true;

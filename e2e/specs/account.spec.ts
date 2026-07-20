@@ -122,4 +122,50 @@ test.describe("Mi cuenta (/account)", () => {
 
     diag.assertClean();
   });
+
+  test("activar la verificación en dos pasos pide un código real al volver a iniciar sesión", async ({ page }) => {
+    const diag = diagnostics(page);
+    await page.goto("/account");
+
+    const toggleButton = page.getByRole("button", { name: /^(Activar|Desactivar)$/ });
+
+    // try/finally: 2FA must end up OFF again for admin@itsm.local even if an
+    // assertion throws mid-test - every other spec's shared storageState was
+    // captured with 2FA off (see auth.setup.ts) and assumes a single-step login.
+    try {
+      await expect(page.getByText("Desactivada")).toBeVisible();
+      await toggleButton.click();
+      await expect(page.getByText("Activada")).toBeVisible();
+
+      await page.getByRole("button", { name: "Salir" }).click();
+      await page.waitForURL(/\/login/);
+
+      await page.getByLabel("Email").fill(process.env.E2E_ADMIN_EMAIL ?? "admin@itsm.local");
+      await page.getByLabel("Contraseña", { exact: true }).fill(process.env.E2E_ADMIN_PASSWORD ?? "ChangeMe123!");
+      await page.getByRole("button", { name: /ingresar/i }).click();
+
+      // The code step appears instead of landing straight on /dashboard - and
+      // with E2E_TEST_MODE=true the real emailed code is pre-filled (see
+      // apps/web/actions/auth.actions.ts), so this exercises the actual
+      // createLoginCode/verifyLoginCode path, not a bypass.
+      // Generous timeout - loginAction sends the code over a real SMTP
+      // connection synchronously before returning (see auth.actions.ts).
+      const codeInput = page.getByLabel("Código");
+      await expect(codeInput).toBeVisible({ timeout: 20_000 });
+      await expect(codeInput).not.toHaveValue("");
+      await page.getByRole("button", { name: /verificar/i }).click();
+
+      await page.waitForURL(/\/dashboard/);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    } finally {
+      await page.goto("/account");
+      const disableButton = page.getByRole("button", { name: "Desactivar" });
+      if (await disableButton.isVisible().catch(() => false)) {
+        await disableButton.click();
+        await expect(page.getByText("Desactivada")).toBeVisible();
+      }
+    }
+
+    diag.assertClean();
+  });
 });

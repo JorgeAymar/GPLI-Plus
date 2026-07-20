@@ -45,7 +45,7 @@ async function requireProjectRight(projectId: string, required: number) {
 }
 
 export async function updateProjectAction(id: string, input: unknown) {
-  const context = await requireProjectRight(id, RIGHT.UPDATE);
+  await requireProjectRight(id, RIGHT.UPDATE);
   const parsed = updateProjectSchema.parse(input);
   const project = await updateProject(id, parsed);
   revalidatePath("/tools/projects");

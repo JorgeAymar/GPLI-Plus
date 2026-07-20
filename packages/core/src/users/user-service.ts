@@ -61,3 +61,10 @@ export async function updateUserLanguage(userId: string, language: string): Prom
   if (!updated) throw new Error(`User ${userId} not found`);
   return updated;
 }
+
+/** Self-service toggle for email-based login 2FA (see auth/two-factor-service.ts) - a plain boolean, no schema needed. */
+export async function updateUserTwoFactorEnabled(userId: string, enabled: boolean): Promise<User> {
+  const [updated] = await db.update(users).set({ twoFactorEnabled: enabled }).where(eq(users.id, userId)).returning();
+  if (!updated) throw new Error(`User ${userId} not found`);
+  return updated;
+}

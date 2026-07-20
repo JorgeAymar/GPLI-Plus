@@ -3,13 +3,18 @@
 import { createUserAction } from "@/actions/users.actions";
 import { useFormSuccessToast } from "@/components/toast";
 import type { Entity } from "@itsm/db";
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useState } from "react";
 
 interface FormState {
   error?: string;
 }
 
 async function action(_prev: FormState | undefined, formData: FormData): Promise<FormState> {
+  // Password-match is checked client-side in handleSubmit, BEFORE this action
+  // ever runs (see UserForm) - React resets a form's uncontrolled fields
+  // whenever an action tied to it completes, success or not, so letting a
+  // simple mismatch reach this action would wipe out everything the admin
+  // just typed. Kept here too as a defense-in-depth backstop.
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
   if (password !== confirmPassword) {
@@ -32,11 +37,24 @@ async function action(_prev: FormState | undefined, formData: FormData): Promise
 
 export function UserForm({ entities }: { entities: Entity[] }) {
   const [state, formAction, isPending] = useActionState(action, undefined);
+  const [mismatchError, setMismatchError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   useFormSuccessToast(state, formRef, "Usuario creado.");
 
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    const form = e.currentTarget;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+    const confirmPassword = (form.elements.namedItem("confirmPassword") as HTMLInputElement).value;
+    if (password !== confirmPassword) {
+      e.preventDefault();
+      setMismatchError("Las contraseñas no coinciden.");
+      return;
+    }
+    setMismatchError(null);
+  }
+
   return (
-    <form ref={formRef} action={formAction} className="space-y-3">
+    <form ref={formRef} action={formAction} onSubmit={handleSubmit} className="space-y-3">
       <div>
         <label htmlFor="user-displayName" className="text-sm font-medium">
           Nombre para mostrar
@@ -115,7 +133,7 @@ export function UserForm({ entities }: { entities: Entity[] }) {
           ))}
         </select>
       </div>
-      {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
+      {mismatchError ?? state?.error ? <p className="text-sm text-red-600">{mismatchError ?? state?.error}</p> : null}
       <button
         type="submit"
         disabled={isPending}
