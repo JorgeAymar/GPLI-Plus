@@ -21,8 +21,8 @@ export default async function AccountPage() {
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold">{t("title")}</h1>
 
-      <section className="space-y-2">
-        <h2 className="text-sm font-medium opacity-70">{t("dataHeading")}</h2>
+      <section className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">{t("dataHeading")}</h2>
         <dl className="grid max-w-md grid-cols-2 gap-y-1 text-sm">
           <dt className="opacity-60">{t("name")}</dt>
           <dd>{context.user.displayName}</dd>
@@ -35,20 +35,20 @@ export default async function AccountPage() {
         </dl>
       </section>
 
-      <section className="space-y-2">
-        <h2 className="text-sm font-medium opacity-70">{t("languageHeading")}</h2>
+      <section className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">{t("languageHeading")}</h2>
         <LanguageForm currentLanguage={context.user.language} options={SUPPORTED_LANGUAGES} />
-        <p className="max-w-md text-xs opacity-50">{t("languageDisclaimer")}</p>
+        <p className="mt-2 max-w-md text-xs opacity-50">{t("languageDisclaimer")}</p>
       </section>
 
-      <section className="space-y-2">
-        <h2 className="text-sm font-medium opacity-70">{t("twoFactorHeading")}</h2>
+      <section className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">{t("twoFactorHeading")}</h2>
         <p className="max-w-md text-xs opacity-50">{t("twoFactorDescription")}</p>
         <TwoFactorForm initialEnabled={context.user.twoFactorEnabled} />
       </section>
 
-      <section className="space-y-4">
-        <h2 className="text-sm font-medium opacity-70">{t("tokensHeading")}</h2>
+      <section className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">{t("tokensHeading")}</h2>
         <p className="max-w-2xl text-sm opacity-70">
           {t.rich("tokensDescription", {
             endpoint: (chunks) => <code className="rounded bg-black/5 px-1 py-0.5 dark:bg-white/10">{chunks}</code>,

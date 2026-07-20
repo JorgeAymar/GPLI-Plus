@@ -30,8 +30,8 @@ export default async function CronJobsPage() {
         </p>
       </div>
 
-      <section>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Horarios programados (pgboss.schedule)</h2>
+      <section className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Horarios programados (pgboss.schedule)</h2>
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left opacity-60">
@@ -59,8 +59,8 @@ export default async function CronJobsPage() {
         </table>
       </section>
 
-      <section>
-        <h2 className="mb-2 text-sm font-medium opacity-70">
+      <section className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">
           Últimas ejecuciones (pgboss.job, últimas {RECENT_RUNS_LIMIT})
         </h2>
         <table className="w-full text-sm">

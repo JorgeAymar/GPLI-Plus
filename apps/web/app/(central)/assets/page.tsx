@@ -90,8 +90,8 @@ export default async function AssetsPage({ searchParams }: { searchParams: Promi
         </tbody>
       </table>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Ir a un tipo específico</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Ir a un tipo específico</h2>
         <div className="flex flex-col gap-1">
           {definitions.map((d) => (
             <Link key={d.id} href={assetTypeHref(d.key)} className="text-sm underline opacity-70 hover:opacity-100">

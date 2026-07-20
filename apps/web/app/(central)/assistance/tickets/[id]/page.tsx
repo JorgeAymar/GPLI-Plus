@@ -59,8 +59,8 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
         <StatusSelect id={ticket.id} currentStatus={ticket.status} updateStatusAction={updateTicketStatusAction} />
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Editar ticket</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Editar ticket</h2>
         <TicketEditForm ticket={ticket} categoryOptions={categoryOptions} />
       </div>
 
