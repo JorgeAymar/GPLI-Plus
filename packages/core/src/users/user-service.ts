@@ -11,18 +11,38 @@ export async function createUser(input: {
   defaultEntityId?: string | null;
 }): Promise<User> {
   const passwordHash = await bcrypt.hash(input.password, SALT_ROUNDS);
-  const [created] = await db
-    .insert(users)
-    .values({
-      email: input.email,
-      username: input.username,
-      passwordHash,
-      displayName: input.displayName,
-      name: input.displayName,
-      defaultEntityId: input.defaultEntityId ?? null,
-    })
-    .returning();
-  if (!created) throw new Error("Failed to insert user");
+  let created: User | undefined;
+  try {
+    [created] = await db
+      .insert(users)
+      .values({
+        email: input.email,
+        username: input.username,
+        passwordHash,
+        displayName: input.displayName,
+        name: input.displayName,
+        defaultEntityId: input.defaultEntityId ?? null,
+      })
+      .returning();
+  } catch (err) {
+    // Drizzle wraps the real node-postgres error (which carries the raw failed
+    // query + bound params - here, literally the bcrypt hash just computed
+    // above - in its own .message) inside a DrizzleQueryError's `.cause`. That
+    // raw content must never reach a caller, since every action wrapper in
+    // this app treats a thrown Error's .message as safe-to-display UI text.
+    // `23505` is Postgres's unique_violation SQLSTATE code; `.constraint`
+    // names exactly which uniqueness rule tripped (see
+    // migrations/0000_stiff_stick.sql).
+    const cause = err instanceof Error ? err.cause : undefined;
+    if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
+      const constraint = "constraint" in cause ? cause.constraint : undefined;
+      if (constraint === "users_email_unique") throw new Error("Ya existe un usuario con este email.");
+      if (constraint === "users_username_unique") throw new Error("Ya existe un usuario con este nombre de usuario.");
+      throw new Error("Ya existe un usuario con esos datos.");
+    }
+    throw new Error("No se pudo crear el usuario.");
+  }
+  if (!created) throw new Error("No se pudo crear el usuario.");
   return created;
 }
 
