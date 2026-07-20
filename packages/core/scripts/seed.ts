@@ -170,6 +170,18 @@ async function main() {
   }
   console.log("Saved search alert notification template ensured");
 
+  // 10. Default notification template for password reset (auth.actions.ts requestPasswordResetAction queues this).
+  if (!(await getNotificationTemplateByKey("password_reset"))) {
+    await createNotificationTemplate({
+      key: "password_reset",
+      name: "Recuperación de contraseña",
+      subjectTemplate: "Recuperá tu contraseña de GLPI-Plus",
+      bodyTemplate:
+        "Hacé clic en el siguiente link para elegir una contraseña nueva (válido por 1 hora):\n\n{{resetLink}}\n\nSi no solicitaste este cambio, podés ignorar este correo - tu contraseña actual sigue siendo válida.",
+    });
+  }
+  console.log("Password reset notification template ensured");
+
   console.log("\nSeed complete.");
   console.log(`Login with: ${email} / ${existingUser ? "(existing password)" : password}`);
   process.exit(0);

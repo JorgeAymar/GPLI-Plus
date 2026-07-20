@@ -5,6 +5,7 @@ export * from "./entities/entity-service";
 export * from "./rbac/profile-service";
 export * from "./rbac/group-service";
 export * from "./users/user-service";
+export * from "./users/password-reset-service";
 export * from "./audit/audit-service";
 export * from "./dropdowns/dropdown-service";
 export * from "./dropdowns/dropdown-categories";

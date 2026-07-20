@@ -41,3 +41,4 @@ export * from "./consumables";
 export * from "./service-catalog";
 export * from "./reminders";
 export * from "./ticket-field-definitions";
+export * from "./password-reset-tokens";

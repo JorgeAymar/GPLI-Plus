@@ -1,0 +1,40 @@
+# Optional overlay for docker-compose.prod.yml, for hosts where Swarm's
+# default "ingress" routing mesh (IPVS-based) doesn't actually route traffic
+# - confirmed on glpi-plus.labshub.cc: `ip_vs` was loaded and the
+# DOCKER-INGRESS iptables chain existed, but Swarm never programmed a DNAT
+# rule into it for the published port, so the app was unreachable even from
+# localhost despite the container itself being healthy. Every *other*
+# container on that host is a plain (non-Swarm) `docker run`/`docker compose`
+# deployment using simple docker-proxy host-port forwarding - ingress mode
+# was, as far as could be determined, simply never exercised (and possibly
+# never fully working) on that specific host before this deploy.
+#
+# This overlay switches the "web" service's published port to Swarm's
+# `mode: host` (the same plain host-port-binding mechanism every other
+# container on such a host already uses successfully), bypassing the
+# routing mesh entirely.
+#
+# Trade-off, explicit: `mode: host` binds the container directly to the host
+# port, so two containers (old + new) can't both hold it during a
+# `start-first` rolling update the way docker-compose.prod.yml's default
+# does - `order: stop-first` below means updates on affected hosts have a
+# brief real downtime (old container stops, new one starts) instead of the
+# zero-downtime rollout the base file is designed for. Only use this overlay
+# on hosts where ingress mode is confirmed broken - the base file's
+# zero-downtime design is correct and should be used as-is everywhere else.
+#
+# Usage (this host only):
+#   docker stack deploy -c docker-compose.prod.yml -c docker-compose.prod.host-network.yml itsm
+
+services:
+  web:
+    ports:
+      - target: 3000
+        published: ${WEB_PUBLISHED_PORT:-3000}
+        protocol: tcp
+        mode: host
+    deploy:
+      update_config:
+        order: stop-first
+      rollback_config:
+        order: stop-first

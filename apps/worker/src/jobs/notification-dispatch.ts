@@ -1,12 +1,13 @@
-import { ConsoleTransport, dispatchPendingNotifications } from "@itsm/core";
+import { createNotificationTransport, dispatchPendingNotifications } from "@itsm/core";
 import type { PgBoss } from "pg-boss";
 
 const QUEUE_NAME = "notification-dispatch";
 const CRON = process.env.NOTIFICATION_DISPATCH_CRON ?? "* * * * *"; // every minute
 
-const transport = new ConsoleTransport();
+// SmtpTransport when SMTP_HOST is set, ConsoleTransport (logs only) otherwise - see createNotificationTransport.
+const transport = createNotificationTransport();
 
-/** Registers the recurring notification-queue drain. Swap ConsoleTransport for a real one (SMTP/etc) later. */
+/** Registers the recurring notification-queue drain. */
 export async function registerNotificationDispatchJob(boss: PgBoss): Promise<void> {
   await boss.createQueue(QUEUE_NAME);
   await boss.schedule(QUEUE_NAME, CRON);

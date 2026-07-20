@@ -94,6 +94,15 @@ services:
 networks:
   itsm_internal:
     driver: overlay
+    # Explicit subnet: this host runs ~50 other Docker networks and the
+    # default auto-allocated address pool was fully exhausted ("all
+    # predefined address pools have been fully subnetted"), so every task
+    # failed to attach. Pinning a subnet that's confirmed free (checked via
+    # `docker network inspect` against every existing network on this host)
+    # sidesteps the auto-pool allocator entirely.
+    ipam:
+      config:
+        - subnet: 10.10.30.0/24
 
 volumes:
   itsm_postgres_data:

@@ -9,7 +9,8 @@ Login de prueba: `admin@itsm.local` / `ChangeMe123!` (cambiar antes de un despli
 - **Entidades**: árbol multi-tenant (`/administration/entities`). Todo objeto (activo, ticket, contrato, etc.) pertenece a una entidad. Los permisos pueden ser específicos de una entidad o recursivos a sus descendientes (vía `ltree`).
 - **Perfiles (RBAC)**: sets de permisos por módulo (`/administration/profiles`), asignables a un usuario en una o más entidades. Cada permiso es un bitmask (`READ`/`CREATE`/`UPDATE`/`DELETE`/`PURGE`/`APPROVE`/`ASSIGN`) sobre ~50 módulos con nombre punteado (`assets.computer`, `assistance.ticket`, etc.). La matriz completa (perfil × módulo × bit) se edita en `/administration/profiles/[id]`.
 - **Interfaz Central vs. Simplified**: un perfil decide si el usuario ve el shell completo de administración (Central) o el portal de autoservicio (Simplified, `/portal`). El redirect de `/` decide según el perfil activo del usuario logueado.
-- **Auditoría**: cada creación/edición relevante queda en `audit_log` (visible en `/administration/audit-log`, filtrable por tipo de objeto/usuario/fecha).
+- **Auditoría**: cada creación/edición relevante queda en `audit_log` (visible en `/administration/audit-log`, filtrable por tipo de objeto/usuario/fecha, con timestamp automático). Cobertura actual: tickets, cambios, problemas, base de conocimiento, SLA, computadoras, equipo de red. Todavía sin instrumentar: proyectos, contratos, presupuestos, certificados, consumibles, proveedores/contactos, usuarios/grupos/perfiles/entidades.
+- **Idioma de interfaz**: selector de 6 idiomas (es/en/pt/fr/it/de) en `/account` y en el login. Cubre el sidebar de navegación completo, `/dashboard` y `/account` — el resto de la app (~72 pantallas) sigue en español fijo (Fase 2 pendiente, ver `architecture-plan.md`).
 
 ## Asistencia (Helpdesk / ITIL)
 
@@ -68,12 +69,16 @@ Login de prueba: `admin@itsm.local` / `ChangeMe123!` (cambiar antes de un despli
 
 Shell separado (interfaz "Simplified") para usuarios finales: catálogo de servicios, formulario simplificado de creación de ticket (con campos custom del Form Builder si están definidos), y "Mis solicitudes".
 
+## Asistente IA (`/assistant`)
+
+Primer ítem del sidebar (visible solo si `AI_ASSISTANT_URL` está configurado en el entorno). Chat embebido dentro de la propia app — mismo sistema de diseño, no un iframe ni una pestaña externa — que proxea contra una app hermana (IA-asistente, repo separado) vía `/api/assistant/chat` (streaming SSE) y `/api/assistant/conversations[/[id]]`. Tiene acceso en vivo, por MCP, a tickets/activos/computadoras/problemas/cambios reales de la instancia (mismas 10 tools que expone `/api/mcp`). Historial de conversaciones persistido server-side (base de datos de la app hermana) y cacheado en `localStorage` del navegador para resumir sin perder contexto tras un refresh. Conversación nueva muestra preguntas sugeridas basadas en las herramientas realmente disponibles.
+
 ## Mi cuenta (`/account`)
 
 Página personal de cualquier usuario logueado (no requiere permiso RBAC específico — es autogestión de la propia cuenta):
 
 - **Datos**: nombre, email, entidad/perfil activos (solo lectura).
-- **Idioma**: selector (`es`/`en`/`pt`/`fr`/`it`/`de`) que guarda la preferencia en `users.language`. Nota: hoy **solo guarda el valor** — todavía no hay motor de traducción que efectivamente cambie el idioma de la interfaz (queda documentado como próximo proyecto separado en `architecture-plan.md`).
+- **Idioma**: selector (`es`/`en`/`pt`/`fr`/`it`/`de`), guarda la preferencia en `users.language` y cambia efectivamente el idioma del sidebar + `/dashboard` + `/account` (Fase 1 del motor de i18n vía `next-intl`; el resto de la app aún no está traducido, ver nota en "Conceptos transversales").
 - **Tokens MCP**: crear/listar/revocar tokens de acceso personal (prefijo `pat_`) para conectar clientes MCP (Claude Desktop, Claude Code, etc.) contra `/api/mcp`. La key cruda se muestra una sola vez al crearla — igual que en `/setup/api-clients`, no se puede volver a mostrar. Un token personal actúa con los mismos permisos RBAC del usuario dueño, no con una lista de scopes elegida a mano.
 
 ## API pública (`/api/v1/...`)
@@ -84,12 +89,14 @@ Bearer token de **entidad** (no sesión de navegador, no intercambiable con un t
 
 Endpoint MCP (Model Context Protocol) real, para que un cliente MCP (Claude Desktop, Claude Code, u otro) se conecte directamente a la instancia. Autenticado con un **token personal** (creado en `/account`, no un token de entidad — un token de entidad usado acá devuelve 401). Expone 10 tools de solo lectura, generadas automáticamente desde el mismo registro que respalda `/api/v1` (`list_tickets`, `get_tickets`, `list_assets`, `get_assets`, `list_computers`, `get_computers`, `list_problems`, `get_problems`, `list_changes`, `get_changes`) — cada llamada aplica el RBAC real del usuario dueño del token, nunca más permisos de los que ese usuario ya tiene logueado normalmente. Escritura (crear/editar vía MCP) queda deliberadamente fuera de alcance por ahora.
 
-**Advertencia de seguridad conocida**: las tools `get_*` no verifican que el registro devuelto pertenezca a la entidad activa del que llama (mismo hueco preexistente en `/api/v1/[itemtype]/[id]`) — un id válido de otra entidad se devuelve igual si existe. La descripción de cada tool `get_*` incluye esta advertencia explícitamente para que un agente que la invoque lo tenga en cuenta. Detalle completo y plan de cierre en `architecture-plan.md`, sección "Tercera ronda".
+**Advertencia de seguridad conocida (lectura, sin cerrar)**: las tools `get_*` no verifican que el registro devuelto pertenezca a la entidad activa del que llama (mismo hueco preexistente en `/api/v1/[itemtype]/[id]`) — un id válido de otra entidad se devuelve igual si existe. La descripción de cada tool `get_*` incluye esta advertencia explícitamente para que un agente que la invoque lo tenga en cuenta. Detalle completo y plan de cierre en `architecture-plan.md`, sección "Tercera ronda".
+
+**Hueco equivalente en escritura (cerrado)**: una auditoría de seguridad encontró el mismo patrón pero en las acciones de edición (`updateTicketAction`/`updateChangeAction`/`updateProblemAction`/`updateProjectAction`/`updateAssetAction` y las acciones de tareas/equipo/costos de Proyectos) — el chequeo de permisos validaba la entidad activa del usuario, no la entidad real del registro editado, permitiendo escritura cross-entity con el right adecuado en la entidad equivocada. Corregido: cada acción ahora resuelve el registro primero y valida el right contra `record.entityId` (`requireRightOnEntity`, `packages/core/src/auth/permissions.ts`). El download de documentos (`/api/documents/[id]`) tenía el mismo problema en forma más grave (cero chequeo de right, solo sesión válida) — también corregido.
 
 ## Testing
 
-- **Unitarios/integración** (Vitest, `pnpm test`): 690 tests en `packages/core`, contra Postgres real (sin mocks), un archivo por servicio + validación Zod.
-- **End-to-end** (Playwright, `pnpm e2e` / `npx playwright test`): 152 tests en `e2e/specs/`, uno por sección del sidebar, con login real vía UI y datos generados en cada corrida. Reporte HTML: `pnpm e2e:report`.
+- **Unitarios/integración** (Vitest, `pnpm test`): 688 tests en `packages/core` + 4 en `apps/web` (i18n), contra Postgres real (sin mocks), un archivo por servicio + validación Zod.
+- **End-to-end** (Playwright, `pnpm e2e` / `npx playwright test`): 234 tests en `e2e/specs/`, uno por sección del sidebar más una capa QA de datos propios/validación de tipos, con login real vía UI y datos generados en cada corrida. Reporte HTML: `pnpm e2e:report`.
 - **Integración MCP real** (`apps/web/app/api/mcp/mcp-route.integration.test.ts`): usa el SDK cliente de MCP de verdad (no solo curl) contra un `npm run dev` corriendo. Separado del `pnpm test` por defecto — correr con `pnpm --filter @itsm/web test:mcp-integration`.
 
 Ver [`qa-report.md`](qa-report.md) para el detalle completo de bugs encontrados/corregidos, auditoría de índices, valores hardcodeados, campos de base de datos sin uso y código muerto.

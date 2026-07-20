@@ -606,7 +606,7 @@ test.describe.serial("QA - Profiles: perfil propio con permisos en cero y su apl
     try {
       await qaPage.goto("/login");
       await qaPage.getByLabel("Email").fill(qaEmail);
-      await qaPage.getByLabel("Contraseña").fill(qaPassword);
+      await qaPage.getByLabel("Contraseña", { exact: true }).fill(qaPassword);
       await qaPage.getByRole("button", { name: /ingresar/i }).click();
       // Confirms resolveAuthContext() actually picked up the isDefault=true assignment made
       // above - if it hadn't taken effect, login would bounce back to /login instead.
@@ -659,7 +659,7 @@ test.describe.serial("QA - Profiles: perfil propio con permisos en cero y su apl
     try {
       await qaPage.goto("/login");
       await qaPage.getByLabel("Email").fill(qaEmail);
-      await qaPage.getByLabel("Contraseña").fill(qaPassword);
+      await qaPage.getByLabel("Contraseña", { exact: true }).fill(qaPassword);
       await qaPage.getByRole("button", { name: /ingresar/i }).click();
       await qaPage.waitForURL(/\/dashboard/);
 
