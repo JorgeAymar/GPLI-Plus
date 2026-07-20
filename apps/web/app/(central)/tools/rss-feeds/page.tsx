@@ -16,7 +16,7 @@ export default async function RssFeedsPage() {
       <h1 className="text-2xl font-semibold">Feeds RSS</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Feeds</h2>
+          <h2 className="mb-2 text-sm font-semibold">Feeds</h2>
           <ul className="space-y-1">
             {feeds.map((f) => (
               <li key={f.id} className="text-sm">
@@ -31,7 +31,7 @@ export default async function RssFeedsPage() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo feed</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo feed</h2>
           <RssFeedForm ownerUserId={context.user.id} />
         </div>
       </div>

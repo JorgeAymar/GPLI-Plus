@@ -14,7 +14,7 @@ export default async function DropdownsPage() {
       <h1 className="text-2xl font-semibold">Listas desplegables</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Categorías existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Categorías existentes</h2>
           <ul className="space-y-1">
             {categories.map((c) => (
               <li key={c.id}>
@@ -27,7 +27,7 @@ export default async function DropdownsPage() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nueva categoría</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nueva categoría</h2>
           <DropdownCategoryForm />
         </div>
       </div>

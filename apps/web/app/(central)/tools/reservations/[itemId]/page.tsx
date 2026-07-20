@@ -23,8 +23,8 @@ export default async function ReservationItemDetailPage({ params }: { params: Pr
       {item.comment ? <p className="text-sm opacity-60">{item.comment}</p> : null}
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Reservas existentes</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Reservas existentes</h2>
           <ul className="space-y-2">
             {reservationList.map((r) => (
               <li key={r.id} className="flex items-center justify-between gap-2 text-sm">
@@ -38,8 +38,8 @@ export default async function ReservationItemDetailPage({ params }: { params: Pr
             {reservationList.length === 0 ? <li className="text-sm opacity-50">Sin reservas todavía.</li> : null}
           </ul>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nueva reserva</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Nueva reserva</h2>
           <ReservationForm reservationItemId={itemId} />
         </div>
       </div>

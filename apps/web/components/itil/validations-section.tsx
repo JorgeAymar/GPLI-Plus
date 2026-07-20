@@ -16,8 +16,8 @@ export function ValidationsSection({
   const userById = new Map(users.map((u) => [u.id, u]));
 
   return (
-    <div>
-      <h2 className="mb-2 text-sm font-medium opacity-70">Aprobaciones</h2>
+    <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+      <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Aprobaciones</h2>
       <ul className="mb-3 space-y-1">
         {validations.map((v) => (
           <li key={v.id} className="text-sm">

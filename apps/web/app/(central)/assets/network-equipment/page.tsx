@@ -44,7 +44,7 @@ export default async function NetworkEquipmentPage({ searchParams }: { searchPar
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="min-w-0">
-          <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Existentes</h2>
           <DataTable
             columns={[
               { key: "name", label: "Nombre" },
@@ -56,7 +56,7 @@ export default async function NetworkEquipmentPage({ searchParams }: { searchPar
           />
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo equipo de red</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo equipo de red</h2>
           <NetworkEquipmentForm entityId={context.activeEntity.id} deviceTypeOptions={deviceTypeOptions} />
         </div>
       </div>

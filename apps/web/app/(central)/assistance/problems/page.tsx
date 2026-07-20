@@ -21,7 +21,7 @@ export default async function ProblemsPage() {
       <h1 className="text-2xl font-semibold">Problemas</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Existentes</h2>
           <ul className="space-y-1">
             {problems.map((p) => (
               <li key={p.id} className="flex items-center gap-2">
@@ -35,7 +35,7 @@ export default async function ProblemsPage() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo problema</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo problema</h2>
           <ProblemForm entityId={context.activeEntity.id} categoryOptions={categoryOptions} />
         </div>
       </div>

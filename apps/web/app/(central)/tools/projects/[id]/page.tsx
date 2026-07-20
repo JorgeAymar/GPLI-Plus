@@ -85,17 +85,18 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold">{project.name}</h1>
-        <div className="mt-4 max-w-md">
-          <h2 className="mb-2 text-sm font-medium opacity-70">Editar proyecto</h2>
+      <h1 className="text-2xl font-semibold">{project.name}</h1>
+
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Editar proyecto</h2>
+        <div className="max-w-md">
           <ProjectEditForm project={project} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Tareas</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Tareas</h2>
           <ul className="space-y-1">
             {taskRows.map(({ task, depth }) => (
               <li key={task.id} className="text-sm" style={{ paddingLeft: `${depth * 16}px` }}>
@@ -106,15 +107,15 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             {taskRows.length === 0 ? <li className="text-sm opacity-50">Sin tareas todavía.</li> : null}
           </ul>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nueva tarea</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Nueva tarea</h2>
           <ProjectTaskForm projectId={id} tasks={tasks} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Equipo</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Equipo</h2>
           <ul className="space-y-1">
             {teamMembers.map((m) => (
               <li key={m.id} className="text-sm">
@@ -124,15 +125,15 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             {teamMembers.length === 0 ? <li className="text-sm opacity-50">Sin miembros todavía.</li> : null}
           </ul>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Agregar miembro</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Agregar miembro</h2>
           <ProjectTeamForm projectId={id} users={users} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Costos</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Costos</h2>
           <ul className="space-y-1">
             {costs.map((c) => (
               <li key={c.id} className="text-sm">
@@ -142,14 +143,14 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             {costs.length === 0 ? <li className="text-sm opacity-50">Sin costos todavía.</li> : null}
           </ul>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Agregar costo</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Agregar costo</h2>
           <ProjectCostForm projectId={id} />
         </div>
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Kanban por estado de tarea</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Kanban por estado de tarea</h2>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
           {columns.map((col) => (
             <div key={col.key} className="rounded-md border border-black/10 p-3 dark:border-white/10">

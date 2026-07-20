@@ -23,7 +23,7 @@ export default async function ContactsPage({ searchParams }: { searchParams: Pro
       <h1 className="text-2xl font-semibold">Contactos</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Existentes</h2>
           <ul className="space-y-1">
             {contacts.map((c) => (
               <li key={c.id} className="flex items-center justify-between gap-2 text-sm">
@@ -42,7 +42,7 @@ export default async function ContactsPage({ searchParams }: { searchParams: Pro
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo contacto</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo contacto</h2>
           <ContactForm entityId={context.activeEntity.id} suppliers={suppliers} defaultSupplierId={supplierId} />
         </div>
       </div>

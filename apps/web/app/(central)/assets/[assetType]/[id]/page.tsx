@@ -48,8 +48,8 @@ export default async function GenericAssetDetailPage({
         <span className="text-sm opacity-60">{definition.name}</span>
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Editar activo</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Editar activo</h2>
         <GenericAssetEditForm asset={asset} fields={fields} dropdownOptions={dropdownOptions} />
       </div>
 

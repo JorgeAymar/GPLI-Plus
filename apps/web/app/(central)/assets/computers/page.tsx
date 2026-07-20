@@ -45,7 +45,7 @@ export default async function ComputersPage({ searchParams }: { searchParams: Pr
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="min-w-0">
-          <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Existentes</h2>
           <DataTable
             columns={[
               {
@@ -65,7 +65,7 @@ export default async function ComputersPage({ searchParams }: { searchParams: Pr
           />
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nueva computadora</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nueva computadora</h2>
           <ComputerForm entityId={context.activeEntity.id} osOptions={osOptions} />
         </div>
       </div>

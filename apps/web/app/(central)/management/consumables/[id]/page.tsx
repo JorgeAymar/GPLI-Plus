@@ -34,23 +34,27 @@ export default async function ConsumableItemDetailPage({ params }: { params: Pro
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">{item.name}</h1>
-      <dl className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
-        <dt className="opacity-60">Disponibles</dt>
-        <dd>
-          {available}
-          {belowThreshold ? <span className="ml-2 font-medium text-red-600">Bajo stock</span> : null}
-        </dd>
-        <dt className="opacity-60">Umbral de alerta</dt>
-        <dd>{item.alertThreshold ?? "-"}</dd>
-      </dl>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Agregar unidades</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Información general</h2>
+        <dl className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+          <dt className="opacity-60">Disponibles</dt>
+          <dd>
+            {available}
+            {belowThreshold ? <span className="ml-2 font-medium text-red-600">Bajo stock</span> : null}
+          </dd>
+          <dt className="opacity-60">Umbral de alerta</dt>
+          <dd>{item.alertThreshold ?? "-"}</dd>
+        </dl>
+      </div>
+
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Agregar unidades</h2>
         <AddUnitsForm consumableItemId={id} />
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Unidades</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Unidades</h2>
         <ul className="space-y-2">
           {units.map((unit) => (
             <li key={unit.id} className="flex items-center justify-between gap-3 border-b border-black/10 pb-2 text-sm dark:border-white/10">

@@ -41,14 +41,19 @@ export default async function ProblemDetailPage({ params }: { params: Promise<{ 
         <ProblemEditForm problem={problem} />
       </div>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <ActorsSection itilType="problem" itilId={id} actors={actors} users={users} />
-        <ValidationsSection itilType="problem" itilId={id} validations={validations} users={users} />
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="flex flex-col gap-8 lg:col-span-8">
+          <TimelineSection itilType="problem" itilId={id} items={timelineItems} />
+
+          <CostsSection itilType="problem" itilId={id} costs={costs} />
+        </div>
+
+        <div className="flex flex-col gap-8 lg:col-span-4">
+          <ActorsSection itilType="problem" itilId={id} actors={actors} users={users} />
+
+          <ValidationsSection itilType="problem" itilId={id} validations={validations} users={users} />
+        </div>
       </div>
-
-      <TimelineSection itilType="problem" itilId={id} items={timelineItems} />
-
-      <CostsSection itilType="problem" itilId={id} costs={costs} />
     </div>
   );
 }

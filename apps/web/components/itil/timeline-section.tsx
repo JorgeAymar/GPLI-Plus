@@ -13,9 +13,9 @@ export function TimelineSection({ itilType, itilId, items }: { itilType: ItilTyp
   const hiddenCount = items.length - visibleItems.length;
 
   return (
-    <div>
-      <div className="mb-2 flex items-baseline justify-between">
-        <h2 className="text-sm font-medium opacity-70">Historial</h2>
+    <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+      <div className="mb-4 flex items-baseline justify-between border-b border-black/10 pb-3 dark:border-white/10">
+        <h2 className="text-sm font-semibold">Historial</h2>
         {totalMinutes > 0 ? <span className="text-sm font-medium">Tiempo total: {totalMinutes} min</span> : null}
       </div>
 

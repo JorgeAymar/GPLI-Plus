@@ -32,8 +32,8 @@ export default async function WebhookDetailPage({ params }: { params: Promise<{ 
         </p>
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Últimos envíos</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Últimos envíos</h2>
         <ul className="space-y-1">
           {queued.map((q) => (
             <li key={q.id} className="text-sm">

@@ -19,7 +19,7 @@ export default async function TicketFieldsPage() {
       <h1 className="text-2xl font-semibold">Campos de ticket</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Campos existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Campos existentes</h2>
           <ul className="space-y-1">
             {fields.map((f) => (
               <li key={f.id} className="text-sm">
@@ -34,7 +34,7 @@ export default async function TicketFieldsPage() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo campo</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo campo</h2>
           <TicketFieldForm dropdownCategories={dropdownCategories} />
         </div>
       </div>

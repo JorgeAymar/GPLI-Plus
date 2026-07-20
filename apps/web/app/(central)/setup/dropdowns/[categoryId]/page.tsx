@@ -27,8 +27,8 @@ export default async function DropdownCategoryPage({ params }: { params: Promise
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">{category.name}</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Items existentes</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Items existentes</h2>
           <ul className="space-y-1">
             {items.map((i) => (
               <li key={i.id} className="text-sm">
@@ -38,8 +38,8 @@ export default async function DropdownCategoryPage({ params }: { params: Promise
             {items.length === 0 ? <li className="text-sm opacity-50">Sin items todavía.</li> : null}
           </ul>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo item</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Nuevo item</h2>
           <DropdownItemForm categoryId={categoryId} entityId={context.activeEntity.id} />
         </div>
       </div>

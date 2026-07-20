@@ -16,7 +16,7 @@ export default async function GroupsPage() {
       <h1 className="text-2xl font-semibold">Grupos</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Existentes</h2>
           <ul className="space-y-1">
             {groups.map((g) => (
               <li key={g.id} className="text-sm">
@@ -29,7 +29,7 @@ export default async function GroupsPage() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo grupo</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo grupo</h2>
           <GroupForm entityId={context.activeEntity.id} />
         </div>
       </div>

@@ -20,7 +20,7 @@ export default async function RemindersPage() {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="space-y-6">
           <div>
-            <h2 className="mb-2 text-sm font-medium opacity-70">Pendientes</h2>
+            <h2 className="mb-2 text-sm font-semibold">Pendientes</h2>
             <ul className="space-y-2">
               {pending.map((r) => (
                 <li key={r.id} className="text-sm">
@@ -35,7 +35,7 @@ export default async function RemindersPage() {
             </ul>
           </div>
           <div>
-            <h2 className="mb-2 text-sm font-medium opacity-70">Hechos</h2>
+            <h2 className="mb-2 text-sm font-semibold">Hechos</h2>
             <ul className="space-y-1">
               {done.map((r) => (
                 <li key={r.id} className="text-sm opacity-50 line-through">
@@ -47,7 +47,7 @@ export default async function RemindersPage() {
           </div>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo recordatorio</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo recordatorio</h2>
           <ReminderForm entityId={context.activeEntity.id} />
         </div>
       </div>

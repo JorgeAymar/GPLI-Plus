@@ -15,7 +15,7 @@ export default async function BudgetsPage() {
       <h1 className="text-2xl font-semibold">Presupuestos</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Existentes</h2>
           <ul className="space-y-1">
             {budgets.map((b) => (
               <li key={b.id} className="text-sm">
@@ -26,7 +26,7 @@ export default async function BudgetsPage() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo presupuesto</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo presupuesto</h2>
           <BudgetForm entityId={context.activeEntity.id} />
         </div>
       </div>

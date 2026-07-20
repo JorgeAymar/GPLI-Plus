@@ -15,7 +15,7 @@ export default async function ProfilesPage() {
       <h1 className="text-2xl font-semibold">Perfiles</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="min-w-0">
-          <h2 className="mb-2 text-sm font-medium opacity-70">Perfiles existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Perfiles existentes</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -49,7 +49,7 @@ export default async function ProfilesPage() {
           </div>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo perfil</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo perfil</h2>
           <ProfileForm />
         </div>
       </div>

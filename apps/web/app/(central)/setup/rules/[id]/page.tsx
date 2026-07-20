@@ -47,8 +47,8 @@ export default async function RuleDetailPage({ params }: { params: Promise<{ id:
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Criterios</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Criterios</h2>
           <ul className="mb-4 space-y-1">
             {criteria.map((c) => (
               <li key={c.id} className="text-sm">
@@ -59,8 +59,8 @@ export default async function RuleDetailPage({ params }: { params: Promise<{ id:
           </ul>
           <CriteriaForm ruleId={id} />
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Acciones</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Acciones</h2>
           <ul className="mb-4 space-y-1">
             {actions.map((a) => (
               <li key={a.id} className="text-sm">

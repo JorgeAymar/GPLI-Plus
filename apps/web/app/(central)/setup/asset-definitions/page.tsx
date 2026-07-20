@@ -14,7 +14,7 @@ export default async function AssetDefinitionsPage() {
       <h1 className="text-2xl font-semibold">Tipos de activo</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Tipos existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Tipos existentes</h2>
           <ul className="space-y-1">
             {definitions.map((d) => (
               <li key={d.id}>
@@ -28,7 +28,7 @@ export default async function AssetDefinitionsPage() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo tipo de activo</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo tipo de activo</h2>
           <AssetDefinitionForm />
         </div>
       </div>

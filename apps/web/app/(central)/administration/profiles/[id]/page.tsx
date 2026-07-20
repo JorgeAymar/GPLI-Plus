@@ -23,7 +23,10 @@ export default async function ProfileDetailPage({ params }: { params: Promise<{ 
         <h1 className="text-2xl font-semibold">{profile.name}</h1>
         <p className="text-sm opacity-60">Interfaz: {profile.interface}</p>
       </div>
-      <PermissionMatrix profileId={id} moduleKeys={Object.values(MODULE)} rightBits={RIGHT} initialRights={rights} />
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Permisos</h2>
+        <PermissionMatrix profileId={id} moduleKeys={Object.values(MODULE)} rightBits={RIGHT} initialRights={rights} />
+      </div>
     </div>
   );
 }

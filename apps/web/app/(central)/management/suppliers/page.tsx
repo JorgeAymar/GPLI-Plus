@@ -18,7 +18,7 @@ export default async function SuppliersPage() {
       <h1 className="text-2xl font-semibold">Proveedores</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Existentes</h2>
+          <h2 className="mb-2 text-sm font-semibold">Existentes</h2>
           <ul className="space-y-1">
             {suppliers.map((s) => (
               <li key={s.id} className="flex items-center justify-between gap-2">
@@ -36,7 +36,7 @@ export default async function SuppliersPage() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium opacity-70">Nuevo proveedor</h2>
+          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo proveedor</h2>
           <SupplierForm entityId={context.activeEntity.id} />
         </div>
       </div>

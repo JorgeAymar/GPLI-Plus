@@ -25,8 +25,8 @@ export async function AttachmentsSection({
   const docs = await listDocumentsForItem(itemType, itemId);
 
   return (
-    <div>
-      <h2 className="mb-2 text-sm font-medium opacity-70">Adjuntos</h2>
+    <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+      <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Adjuntos</h2>
       <ul className="mb-3 space-y-1">
         {docs.map((d) => (
           <li key={d.id} className="flex items-center gap-2 text-sm">

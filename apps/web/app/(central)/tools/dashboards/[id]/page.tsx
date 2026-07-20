@@ -45,29 +45,32 @@ export default async function DashboardDetailPage({ params }: { params: Promise<
         <p className="mt-1 text-xs opacity-50">{dashboard.key}</p>
       </div>
 
-      <div className="grid grid-cols-12 gap-4">
-        {cardsWithData.map(({ card, data }) => (
-          <div
-            key={card.id}
-            className="rounded-md border border-black/10 p-3 dark:border-white/10"
-            style={{ gridColumn: `span ${card.width}`, gridRow: `span ${card.height}` }}
-          >
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-medium">{CARD_KEY_LABEL[card.cardKey] ?? card.cardKey}</h3>
-              <RemoveDashboardCardButton id={card.id} dashboardId={dashboard.id} />
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Cards del dashboard</h2>
+        <div className="grid grid-cols-12 gap-4">
+          {cardsWithData.map(({ card, data }) => (
+            <div
+              key={card.id}
+              className="rounded-md border border-black/10 p-3 dark:border-white/10"
+              style={{ gridColumn: `span ${card.width}`, gridRow: `span ${card.height}` }}
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-sm font-medium">{CARD_KEY_LABEL[card.cardKey] ?? card.cardKey}</h3>
+                <RemoveDashboardCardButton id={card.id} dashboardId={dashboard.id} />
+              </div>
+              <DashboardCardView
+                cardKey={card.cardKey}
+                data={data}
+                chartType={(card.options as { chartType?: string } | null)?.chartType}
+              />
             </div>
-            <DashboardCardView
-              cardKey={card.cardKey}
-              data={data}
-              chartType={(card.options as { chartType?: string } | null)?.chartType}
-            />
-          </div>
-        ))}
-        {cards.length === 0 ? <p className="col-span-12 text-sm opacity-50">Sin cards todavía.</p> : null}
+          ))}
+          {cards.length === 0 ? <p className="col-span-12 text-sm opacity-50">Sin cards todavía.</p> : null}
+        </div>
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Agregar card</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Agregar card</h2>
         <DashboardCardForm dashboardId={dashboard.id} availableCardKeys={AVAILABLE_CARD_KEYS} />
       </div>
     </div>

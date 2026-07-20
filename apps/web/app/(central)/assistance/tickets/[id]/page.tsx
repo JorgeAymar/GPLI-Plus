@@ -64,18 +64,23 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
         <TicketEditForm ticket={ticket} categoryOptions={categoryOptions} />
       </div>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <ActorsSection itilType="ticket" itilId={id} actors={actors} users={users} />
-        <ValidationsSection itilType="ticket" itilId={id} validations={validations} users={users} />
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="flex flex-col gap-8 lg:col-span-8">
+          <TimelineSection itilType="ticket" itilId={id} items={timelineItems} />
+
+          <CostsSection itilType="ticket" itilId={id} costs={costs} />
+        </div>
+
+        <div className="flex flex-col gap-8 lg:col-span-4">
+          <ActorsSection itilType="ticket" itilId={id} actors={actors} users={users} />
+
+          <ValidationsSection itilType="ticket" itilId={id} validations={validations} users={users} />
+
+          <SlaSection itilType="ticket" itilId={id} assignments={slaAssignments} policies={slaPolicies} />
+
+          <AttachmentsSection itemType="ticket" itemId={id} revalidatePathTarget={`/assistance/tickets/${id}`} />
+        </div>
       </div>
-
-      <SlaSection itilType="ticket" itilId={id} assignments={slaAssignments} policies={slaPolicies} />
-
-      <TimelineSection itilType="ticket" itilId={id} items={timelineItems} />
-
-      <CostsSection itilType="ticket" itilId={id} costs={costs} />
-
-      <AttachmentsSection itemType="ticket" itemId={id} revalidatePathTarget={`/assistance/tickets/${id}`} />
     </div>
   );
 }
