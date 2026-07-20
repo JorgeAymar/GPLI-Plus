@@ -2,6 +2,7 @@
 
 import { requireAuthContext } from "@/lib/session";
 import { MODULE, RIGHT, createUser, createUserSchema, recordAuditLog, requireRight } from "@itsm/core";
+import type { User } from "@itsm/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -23,17 +24,40 @@ function parseInput<Schema extends z.ZodTypeAny>(schema: Schema, input: unknown)
   return result.data;
 }
 
+export interface CreateUserResult {
+  user?: User;
+  error?: string;
+}
+
+/**
+ * Returns `{error}` instead of throwing on a validation/uniqueness failure.
+ * Next.js redacts the message of anything a Server Action *throws* across
+ * the client/server boundary in production builds (by design - it can't
+ * tell a deliberately safe message from an accidental one), replacing it
+ * with a generic "an error occurred" string. That silently ate this
+ * function's own careful "Ya existe un usuario con este email." message in
+ * production even though it worked perfectly in dev. Returning the error as
+ * plain data sidesteps that redaction entirely, matching how loginAction/
+ * resetPasswordAction already do this in apps/web/actions/auth.actions.ts.
+ */
 export async function createUserAction(input: {
   email: string;
   username: string;
   password: string;
   displayName: string;
   defaultEntityId?: string | null;
-}) {
+}): Promise<CreateUserResult> {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ADMINISTRATION_USER, RIGHT.CREATE);
-  const parsed = parseInput(createUserSchema, input);
-  const user = await createUser(parsed);
+
+  let user: User;
+  try {
+    const parsed = parseInput(createUserSchema, input);
+    user = await createUser(parsed);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "No se pudo crear el usuario." };
+  }
+
   // NOTE: never persist passwordHash into the audit trail - "Ver cambios" on
   // /administration/audit-log renders `after` as raw JSON to any admin with READ
   // on administration.audit_log, which would otherwise leak password hashes.
@@ -47,5 +71,5 @@ export async function createUserAction(input: {
     after: safeUser,
   });
   revalidatePath("/administration/users");
-  return user;
+  return { user };
 }

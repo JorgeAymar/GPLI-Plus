@@ -21,18 +21,14 @@ async function action(_prev: FormState | undefined, formData: FormData): Promise
     return { error: "Las contraseñas no coinciden." };
   }
 
-  try {
-    await createUserAction({
-      email: formData.get("email") as string,
-      username: formData.get("username") as string,
-      password,
-      displayName: formData.get("displayName") as string,
-      defaultEntityId: (formData.get("defaultEntityId") as string) || null,
-    });
-    return {};
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : "Error desconocido" };
-  }
+  const result = await createUserAction({
+    email: formData.get("email") as string,
+    username: formData.get("username") as string,
+    password,
+    displayName: formData.get("displayName") as string,
+    defaultEntityId: (formData.get("defaultEntityId") as string) || null,
+  });
+  return result.error ? { error: result.error } : {};
 }
 
 export function UserForm({ entities }: { entities: Entity[] }) {
