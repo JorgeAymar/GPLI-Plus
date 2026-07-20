@@ -46,3 +46,6 @@ packages/db/drizzle/meta/
 
 # graphify (regenerable knowledge-graph artifacts, run /graphify to rebuild)
 /graphify-out/
+
+# DB dumps (may contain password hashes / PII, reference-only, never commit)
+/backups/

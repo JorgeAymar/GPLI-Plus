@@ -22,15 +22,20 @@ export default auth(async (req) => {
   // this runs on every request the matcher below allows through, including
   // every Server Action POST, so it needs to stay a single indexed read.
   const isLoggedIn = session?.userId ? await isActiveUserId(session.userId) : false;
-  const isLoginRoute = req.nextUrl.pathname.startsWith("/login");
+  // Every route under (auth)/ - reachable without a session by design (that's
+  // the whole point of a password-recovery flow), same treatment as /login.
+  const isPublicAuthRoute =
+    req.nextUrl.pathname.startsWith("/login") ||
+    req.nextUrl.pathname.startsWith("/forgot-password") ||
+    req.nextUrl.pathname.startsWith("/reset-password");
 
-  if (!isLoggedIn && !isLoginRoute) {
+  if (!isLoggedIn && !isPublicAuthRoute) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isLoggedIn && isLoginRoute) {
+  if (isLoggedIn && isPublicAuthRoute) {
     return NextResponse.redirect(new URL("/", req.nextUrl.origin));
   }
 
