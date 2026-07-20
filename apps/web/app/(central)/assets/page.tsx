@@ -39,56 +39,58 @@ export default async function AssetsPage({ searchParams }: { searchParams: Promi
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Todos los activos</h1>
 
-      <form className="flex gap-2">
-        <input
-          name="q"
-          defaultValue={q ?? ""}
-          placeholder="Buscar por nombre, serie o inventario..."
-          className="w-full max-w-md rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
-        />
-        <button type="submit" className="rounded-md border border-black/15 px-3 py-2 text-sm dark:border-white/15">
-          Buscar
-        </button>
-      </form>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <form className="flex gap-2">
+          <input
+            name="q"
+            defaultValue={q ?? ""}
+            placeholder="Buscar por nombre, serie o inventario..."
+            className="w-full max-w-md rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
+          />
+          <button type="submit" className="rounded-md border border-black/15 px-3 py-2 text-sm dark:border-white/15">
+            Buscar
+          </button>
+        </form>
 
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-left opacity-60">
-            <th className="pb-2">Nombre</th>
-            <th className="pb-2">Tipo</th>
-            <th className="pb-2">Serie</th>
-            <th className="pb-2">Inventario</th>
-          </tr>
-        </thead>
-        <tbody>
-          {assets.map((a) => {
-            const definition = definitionById.get(a.assetDefinitionId);
-            return (
-              <tr key={a.id} className="border-t border-black/5 dark:border-white/5">
-                <td className="py-2">
-                  {definition ? (
-                    <Link href={assetDetailHref(definition.key, a.id)} className="hover:underline">
-                      {a.name}
-                    </Link>
-                  ) : (
-                    a.name
-                  )}
-                </td>
-                <td className="py-2 opacity-70">{definition?.name ?? "?"}</td>
-                <td className="py-2 opacity-70">{a.serialNumber ?? "-"}</td>
-                <td className="py-2 opacity-70">{a.inventoryNumber ?? "-"}</td>
-              </tr>
-            );
-          })}
-          {assets.length === 0 ? (
-            <tr>
-              <td colSpan={4} className="py-2 opacity-50">
-                Sin activos todavía.
-              </td>
+        <table className="mt-4 w-full text-sm">
+          <thead>
+            <tr className="text-left">
+              <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Nombre</th>
+              <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Tipo</th>
+              <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Serie</th>
+              <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Inventario</th>
             </tr>
-          ) : null}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {assets.map((a) => {
+              const definition = definitionById.get(a.assetDefinitionId);
+              return (
+                <tr key={a.id} className="border-t border-black/5 dark:border-white/5">
+                  <td className="py-2">
+                    {definition ? (
+                      <Link href={assetDetailHref(definition.key, a.id)} className="hover:underline">
+                        {a.name}
+                      </Link>
+                    ) : (
+                      a.name
+                    )}
+                  </td>
+                  <td className="py-2 opacity-70">{definition?.name ?? "?"}</td>
+                  <td className="py-2 opacity-70">{a.serialNumber ?? "-"}</td>
+                  <td className="py-2 opacity-70">{a.inventoryNumber ?? "-"}</td>
+                </tr>
+              );
+            })}
+            {assets.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="py-2 opacity-50">
+                  Sin activos todavía.
+                </td>
+              </tr>
+            ) : null}
+          </tbody>
+        </table>
+      </div>
 
       <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
         <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Ir a un tipo específico</h2>

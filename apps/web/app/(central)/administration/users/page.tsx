@@ -11,17 +11,17 @@ export default async function UsersPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Usuarios</h1>
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div className="min-w-0">
-          <h2 className="mb-2 text-sm font-semibold">Usuarios existentes</h2>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="min-w-0 rounded-md border border-black/10 p-6 lg:col-span-8 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Usuarios existentes</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left opacity-60">
-                  <th className="pb-2">Nombre</th>
-                  <th className="pb-2">Email</th>
-                  <th className="pb-2">Usuario</th>
-                  <th className="pb-2">Último acceso</th>
+                <tr className="text-left">
+                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Nombre</th>
+                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Email</th>
+                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Usuario</th>
+                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Último acceso</th>
                 </tr>
               </thead>
               <tbody>
@@ -44,8 +44,8 @@ export default async function UsersPage() {
             </table>
           </div>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo usuario</h2>
+        <div className="rounded-md border border-black/10 p-6 lg:col-span-4 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-medium opacity-60 dark:border-white/10">Nuevo usuario</h2>
           <UserForm entities={entities} />
         </div>
       </div>

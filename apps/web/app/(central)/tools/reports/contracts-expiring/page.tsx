@@ -41,11 +41,11 @@ export default async function ContractsExpiringReportPage({ searchParams }: { se
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left opacity-60">
-            <th className="pb-2">Nombre</th>
-            <th className="pb-2">Tipo</th>
-            <th className="pb-2">Vence</th>
-            <th className="pb-2">Aviso (días)</th>
+          <tr className="text-left">
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Nombre</th>
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Tipo</th>
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Vence</th>
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Aviso (días)</th>
           </tr>
         </thead>
         <tbody>

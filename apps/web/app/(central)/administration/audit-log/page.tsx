@@ -67,6 +67,7 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Pro
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Registro de auditoría</h1>
 
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
       <form className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1">
           <label htmlFor="objectType" className="text-xs opacity-70">
@@ -123,15 +124,15 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Pro
         </button>
       </form>
 
-      <table className="w-full text-sm">
+      <table className="mt-4 w-full text-sm">
         <thead>
-          <tr className="text-left opacity-60">
-            <th className="pb-2">Fecha</th>
-            <th className="pb-2">Acción</th>
-            <th className="pb-2">Tipo</th>
-            <th className="pb-2">Objeto</th>
-            <th className="pb-2">Usuario</th>
-            <th className="pb-2">Cambios</th>
+          <tr className="text-left">
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Fecha</th>
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Acción</th>
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Tipo</th>
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Objeto</th>
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Usuario</th>
+            <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Cambios</th>
           </tr>
         </thead>
         <tbody>
@@ -164,7 +165,7 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Pro
         </tbody>
       </table>
 
-      <div className="flex items-center justify-between text-sm">
+      <div className="mt-4 flex items-center justify-between text-sm">
         <span className="opacity-70">
           Página {page} de {totalPages} ({total} registros)
         </span>
@@ -180,6 +181,7 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Pro
             </Link>
           ) : null}
         </div>
+      </div>
       </div>
     </div>
   );

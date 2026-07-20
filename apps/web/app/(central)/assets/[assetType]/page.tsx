@@ -41,8 +41,8 @@ export default async function AssetTypePage({ params }: { params: Promise<{ asse
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">{definition.name}</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-sm font-semibold">Instancias existentes</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Instancias existentes</h2>
           <ul className="space-y-1">
             {assets.map((a) => (
               <li key={a.id} className="flex items-center justify-between gap-2 text-sm">
@@ -59,8 +59,8 @@ export default async function AssetTypePage({ params }: { params: Promise<{ asse
             {assets.length === 0 ? <li className="text-sm opacity-50">Sin instancias todavía.</li> : null}
           </ul>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo {definition.name.toLowerCase()}</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-medium opacity-60 dark:border-white/10">Nuevo {definition.name.toLowerCase()}</h2>
           <GenericAssetForm
             assetDefinitionId={definition.id}
             entityId={context.activeEntity.id}

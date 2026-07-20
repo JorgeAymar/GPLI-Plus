@@ -14,14 +14,14 @@ export default async function ProfilesPage() {
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold">Perfiles</h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div className="min-w-0">
-          <h2 className="mb-2 text-sm font-semibold">Perfiles existentes</h2>
+        <div className="min-w-0 rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Perfiles existentes</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left opacity-60">
-                  <th className="pb-2">Nombre</th>
-                  <th className="pb-2">Interfaz</th>
+                <tr className="text-left">
+                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Nombre</th>
+                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Interfaz</th>
                   <th className="pb-2"></th>
                 </tr>
               </thead>
@@ -48,13 +48,13 @@ export default async function ProfilesPage() {
             </table>
           </div>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo perfil</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-medium opacity-60 dark:border-white/10">Nuevo perfil</h2>
           <ProfileForm />
         </div>
       </div>
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Asignar perfil a usuario</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-medium opacity-60 dark:border-white/10">Asignar perfil a usuario</h2>
         <AssignForm users={users} profiles={profiles} entities={entities} />
       </div>
     </div>
