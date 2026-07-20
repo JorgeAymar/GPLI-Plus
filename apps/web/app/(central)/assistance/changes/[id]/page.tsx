@@ -36,8 +36,8 @@ export default async function ChangeDetailPage({ params }: { params: Promise<{ i
         <StatusSelect id={change.id} currentStatus={change.status} updateStatusAction={updateChangeStatusAction} />
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Editar cambio</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Editar cambio</h2>
         <ChangeEditForm change={change} />
       </div>
 

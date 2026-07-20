@@ -36,8 +36,8 @@ export default async function ProblemDetailPage({ params }: { params: Promise<{ 
         <StatusSelect id={problem.id} currentStatus={problem.status} updateStatusAction={updateProblemStatusAction} />
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Editar problema</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Editar problema</h2>
         <ProblemEditForm problem={problem} />
       </div>
 

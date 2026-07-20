@@ -18,8 +18,8 @@ export default async function DcimIndexPage() {
       <h1 className="text-2xl font-semibold">DCIM</h1>
       <p className="text-sm opacity-70">Gestión de infraestructura de datacenter: racks, chasis, PDUs, clusters y cables.</p>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Racks</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Racks</h2>
         {rackDefinition ? (
           <>
             <ul className="mb-2 space-y-1">
@@ -43,8 +43,8 @@ export default async function DcimIndexPage() {
         )}
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium opacity-70">Cables</h2>
+      <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+        <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Cables</h2>
         <Link href="/assets/dcim/cables" className="text-sm underline">
           Ver todos los cables
         </Link>
