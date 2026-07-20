@@ -154,10 +154,15 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
           {columns.map((col) => (
             <div key={col.key} className="rounded-md border border-black/10 p-3 dark:border-white/10">
-              <h3 className="mb-2 text-xs font-medium uppercase tracking-wide opacity-60">{col.label}</h3>
-              <ul className="space-y-1">
+              <h3 className="mb-2 flex items-center justify-between text-xs font-bold tracking-wide text-black/60 uppercase dark:text-white/60">
+                {col.label}
+                <span className="rounded-full bg-black/10 px-1.5 py-0.5 text-[10px] font-bold dark:bg-white/15">
+                  {col.tasks.length}
+                </span>
+              </h3>
+              <ul className="space-y-1.5">
                 {col.tasks.map((t) => (
-                  <li key={t.id} className="rounded bg-black/5 px-2 py-1 text-sm dark:bg-white/5">
+                  <li key={t.id} className="rounded-md border border-black/10 bg-white px-2 py-1.5 text-sm dark:border-white/10 dark:bg-black/20">
                     {t.name}
                   </li>
                 ))}

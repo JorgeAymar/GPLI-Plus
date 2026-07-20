@@ -140,13 +140,15 @@ export function PermissionMatrix({ profileId, moduleKeys, rightBits, initialRigh
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {groups.map(([prefix, keys]) => (
         <div key={prefix}>
-          <h2 className="mb-2 text-sm font-medium uppercase tracking-wide opacity-50">{prefix}</h2>
+          <h2 className="mb-2 text-xs font-bold tracking-wide text-black/60 uppercase dark:text-white/60">
+            {GROUP_LABELS[prefix] ?? prefix}
+          </h2>
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left opacity-60">
-                <th className="pb-2 pr-4">Módulo</th>
+              <tr className="text-left">
+                <th className="pb-2 pr-4 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Módulo</th>
                 {rightEntries.map(([name]) => (
-                  <th key={name} className="pb-2 text-center">
+                  <th key={name} className="pb-2 text-center text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">
                     {RIGHT_LABELS[name] ?? name}
                   </th>
                 ))}
@@ -155,7 +157,7 @@ export function PermissionMatrix({ profileId, moduleKeys, rightBits, initialRigh
             <tbody>
               {keys.map((moduleKey) => (
                 <tr key={moduleKey} className="border-t border-black/5 dark:border-white/5">
-                  <td className="py-1.5 pr-4 font-mono text-xs opacity-80">{moduleKey}</td>
+                  <td className="py-1.5 pr-4">{moduleLabel(moduleKey)}</td>
                   {rightEntries.map(([name, bit]) => {
                     const checked = ((rights[moduleKey] ?? 0) & bit) === bit;
                     const isPending = pendingKey === `${moduleKey}:${bit}`;
