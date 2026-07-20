@@ -7,6 +7,8 @@
     "aiAssistant": "AI Assistant",
     "dashboard": "Dashboard",
     "account": "My account",
+    "groupPrincipal": "Main",
+    "groupSistema": "System",
     "sectionAsistencia": "Service Desk",
     "tickets": "Tickets",
     "problems": "Problems",

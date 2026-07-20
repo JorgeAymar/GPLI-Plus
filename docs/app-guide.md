@@ -100,7 +100,7 @@ Endpoint MCP (Model Context Protocol) real, para que un cliente MCP (Claude Desk
 ## Testing
 
 - **Unitarios/integración** (Vitest, `pnpm test`): 688 tests en `packages/core` + 4 en `apps/web` (i18n), contra Postgres real (sin mocks), un archivo por servicio + validación Zod.
-- **End-to-end** (Playwright, `pnpm e2e` / `npx playwright test`): 234 tests en `e2e/specs/`, uno por sección del sidebar más una capa QA de datos propios/validación de tipos, con login real vía UI y datos generados en cada corrida. Reporte HTML: `pnpm e2e:report`.
+- **End-to-end** (Playwright, `pnpm e2e` / `npx playwright test`): 235 tests en `e2e/specs/`, uno por sección del sidebar más una capa QA de datos propios/validación de tipos, con login real vía UI y datos generados en cada corrida. Reporte HTML: `pnpm e2e:report`.
 - **Integración MCP real** (`apps/web/app/api/mcp/mcp-route.integration.test.ts`): usa el SDK cliente de MCP de verdad (no solo curl) contra un `npm run dev` corriendo. Separado del `pnpm test` por defecto — correr con `pnpm --filter @itsm/web test:mcp-integration`.
 
 Ver [`qa-report.md`](qa-report.md) para el detalle completo de bugs encontrados/corregidos, auditoría de índices, valores hardcodeados, campos de base de datos sin uso y código muerto.
