@@ -225,8 +225,12 @@ export function AssistantChat() {
       <aside className="flex w-56 shrink-0 flex-col overflow-hidden rounded-md border border-black/10 dark:border-white/10">
         <div className="flex items-center justify-between border-b border-black/10 px-3 py-2 dark:border-white/10">
           <span className="text-xs font-medium uppercase tracking-wide opacity-60">{t("history")}</span>
-          <button type="button" onClick={startNewConversation} className="text-sm opacity-70 hover:opacity-100">
-            {t("newConversation")}
+          <button
+            type="button"
+            onClick={startNewConversation}
+            className="rounded-md bg-accent px-2 py-1 text-xs font-medium text-white hover:bg-accent-hover"
+          >
+            + {t("newConversation")}
           </button>
         </div>
         <ul className="flex-1 space-y-1 overflow-y-auto p-2">
@@ -300,7 +304,7 @@ export function AssistantChat() {
                           ul: (p) => <ul className="list-disc space-y-1 pl-5" {...p} />,
                           ol: (p) => <ol className="list-decimal space-y-1 pl-5" {...p} />,
                           strong: (p) => <strong className="font-semibold" {...p} />,
-                          code: (p) => <code className="rounded bg-black/5 px-1 py-0.5 font-mono text-xs dark:bg-white/10" {...p} />,
+                          code: (p) => <code className="rounded bg-black px-1 py-0.5 font-mono text-xs text-white" {...p} />,
                         }}
                       >
                         {stripLatex(m.content)}
