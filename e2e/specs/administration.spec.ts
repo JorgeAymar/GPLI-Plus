@@ -316,14 +316,14 @@ test.describe.serial("Profiles - create + permission matrix toggle/persist (E2E-
   test("the new profile's permission matrix starts fully unchecked", async ({ page }) => {
     await page.goto(detailUrl);
     await expect(page.getByRole("heading", { level: 1, name: profileName })).toBeVisible();
-    const row = page.locator("tr", { hasText: "administration.entity" });
+    const row = page.locator("tr", { hasText: "Administración - Entidades" });
     await expect(row).toBeVisible();
     await expect(row.getByRole("checkbox").first()).not.toBeChecked();
   });
 
   test("toggling a right checkbox persists across reload, in both directions", async ({ page }) => {
     await page.goto(detailUrl);
-    const row = () => page.locator("tr", { hasText: "administration.entity" });
+    const row = () => page.locator("tr", { hasText: "Administración - Entidades" });
     const checkbox = () => row().getByRole("checkbox").first();
 
     await checkbox().click();
@@ -641,7 +641,7 @@ test.describe.serial("QA - Profiles: perfil propio con permisos en cero y su apl
 
     // Column order matches RIGHT (packages/core/src/auth/permissions.ts) object-literal insertion
     // order - READ, CREATE, UPDATE, DELETE, PURGE, APPROVE, ASSIGN - so CREATE is the 2nd checkbox.
-    const entityRow = page.locator("tr", { hasText: "administration.entity" });
+    const entityRow = page.locator("tr", { hasText: "Administración - Entidades" });
     const createCheckbox = entityRow.getByRole("checkbox").nth(1);
     await expect(createCheckbox).not.toBeChecked();
     await createCheckbox.click();

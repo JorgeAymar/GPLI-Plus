@@ -31,7 +31,11 @@ export default async function AccountPage() {
           <dt className="opacity-60">{t("activeEntity")}</dt>
           <dd>{context.activeEntity.name}</dd>
           <dt className="opacity-60">{t("activeProfile")}</dt>
-          <dd>{context.activeProfile.name}</dd>
+          <dd>
+            <span className="rounded-md bg-black/10 px-2 py-0.5 text-xs font-medium dark:bg-white/15">
+              {context.activeProfile.name}
+            </span>
+          </dd>
         </dl>
       </section>
 

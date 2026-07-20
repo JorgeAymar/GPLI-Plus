@@ -14,24 +14,24 @@ function buildChildIndex(entities: Entity[]): Map<string | null, Entity[]> {
 function EntityNode({
   entity,
   byParent,
-  depth,
 }: {
   entity: Entity;
   byParent: Map<string | null, Entity[]>;
-  depth: number;
 }) {
   const children = byParent.get(entity.id) ?? [];
   return (
     <div>
-      <div
-        style={{ paddingLeft: `${depth * 1.25}rem` }}
-        className="rounded px-2 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/5"
-      >
-        {entity.name} <span className="opacity-40">({entity.path})</span>
+      <div className="rounded px-2 py-1.5 hover:bg-black/5 dark:hover:bg-white/5">
+        <div className="text-sm font-medium">{entity.name}</div>
+        <div className="font-mono text-xs opacity-40">{entity.path}</div>
       </div>
-      {children.map((c) => (
-        <EntityNode key={c.id} entity={c} byParent={byParent} depth={depth + 1} />
-      ))}
+      {children.length > 0 ? (
+        <div className="ml-3 border-l border-black/10 pl-3 dark:border-white/10">
+          {children.map((c) => (
+            <EntityNode key={c.id} entity={c} byParent={byParent} />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -47,7 +47,7 @@ export function EntityTree({ entities }: { entities: Entity[] }) {
   return (
     <div>
       {roots.map((r) => (
-        <EntityNode key={r.id} entity={r} byParent={byParent} depth={0} />
+        <EntityNode key={r.id} entity={r} byParent={byParent} />
       ))}
     </div>
   );
