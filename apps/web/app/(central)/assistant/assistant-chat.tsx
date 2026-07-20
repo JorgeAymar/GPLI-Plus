@@ -9,6 +9,32 @@ interface ChatMessage {
   content: string;
 }
 
+/**
+ * The model is instructed (system prompt) to avoid LaTeX and use unicode
+ * symbols instead, but that's a soft instruction it doesn't always follow -
+ * this is a deterministic fallback so `$\rightarrow$`-style output still
+ * renders correctly regardless of whether the model complied.
+ */
+const LATEX_REPLACEMENTS: [RegExp, string][] = [
+  [/\\rightarrow/g, "→"],
+  [/\\leftarrow/g, "←"],
+  [/\\leftrightarrow/g, "↔"],
+  [/\\times/g, "×"],
+  [/\\div/g, "÷"],
+  [/\\leq/g, "≤"],
+  [/\\geq/g, "≥"],
+  [/\\neq/g, "≠"],
+];
+
+function stripLatex(content: string): string {
+  let result = content;
+  for (const [pattern, replacement] of LATEX_REPLACEMENTS) {
+    result = result.replace(pattern, replacement);
+  }
+  // Drop now-empty inline math delimiters left behind, e.g. "$→$" -> "→".
+  return result.replace(/\$([^$]*)\$/g, "$1");
+}
+
 interface ConversationSummary {
   id: string;
   title: string;
@@ -277,7 +303,7 @@ export function AssistantChat() {
                           code: (p) => <code className="rounded bg-black/5 px-1 py-0.5 font-mono text-xs dark:bg-white/10" {...p} />,
                         }}
                       >
-                        {m.content}
+                        {stripLatex(m.content)}
                       </Markdown>
                     ) : (
                       <span className="whitespace-pre-wrap">{m.content}</span>
