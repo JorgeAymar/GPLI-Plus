@@ -25,6 +25,25 @@ function parseDateEnd(value?: string): Date | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date;
 }
 
+/**
+ * Color-codes the audit action so it scans like the status badges used
+ * elsewhere in the app (see components/status-badge.tsx) - `action` here is
+ * a free-form string set by each service (create/update/delete/restore/
+ * purge/status_change/...), not a fixed enum, so this only maps the common
+ * prefixes and falls back to neutral for anything else. Never hides the
+ * actual action text, just colors it.
+ */
+function actionBadgeClass(action: string): string {
+  const variant = action === "create" || action === "restore"
+    ? "bg-green-500/10 text-green-700 dark:text-green-400"
+    : action === "delete" || action === "purge"
+      ? "bg-red-500/10 text-red-700 dark:text-red-400"
+      : action === "update" || action === "status_change"
+        ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+        : "bg-black/10 text-black/70 dark:bg-white/15 dark:text-white/70";
+  return `rounded-md px-1.5 py-0.5 text-xs whitespace-nowrap ${variant}`;
+}
+
 /** Builds a pagination link that preserves every filter already in the URL, only overriding `page`. */
 function buildHref(params: AuditLogSearchParams, page: number): string {
   const query = new URLSearchParams();
@@ -139,7 +158,9 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Pro
           {entries.map((entry) => (
             <tr key={entry.id} className="border-t border-black/5 align-top dark:border-white/5">
               <td className="whitespace-nowrap py-2 opacity-70">{entry.createdAt.toLocaleString()}</td>
-              <td className="py-2">{entry.action}</td>
+              <td className="py-2">
+                <span className={actionBadgeClass(entry.action)}>{entry.action}</span>
+              </td>
               <td className="py-2 opacity-70">{entry.objectType}</td>
               <td className="py-2 font-mono text-xs opacity-70" title={entry.objectId}>
                 {entry.objectId.slice(0, 8)}…

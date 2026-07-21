@@ -41,7 +41,11 @@ export default async function ConsumableItemDetailPage({ params }: { params: Pro
           <dt className="opacity-60">Disponibles</dt>
           <dd>
             {available}
-            {belowThreshold ? <span className="ml-2 font-medium text-red-600">Bajo stock</span> : null}
+            {belowThreshold ? (
+              <span className="ml-2 rounded-md bg-red-500/10 px-1.5 py-0.5 text-xs whitespace-nowrap text-red-700 dark:text-red-400">
+                Bajo stock
+              </span>
+            ) : null}
           </dd>
           <dt className="opacity-60">Umbral de alerta</dt>
           <dd>{item.alertThreshold ?? "-"}</dd>

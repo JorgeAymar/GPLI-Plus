@@ -17,15 +17,15 @@ export default async function GroupsPage() {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
           <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Existentes</h2>
-          <ul className="space-y-1">
+          <ul className="divide-y divide-black/5 dark:divide-white/5">
             {groups.map((g) => (
-              <li key={g.id} className="text-sm">
+              <li key={g.id} className="py-2 text-sm">
                 <Link href={`/administration/groups/${g.id}`} className="hover:underline">
                   {g.name}
                 </Link>
               </li>
             ))}
-            {groups.length === 0 ? <li className="text-sm opacity-50">Sin grupos todavía.</li> : null}
+            {groups.length === 0 ? <li className="py-2 text-sm opacity-50">Sin grupos todavía.</li> : null}
           </ul>
         </div>
         <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
