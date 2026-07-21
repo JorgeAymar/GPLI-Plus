@@ -236,7 +236,7 @@ test.describe.serial("Base de conocimiento - flujo E2E", () => {
     await isFaqCheckbox.check();
     await page.getByRole("button", { name: "Crear artículo" }).click();
 
-    await expect(page.getByRole("link", { name: `${articleTitle} (FAQ)` })).toBeVisible();
+    await expect(page.getByRole("link", { name: `${articleTitle}FAQ` })).toBeVisible();
 
     expectNoCriticalErrors(diagnostics);
   });
@@ -244,7 +244,7 @@ test.describe.serial("Base de conocimiento - flujo E2E", () => {
   test("el detalle del artículo muestra su contenido y el historial de revisiones", async ({ page }) => {
     const diagnostics = attachDiagnostics(page);
     await page.goto("/tools/knowledge-base");
-    await page.getByRole("link", { name: `${articleTitle} (FAQ)` }).click();
+    await page.getByRole("link", { name: `${articleTitle}FAQ` }).click();
     await page.waitForURL(/\/tools\/knowledge-base\/[^/]+$/);
 
     await expect(page.getByRole("heading", { level: 1, name: articleTitle })).toBeVisible();
@@ -263,7 +263,7 @@ test.describe.serial("Base de conocimiento - flujo E2E", () => {
   test("agregar un comentario lo muestra en la lista de comentarios", async ({ page }) => {
     const diagnostics = attachDiagnostics(page);
     await page.goto("/tools/knowledge-base");
-    await page.getByRole("link", { name: `${articleTitle} (FAQ)` }).click();
+    await page.getByRole("link", { name: `${articleTitle}FAQ` }).click();
     await page.waitForURL(/\/tools\/knowledge-base\/[^/]+$/);
 
     const commentBox = page.locator('textarea[name="content"]');
