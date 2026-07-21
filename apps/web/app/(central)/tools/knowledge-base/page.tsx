@@ -37,7 +37,9 @@ export default async function KnowledgeBasePage({ searchParams }: { searchParams
                 <Link href={`/tools/knowledge-base/${a.id}`} className="text-sm hover:underline">
                   {a.isPinned ? "\u{1F4CC} " : ""}
                   {a.title}
-                  {a.isFaq ? <span className="opacity-40"> (FAQ)</span> : null}
+                  {a.isFaq ? (
+                    <span className="ml-2 rounded-md border border-black/15 px-2 py-0.5 text-xs dark:border-white/15">FAQ</span>
+                  ) : null}
                 </Link>
               </li>
             ))}

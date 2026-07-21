@@ -21,8 +21,8 @@ export default async function ApiClientsPage() {
       </p>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div className="min-w-0">
-          <h2 className="mb-2 text-sm font-semibold">Clientes existentes</h2>
+        <div className="min-w-0 rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Clientes existentes</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -67,8 +67,8 @@ export default async function ApiClientsPage() {
             </table>
           </div>
         </div>
-        <div>
-          <h2 className="mb-2 text-sm font-medium opacity-60">Nuevo cliente API</h2>
+        <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+          <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-medium opacity-60 dark:border-white/10">Nuevo cliente API</h2>
           <ApiClientForm entityId={context.activeEntity.id} scopeOptions={Object.values(MODULE)} />
         </div>
       </div>

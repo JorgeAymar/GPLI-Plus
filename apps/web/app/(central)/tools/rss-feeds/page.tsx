@@ -23,7 +23,11 @@ export default async function RssFeedsPage() {
                 <Link href={`/tools/rss-feeds/${f.id}`} className="hover:underline">
                   {f.name}
                 </Link>
-                {f.haveError ? <span className="ml-2 text-xs text-red-600">error</span> : null}
+                {f.haveError ? (
+                  <span className="ml-2 rounded-md bg-red-500/10 px-1.5 py-0.5 text-xs whitespace-nowrap text-red-700 dark:text-red-400">
+                    error
+                  </span>
+                ) : null}
                 {f.isActive ? null : <span className="ml-2 text-xs opacity-40">(inactivo)</span>}
               </li>
             ))}
