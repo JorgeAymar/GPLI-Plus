@@ -46,7 +46,11 @@ export default async function SavedSearchesPage() {
               <li key={s.id} className="flex items-center justify-between gap-2 text-sm">
                 <span>
                   {s.name} <span className="opacity-40">({ITEM_TYPE_LABEL[s.itemType] ?? s.itemType})</span>
-                  {s.isPrivate ? null : <span className="opacity-40"> · compartida</span>}
+                  {s.isPrivate ? null : (
+                    <span className="ml-2 rounded-md border border-black/15 px-2 py-0.5 text-xs dark:border-white/15">
+                      compartida
+                    </span>
+                  )}
                 </span>
                 <Link
                   href={buildUseHref(s.itemType, s.queryJson)}

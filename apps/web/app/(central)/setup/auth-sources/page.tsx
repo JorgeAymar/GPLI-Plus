@@ -20,8 +20,8 @@ export default async function AuthSourcesPage() {
       <section className="space-y-4">
         <h2 className="text-lg font-medium">LDAP</h2>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-          <div>
-            <h3 className="mb-2 text-sm font-semibold">Servidores configurados</h3>
+          <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+            <h3 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Servidores configurados</h3>
             <ul className="space-y-2">
               {sources.map((s) => (
                 <li key={s.id} className="rounded-md border border-black/10 p-3 text-sm dark:border-white/10">
@@ -43,8 +43,8 @@ export default async function AuthSourcesPage() {
               {sources.length === 0 ? <li className="text-sm opacity-50">Sin fuentes LDAP todavía.</li> : null}
             </ul>
           </div>
-          <div>
-            <h3 className="mb-2 text-sm font-medium opacity-60">Nueva fuente LDAP</h3>
+          <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
+            <h3 className="mb-4 border-b border-black/10 pb-3 text-sm font-medium opacity-60 dark:border-white/10">Nueva fuente LDAP</h3>
             <p className="mb-3 text-xs opacity-50">
               La contraseña del bind se guarda en texto plano en esta versión (v1) - el cifrado en reposo es una
               mejora de infraestructura pendiente, fuera del alcance de este módulo.

@@ -50,19 +50,22 @@ export default async function RackDetailPage({ params }: { params: Promise<{ ass
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left">
-                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">U</th>
-                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Altura</th>
-                  <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Orientación</th>
+                  <th className="pr-4 pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">U</th>
+                  <th className="pr-4 pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Altura</th>
+                  <th className="pr-4 pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Orientación</th>
                   <th className="pb-2 text-[11px] font-bold tracking-wider text-black/60 uppercase dark:text-white/60">Ocupante</th>
                   <th className="pb-2"></th>
                 </tr>
               </thead>
               <tbody>
                 {slots.map((slot) => (
-                  <tr key={slot.id} className="border-t border-black/5 dark:border-white/5">
-                    <td className="py-2">{slot.positionU}</td>
-                    <td className="py-2 opacity-70">{slot.unitHeight}</td>
-                    <td className="py-2 opacity-70">{slot.orientation}</td>
+                  <tr
+                    key={slot.id}
+                    className="border-t border-black/5 hover:bg-black/[0.02] dark:border-white/5 dark:hover:bg-white/[0.03]"
+                  >
+                    <td className="py-2 pr-4">{slot.positionU}</td>
+                    <td className="py-2 pr-4 opacity-70">{slot.unitHeight}</td>
+                    <td className="py-2 pr-4 opacity-70">{slot.orientation}</td>
                     <td className="py-2 opacity-70">
                       {slot.occupantAssetId ? (assetById.get(slot.occupantAssetId)?.name ?? slot.occupantAssetId) : "-"}
                     </td>
