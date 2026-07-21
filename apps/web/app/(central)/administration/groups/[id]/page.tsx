@@ -24,15 +24,15 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ id
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="rounded-md border border-black/10 p-6 dark:border-white/10">
           <h2 className="mb-4 border-b border-black/10 pb-3 text-sm font-semibold dark:border-white/10">Miembros</h2>
-          <ul className="space-y-1">
+          <ul className="divide-y divide-black/5 dark:divide-white/5">
             {members.map((m) => (
-              <li key={m.userId} className="flex items-center gap-2 text-sm">
+              <li key={m.userId} className="flex items-center gap-2 py-2 text-sm">
                 {m.displayName}
                 {m.isManager ? <span className="text-xs opacity-40">(responsable)</span> : null}
                 <RemoveMemberButton userId={m.userId} groupId={id} />
               </li>
             ))}
-            {members.length === 0 ? <li className="text-sm opacity-50">Sin miembros todavía.</li> : null}
+            {members.length === 0 ? <li className="py-2 text-sm opacity-50">Sin miembros todavía.</li> : null}
           </ul>
         </div>
         <div className="rounded-md border border-black/10 p-6 dark:border-white/10">

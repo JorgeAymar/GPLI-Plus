@@ -65,7 +65,10 @@ export default async function AssetsPage({ searchParams }: { searchParams: Promi
             {assets.map((a) => {
               const definition = definitionById.get(a.assetDefinitionId);
               return (
-                <tr key={a.id} className="border-t border-black/5 dark:border-white/5">
+                <tr
+                  key={a.id}
+                  className="border-t border-black/5 hover:bg-black/[0.02] dark:border-white/5 dark:hover:bg-white/[0.03]"
+                >
                   <td className="py-2">
                     {definition ? (
                       <Link href={assetDetailHref(definition.key, a.id)} className="hover:underline">

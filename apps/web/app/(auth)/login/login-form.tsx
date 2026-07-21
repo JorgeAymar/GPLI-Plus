@@ -21,7 +21,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
         action={formAction}
         className="w-full max-w-sm space-y-6 rounded-md border border-black/10 p-8 dark:border-white/10"
       >
-        <div className="space-y-3">
+        <div className="flex flex-col items-center space-y-3 text-center">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-accent text-sm font-semibold text-white">G+</div>
           <div>
             <h1 className="text-2xl font-semibold">Verificá tu identidad</h1>
@@ -73,7 +73,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
       action={formAction}
       className="w-full max-w-sm space-y-6 rounded-md border border-black/10 p-8 dark:border-white/10"
     >
-      <div className="space-y-3">
+      <div className="flex flex-col items-center space-y-3 text-center">
         <div className="flex h-9 w-9 items-center justify-center rounded-md bg-accent text-sm font-semibold text-white">G+</div>
         <div>
           <h1 className="text-2xl font-semibold">Iniciar sesión</h1>
@@ -112,9 +112,19 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute inset-y-0 right-0 px-3 text-xs opacity-60 hover:opacity-100"
+              className="absolute inset-y-0 right-0 flex items-center gap-1 px-3 text-xs opacity-60 hover:opacity-100"
               aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
             >
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-4 w-4">
+                {showPassword ? (
+                  <path d="M3 3l14 14M9.5 9.7a2 2 0 0 0 2.8 2.8M7 5.3A8.6 8.6 0 0 1 10 5c4 0 7 3 8 5-.4.8-1.3 2.1-2.7 3.2M5.2 6.9C3.8 8 2.9 9.3 2.5 10c1 2 4 5 7.5 5 .9 0 1.7-.2 2.5-.5" />
+                ) : (
+                  <>
+                    <path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5Z" />
+                    <circle cx="10" cy="10" r="2.25" />
+                  </>
+                )}
+              </svg>
               {showPassword ? "Ocultar" : "Mostrar"}
             </button>
           </div>

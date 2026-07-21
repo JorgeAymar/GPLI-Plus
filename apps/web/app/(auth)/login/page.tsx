@@ -23,7 +23,10 @@ export default async function LoginPage({
           Esto solo guarda tu preferencia. Todavía no cambia el idioma de la interfaz.
         </p>
       </div>
-      <LoginForm callbackUrl={callbackUrl ?? "/"} />
+      <div className="flex flex-col items-center gap-4">
+        <LoginForm callbackUrl={callbackUrl ?? "/"} />
+        <p className="text-center text-xs opacity-40">© {new Date().getFullYear()} GLPI-Plus. Todos los derechos reservados.</p>
+      </div>
     </div>
   );
 }

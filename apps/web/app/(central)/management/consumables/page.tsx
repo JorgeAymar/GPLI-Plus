@@ -35,7 +35,11 @@ export default async function ConsumablesPage() {
                   {item.name}
                 </Link>{" "}
                 <span className="opacity-40">({available} disponibles)</span>
-                {belowThreshold ? <span className="ml-2 font-medium text-red-600">Bajo stock</span> : null}
+                {belowThreshold ? (
+                  <span className="ml-2 rounded-md bg-red-500/10 px-1.5 py-0.5 text-xs whitespace-nowrap text-red-700 dark:text-red-400">
+                    Bajo stock
+                  </span>
+                ) : null}
               </li>
             ))}
             {itemsWithStock.length === 0 ? <li className="text-sm opacity-50">Sin consumibles todavía.</li> : null}
