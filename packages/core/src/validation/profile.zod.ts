@@ -4,7 +4,6 @@ export const createProfileSchema = z.object({
   name: z.string().min(1).max(100),
   interface: z.enum(["central", "simplified"]),
   description: z.string().max(500).nullable().optional(),
-  isDefault: z.boolean().optional(),
 });
 export type CreateProfileInput = z.infer<typeof createProfileSchema>;
 

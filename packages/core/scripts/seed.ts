@@ -72,7 +72,6 @@ async function main() {
       name: "Super-Admin",
       interface: "central",
       description: "Acceso total a todos los módulos",
-      isDefault: true,
     }));
   for (const moduleKey of Object.values(MODULE)) {
     await setModuleRight(adminProfile.id, moduleKey, FULL_RIGHTS);

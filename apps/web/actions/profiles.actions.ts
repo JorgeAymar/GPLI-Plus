@@ -32,7 +32,6 @@ export async function createProfileAction(input: {
   name: string;
   interface: "central" | "simplified";
   description?: string | null;
-  isDefault?: boolean;
 }): Promise<CreateProfileResult> {
   const context = await requireAuthContext();
   await requireRight(context, MODULE.ADMINISTRATION_PROFILE, RIGHT.CREATE);

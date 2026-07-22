@@ -5,6 +5,7 @@ import {
   listAssetComponents,
   listInstallationsForAsset,
   listSoftware,
+  listSoftwareLicenses,
   listSoftwareVersions,
 } from "@itsm/core";
 import type { Metadata } from "next";
@@ -33,16 +34,23 @@ export default async function ComputerDetailPage({ params }: { params: Promise<{
     listSoftware(context.activeEntity.id, { includeSubtree: true }),
   ]);
 
-  // Flatten software -> versions into a single {id, label} list for the
-  // install-software select, and a lookup map to label existing installations.
+  // Flatten software -> versions/licenses into single {id, label} lists for the
+  // install-software selects, and a lookup map to label existing installations.
+  // Licenses are scoped to the software product (not a specific version, same as
+  // softwareLicenses.softwareVersionId being optional) - listed flat like versions,
+  // labeled with the parent software's name so the user can match it manually.
   const versionLabels = new Map<string, string>();
   const versionOptions: { id: string; label: string }[] = [];
+  const licenseOptions: { id: string; label: string }[] = [];
   for (const item of softwareList) {
-    const versions = await listSoftwareVersions(item.id);
+    const [versions, licenses] = await Promise.all([listSoftwareVersions(item.id), listSoftwareLicenses(item.id)]);
     for (const v of versions) {
       const label = `${item.name} ${v.name}`;
       versionLabels.set(v.id, label);
       versionOptions.push({ id: v.id, label });
+    }
+    for (const l of licenses) {
+      licenseOptions.push({ id: l.id, label: `${item.name} — ${l.name}` });
     }
   }
 
@@ -99,7 +107,7 @@ export default async function ComputerDetailPage({ params }: { params: Promise<{
           ))}
           {installations.length === 0 ? <li className="text-sm opacity-50">Sin software instalado todavía.</li> : null}
         </ul>
-        <InstallSoftwareForm assetId={asset.id} versionOptions={versionOptions} />
+        <InstallSoftwareForm assetId={asset.id} versionOptions={versionOptions} licenseOptions={licenseOptions} />
       </div>
 
       <AttachmentsSection itemType="computer" itemId={asset.id} revalidatePathTarget={`/assets/computers/${asset.id}`} />

@@ -12,7 +12,6 @@ async function action(_prev: FormState | undefined, formData: FormData): Promise
     name: formData.get("name") as string,
     interface: formData.get("interface") as "central" | "simplified",
     description: (formData.get("description") as string) || null,
-    isDefault: formData.get("isDefault") === "on",
   });
   return result.error ? { error: result.error } : {};
 }
@@ -56,9 +55,6 @@ export function ProfileForm() {
           className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
         />
       </div>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="isDefault" /> Perfil por defecto
-      </label>
       {state?.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
       <button
         type="submit"
