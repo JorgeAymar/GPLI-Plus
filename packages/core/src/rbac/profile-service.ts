@@ -5,7 +5,6 @@ export async function createProfile(input: {
   name: string;
   interface: "central" | "simplified";
   description?: string | null;
-  isDefault?: boolean;
 }): Promise<Profile> {
   let created: Profile | undefined;
   try {
@@ -15,7 +14,6 @@ export async function createProfile(input: {
         name: input.name,
         interface: input.interface,
         description: input.description ?? null,
-        isDefault: input.isDefault ?? false,
       } satisfies NewProfile)
       .returning();
   } catch (err) {

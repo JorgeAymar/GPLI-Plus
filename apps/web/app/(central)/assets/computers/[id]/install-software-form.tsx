@@ -12,12 +12,19 @@ interface VersionOption {
   label: string;
 }
 
+interface LicenseOption {
+  id: string;
+  label: string;
+}
+
 function makeAction(assetId: string) {
   return async (_prev: FormState | undefined, formData: FormData): Promise<FormState> => {
     try {
+      const softwareLicenseId = formData.get("softwareLicenseId") as string;
       await createInstallationAction({
         assetId,
         softwareVersionId: formData.get("softwareVersionId") as string,
+        softwareLicenseId: softwareLicenseId || null,
       });
       return {};
     } catch (err) {
@@ -26,7 +33,15 @@ function makeAction(assetId: string) {
   };
 }
 
-export function InstallSoftwareForm({ assetId, versionOptions }: { assetId: string; versionOptions: VersionOption[] }) {
+export function InstallSoftwareForm({
+  assetId,
+  versionOptions,
+  licenseOptions,
+}: {
+  assetId: string;
+  versionOptions: VersionOption[];
+  licenseOptions: LicenseOption[];
+}) {
   const [state, formAction, isPending] = useActionState(makeAction(assetId), undefined);
 
   return (
@@ -42,6 +57,23 @@ export function InstallSoftwareForm({ assetId, versionOptions }: { assetId: stri
           {versionOptions.map((v) => (
             <option key={v.id} value={v.id}>
               {v.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="flex-1">
+        {/* Optional: counts against the license's seat total (see countSeatsUsed) - left
+            unselected when a computer is running unlicensed/unmanaged software. */}
+        <label htmlFor="install-software-license" className="text-sm font-medium">Licencia (opcional)</label>
+        <select
+          id="install-software-license"
+          name="softwareLicenseId"
+          className="mt-1 w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
+        >
+          <option value="">Sin licencia</option>
+          {licenseOptions.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.label}
             </option>
           ))}
         </select>

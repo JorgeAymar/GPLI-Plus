@@ -126,7 +126,73 @@ Gaps reales pero deliberadamente no inventados (fuera del alcance de "encontrar 
 - `software-license-form.tsx` no expone `purchaseDate`/`expirationDate` pese a que el schema los soporta.
 - `rss-feed.zod.ts` no aplica la validación anti-SSRF a nivel de schema (el guard real corre después, dentro de `refreshRssFeed()`).
 
-## 11. Documentación relacionada
+## 12. Cuarta ronda: confirmación completa contra localhost (2026-07-21)
+
+Ronda de **validación**, no de descubrimiento — el objetivo fue confirmar en vivo que todo lo documentado en las rondas 1-3 (índices, hardcodeo, tests) sigue sostenido hoy, correr la suite completa por CLI contra `localhost:3210`, y cerrar cualquier bug real que apareciera. Entremedio de la Tercera ronda (§7, 690 unit + 152 E2E) y esta, un trabajo previo no documentado en este archivo agregó **Jest** (`tests/jest/`, suite separada de Vitest — ver comentario en `tests/jest/jest.config.js`) cerrando los 2 gaps unitarios de alto riesgo que `docs/superpowers/specs/2026-07-19-plan-de-pruebas.md` había identificado (`auth/get-auth-context.ts`, `rules/rule-engine.ts`) + tests de 5 `apps/web/actions/*.ts`, y amplió la suite E2E con bloques `QA:`/`QA -` de validación de formularios (datos propios generados, no hardcodeados, más casos de campo vacío/formato inválido/fuera de rango) en `setup.spec.ts` y `tools.spec.ts`.
+
+**Estado confirmado hoy, corrida real:**
+
+| Suite | Comando | Resultado |
+|---|---|---|
+| Jest | `pnpm test:jest` | **71/71** (7 suites) |
+| Vitest | `pnpm exec vitest run` (`packages/core`) | **693/693** (81 archivos) |
+| Playwright E2E | `pnpm exec playwright test --project=chromium` contra `localhost:3210` | **236/236** (solo Chromium, único proyecto configurado) |
+
+- **1 falla transitoria triangulada, no un bug real**: `webhook-service.test.ts > dispatchPendingWebhooks POSTs...` dio timeout (20s) en la corrida con Jest+E2E+dev server compitiendo por recursos en simultáneo en esta máquina (además de ~10 contenedores Postgres de otros proyectos ya corriendo). Aislado, el mismo test pasa en 2.9s. Re-corrida de la suite completa de `packages/core` en solitario: 693/693 verde. No se tocó código — no había nada que corregir.
+- **Cobertura de validación de formularios (vacío/inválido/tipo incorrecto) ya está cerrada en los 8 módulos**, incluido Portal (`portal.spec.ts:81-117`, bloquea el submit con título vacío vía `validity.valid`) — no hizo falta agregar tests nuevos.
+- **Auditoría de índices re-confirmada, cero gaps**: cruce en vivo contra `pg_catalog` de las 140 columnas FK y las 29 columnas `entity_id` del schema — el diff contra los índices reales (incluyendo los que cubren como columna líder de una PK compuesta, ej. `user_groups_user_id_group_id_pk`) da **vacío** en ambos casos. Los 36 índices de la migración `0016_skinny_liz_osborn.sql` (§4) siguen siendo la base y ningún schema nuevo desde entonces quedó sin indexar. Pooling de conexiones (`pg.Pool` en `packages/db/src/client.ts`) confirmado en uso, no una conexión sin pool.
+- **Auditoría de hardcodeo re-confirmada**: cero secretos/contraseñas hardcodeadas fuera de fixtures de `*.test.ts` (valores de prueba tipo `"supersecret"`, nunca credenciales reales), cero URLs hardcodeadas fuera de placeholders de UI (`placeholder="https://ejemplo.com/..."`) y un link a la doc de Next.js. El único hardcodeo real que queda es el ya documentado en el plan de pruebas: **72/74 páginas con texto en español fijo en JSX, sin `next-intl`** — deliberadamente fuera de alcance de esta ronda (Fase 2 de i18n, migración propia de ~72 archivos, no un "arreglo" que quepa en un pase de QA).
+
+**Conclusión:** la app está en verde de punta a punta hoy contra `localhost` — 1000 tests (71+693+236) pasando, cero errores de consola/red en toda la corrida E2E, base de datos indexada sin gaps, sin hardcodeo real pendiente salvo la migración de i18n ya conocida y explícitamente diferida.
+
+## 13. Quinta ronda: auditoría exhaustiva de campos de DB sin uso + código muerto, vía 6 agentes en paralelo (2026-07-21)
+
+Repregunta explícita del usuario: "¿hay campos de BD que no se estén usando? ¿hay código muerto?". En vez de repetir el barrido manual de §8/§9 (ya parcialmente stale), se lanzaron **6 agentes en paralelo**, cada uno auditando ~8 de los 47 archivos de schema (`packages/db/src/schema/*.ts`) columna por columna contra uso real en `apps/web` + `packages/core` + `apps/worker` (excluyendo tests y migraciones). Además se corrió **`knip`** (instalado temporalmente, desinstalado al terminar) para un barrido automático de exports/dependencias sin uso en todo el monorepo.
+
+### 13.1 Correcciones a hallazgos ya documentados (staleness real, confirmada con código actual)
+
+| Hallazgo viejo (§8/§9) | Estado hoy |
+|---|---|
+| `users.language`/`.timezone` "reservados, nunca leídos" | **`language` es STALE — ahora SÍ se usa** (Fase 1 de i18n: `account/page.tsx` → `LanguageForm` → `updateMyLanguageAction` → JWT → `i18n/request.ts` resuelve el locale real). `.timezone` sigue sin uso, confirmado. |
+| `assets.comment` write-only | **STALE** — `asset-edit-form.tsx`/`generic-asset-edit-form.tsx` ahora lo leen y muestran en el form de edición. |
+| `computers.lastBootAt` write-only | **STALE, más fuerte de lo esperado** — la columna **ya no existe** en el schema actual (fue removida). |
+| `savedSearches.lastExecutionAt`/`.executionCount` write-only | **STALE** — esas columnas exactas no existen más; la feature se refactorizó a la tabla `saved_search_alerts` (`lastCheckedAt`, sí se lee para throttling). |
+| `inventoryLockedFields.lockedAt` | **Dato incorrecto en el doc viejo** — esa columna no existe en `inventory.ts` actual (la tabla solo tiene `id`/`assetId`/`fieldName`). |
+| §9 "Server Actions huérfanas": `updateAssetAction`, `updateTicketAction`, `updateProblemAction`, `updateChangeAction`, `softDeleteContactAction` | **Las 5 son STALE** — todas están wireadas hoy a UI real (`asset-edit-form.tsx`, `ticket-edit-form.tsx`, `problem-edit-form.tsx`, `change-edit-form.tsx`, y un botón "Eliminar" en `/management/suppliers`... revisar: confirmado también para contacts). Se construyó edición completa de Activos/Tickets/Problemas/Cambios desde el reporte viejo. |
+
+### 13.2 Hallazgos nuevos, no documentados antes
+
+- **`impactContexts` es una tabla 100% muerta** — declarada y documentada en su propio comentario ("config de exploración del mapa de impacto por activo raíz"), pero nunca insertada ni leída en ningún lugar de `packages/core`/`apps/web` fuera de un test. La feature descrita nunca se construyó.
+- **Las 3 tablas de Auth.js (`accounts`, `sessions`, `verification_tokens`) están dormidas** — sus 17 columnas combinadas tienen cero referencias por nombre en todo el repo. Es consistente con la config real: `session: { strategy: "jwt" }` nunca invoca el adapter para sesiones, y no hay provider de email/passwordless ni SSO configurado activamente — las tablas solo se activarían si se configura `OIDC_ISSUER`/etc.
+- **Bug funcional real #1 — checkbox de "Perfil por defecto" no hace nada**: `profile-form.tsx` tiene un checkbox que escribe `profiles.isDefault`, pero la lógica real de resolución de perfil por defecto (`get-auth-context.ts`) lee una columna distinta: `user_profiles.isDefault` (por asignación usuario↔perfil↔entidad, no por perfil). El checkbox a nivel de perfil es UI engañosa — parece funcional pero no afecta nada.
+- **Bug funcional real #2 — conteo de asientos de licencias de software siempre da 0**: `countSeatsUsed()` cuenta instalaciones por `assetSoftwareInstallations.softwareLicenseId`, pero el único formulario que crea instalaciones (`install-software-form.tsx`) nunca envía ese campo — siempre queda `NULL`. El "X/Y asientos" mostrado en `/assets/software/[id]` está roto en la práctica, aunque el código de conteo en sí es correcto.
+- **Patrón recurrente: filtros de soft-delete "muertos" en 5+ módulos** (`certificates`, `consumableItems`, `contracts`, `projects`, `groups.isActive`) — cada uno tiene un filtro `isNull(deletedAt)`/`eq(isActive, true)` real en su `list*()`, pero **ningún módulo tiene una función que realmente lo setee** (sin UI de eliminar/desactivar) — el filtro es una guarda protectora permanentemente inerte, no un bug, pero sí superficie sin terminar repetida.
+- **`rss_feeds.refreshRateMinutes`** se captura, valida y muestra, pero el sweep real (`apps/worker/src/jobs/rss-feed-refresh.ts`) lo ignora y refresca todo cada 15 min fijo — ya documentado con comentario en el código como simplificación consciente, no un bug nuevo.
+- **`kbArticleCategories`/`kbCategories`, `clusterMembers`, `enclosureSlots`** — confirmado: siguen 100% sin superficie de UI, igual que documentaba §8/§9.
+
+### 13.3 Barrido `knip` (exports/dependencias sin uso, todo el monorepo)
+
+Resultado mucho más acotado que el barrido manual viejo (evidencia de que gran parte de la deuda de §9 ya se cerró): **2 hallazgos reales, corregidos en el momento**:
+- `statusLabel` en `status-badge.tsx` estaba exportado pero solo se usaba dentro del propio archivo → se le quitó el `export`.
+- `@itsm/db` en `apps/worker/package.json` era una dependencia declarada sin ningún import directo (el worker accede a datos vía `@itsm/core`) → removida.
+- Falso positivo descartado: `@auth/core` en `apps/web` parece sin uso para `knip` pero es necesario para el `declare module "@auth/core/jwt"` de `apps/web/lib/auth.ts` — no se tocó.
+- `knip` se instaló solo para este análisis y se desinstaló al terminar (no queda como dependencia permanente del repo).
+
+**No se tocó nada más** de §13.1/§13.2 más allá de las 2 correcciones de `knip` en el momento de escribir esto — los bugs funcionales #1 y #2 quedaron documentados, pendientes de decisión. Ambos se corrigieron en la siguiente pasada (§13.4).
+
+### 13.4 Bugs funcionales #1 y #2 corregidos (2026-07-22)
+
+**Bug #1 — checkbox "Perfil por defecto" muerto**: se decidió **quitar el checkbox** en vez de wirearlo a una nueva funcionalidad — `profiles.isDefault` no tenía ningún lector real y no era claro qué debería significar "perfil por defecto" a nivel de definición de perfil (a diferencia de `user_profiles.isDefault`, que sí es real: el flag por asignación usuario↔perfil↔entidad que `get-auth-context.ts` usa para resolver el contexto default al loguearse). Se quitó el checkbox de `profile-form.tsx` y se sacó `isDefault` de `createProfileAction`/`createProfileSchema`/`createProfile()` (la columna en sí no se tocó — sigue con default `false` a nivel de DB). `assignUserProfile()`/`assign-form.tsx` (el mecanismo real) no se tocaron.
+
+**Bug #2 — conteo de asientos de licencias siempre en 0**: se agregó un selector "Licencia (opcional)" a `InstallSoftwareForm` (`apps/web/app/(central)/assets/computers/[id]/install-software-form.tsx`), poblado con `listSoftwareLicenses()` por cada software en scope (mismo patrón ya usado para `versionOptions`), que ahora sí envía `softwareLicenseId` a `createInstallationAction`. El schema/servicio (`createInstallationSchema`, `createInstallation()`) ya soportaban el campo end-to-end — solo faltaba la UI.
+
+**Validación (Vitest + Playwright real, no solo lectura de código)**:
+- `pnpm exec vitest run src/rbac/profile-service.test.ts src/software/software-service.test.ts` → 21/21 verde.
+- Spec temporal de Playwright (creada y borrada en la misma sesión) confirmó en vivo: (a) el checkbox "Perfil por defecto" ya no existe en el form de creación, crear un perfil sigue funcionando; (b) crear software → versión → licencia (5 asientos) → computadora → instalar con licencia elegida → el detalle de software pasa de "0/5 asientos" a **"1/5 asientos"** — el bug real ya no reproduce.
+- Re-corrida completa de `administration.spec.ts` + `assets.spec.ts` (64 tests, incluida la cobertura preexistente de creación de perfiles/permisos y de instalación de software) → **64/64 verde**, sin regresiones.
+- `tsc --noEmit` en `apps/web` y `packages/core` limpio tras ambos cambios.
+
+## 14. Documentación relacionada
 
 - [`architecture-plan.md`](architecture-plan.md) — plan de arquitectura completo + narrativa de todas las fases, incluida la sección "Pase de testing y hardening" con este mismo resumen integrado al historial del proyecto.
 - [`app-guide.md`](app-guide.md) — guía funcional de la app por módulo.

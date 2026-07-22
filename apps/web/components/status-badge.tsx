@@ -35,7 +35,7 @@ const VARIANT_CLASSES: Record<StatusVariant, string> = {
   danger: "bg-red-500/10 text-red-700 dark:text-red-400",
 };
 
-export function statusLabel(status: string): string {
+function statusLabel(status: string): string {
   return STATUS_LABELS[status] ?? status;
 }
 

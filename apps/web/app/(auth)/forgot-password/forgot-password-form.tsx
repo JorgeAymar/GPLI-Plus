@@ -30,6 +30,7 @@ export function ForgotPasswordForm() {
             type="email"
             required
             autoComplete="email"
+            placeholder="ejemplo@glpi-plus.com"
             className="w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
           />
         </div>
