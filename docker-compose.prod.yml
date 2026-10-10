@@ -82,14 +82,37 @@ services:
   worker:
     # Same IMAGE_TAG convention as "web" (see above).
     image: itsm-worker:${IMAGE_TAG:-latest}
+    # Non-secret settings only: .env.worker is derived from .env.production by
+    # scripts/deploy.sh (secret keys stripped). DATABASE_URL, SMTP_PASSWORD and
+    # AI_API_KEY come from Swarm secrets, read at startup by
+    # apps/worker/src/load-secrets.ts via the *_FILE variables below.
     env_file:
-      - .env.production
+      - .env.worker
+    environment:
+      DATABASE_URL_FILE: /run/secrets/itsm_database_url
+      SMTP_PASSWORD_FILE: /run/secrets/itsm_smtp_password
+      AI_API_KEY_FILE: /run/secrets/itsm_ai_api_key
+    secrets:
+      - itsm_database_url
+      - itsm_smtp_password
+      - itsm_ai_api_key
     networks:
       - itsm_internal
     deploy:
       replicas: 1
       restart_policy:
         condition: any
+
+# Created once, out-of-band (secrets are immutable; to rotate, create a new one
+# with another name, update the references above and redeploy):
+#   printf %s "<value>" | docker secret create itsm_database_url -
+secrets:
+  itsm_database_url:
+    external: true
+  itsm_smtp_password:
+    external: true
+  itsm_ai_api_key:
+    external: true
 
 networks:
   itsm_internal:

@@ -45,6 +45,18 @@ if [ ! -f ".env.production" ]; then
   exit 1
 fi
 
+# Worker env file: everything in .env.production except the keys that reach the
+# worker as Swarm secrets (or that it doesn't use at all).
+grep -v -E '^(DATABASE_URL|SMTP_PASSWORD|AI_API_KEY|POSTGRES_PASSWORD|SEED_ADMIN_PASSWORD|AUTH_SECRET)=' .env.production > .env.worker
+chmod 600 .env.worker
+for s in itsm_database_url itsm_smtp_password itsm_ai_api_key; do
+  if ! docker secret inspect "${s}" >/dev/null 2>&1; then
+    echo "ERROR: Swarm secret '${s}' does not exist. Create it first:" >&2
+    echo "       printf %s '<value>' | docker secret create ${s} -" >&2
+    exit 1
+  fi
+done
+
 IMAGE_TAG="$(git rev-parse --short HEAD)"
 export IMAGE_TAG
 
