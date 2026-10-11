@@ -23,21 +23,12 @@ cd "$(dirname "$0")/.."
 
 STACK_NAME="itsm"
 COMPOSE_FILE="docker-compose.prod.yml"
-SERVICE="${STACK_NAME}_web"
-WORKER_SERVICE="${STACK_NAME}_worker"
 TIMEOUT_SECONDS=180
 POLL_INTERVAL=3
 INITIAL_DELAY_SECONDS=5
 WORKER_TIMEOUT_SECONDS=60
 WORKER_STABILITY_CHECK_SECONDS=10
 
-echo "==> Checking Docker Swarm is active..."
-swarm_state="$(docker info --format '{{.Swarm.LocalNodeState}}' 2>/dev/null || echo "unknown")"
-if [ "${swarm_state}" != "active" ]; then
-  echo "ERROR: Docker Swarm is not active on this host (state: ${swarm_state})." >&2
-  echo "Run 'docker swarm init' once — see README.md, section 'Producción'." >&2
-  exit 1
-fi
 
 if [ ! -f ".env.production" ]; then
   echo "ERROR: .env.production not found in repo root." >&2
@@ -49,12 +40,13 @@ fi
 # worker as Swarm secrets (or that it doesn't use at all).
 grep -v -E '^(DATABASE_URL|SMTP_PASSWORD|AI_API_KEY|POSTGRES_PASSWORD|SEED_ADMIN_PASSWORD|AUTH_SECRET)=' .env.production > .env.worker
 chmod 600 .env.worker
-for s in itsm_database_url itsm_smtp_password itsm_ai_api_key; do
-  if ! docker secret inspect "${s}" >/dev/null 2>&1; then
-    echo "ERROR: Swarm secret '${s}' does not exist. Create it first:" >&2
-    echo "       printf %s '<value>' | docker secret create ${s} -" >&2
-    exit 1
-  fi
+mkdir -p secrets && chmod 700 secrets
+for pair in itsm_database_url:DATABASE_URL itsm_smtp_password:SMTP_PASSWORD itsm_ai_api_key:AI_API_KEY; do
+  name="${pair%%:*}"; key="${pair##*:}"
+  ( umask 077; grep "^${key}=" .env.production | cut -d= -f2- | tr -d '\n' > "secrets/${name}" )
+  # The worker container runs as uid 1001 ("worker", see apps/worker/Dockerfile);
+  # plain-compose file secrets are bind mounts, so ownership/mode must allow it.
+  chown 1001:1001 "secrets/${name}" && chmod 440 "secrets/${name}"
 done
 
 IMAGE_TAG="$(git rev-parse --short HEAD)"
@@ -73,122 +65,31 @@ docker build -f apps/web/Dockerfile -t "itsm-web:${IMAGE_TAG}" .
 echo "==> Building itsm-worker:${IMAGE_TAG} ..."
 docker build -f apps/worker/Dockerfile -t "itsm-worker:${IMAGE_TAG}" .
 
-echo "==> Deploying stack '${STACK_NAME}' (IMAGE_TAG=${IMAGE_TAG}) ..."
-docker stack deploy -c "${COMPOSE_FILE}" "${STACK_NAME}"
+echo "==> Starting stack '${STACK_NAME}' (IMAGE_TAG=${IMAGE_TAG}) ..."
+docker compose -p "${STACK_NAME}" -f "${COMPOSE_FILE}" up -d
 
-# Give Swarm a moment to actually register the update before we start
-# polling — otherwise the first iteration can read stale UpdateStatus left
-# over from a *prior* deploy and misjudge convergence.
-echo "==> Waiting ${INITIAL_DELAY_SECONDS}s before polling for convergence..."
-sleep "${INITIAL_DELAY_SECONDS}"
+wait_running() { # $1=service, $2=timeout seconds
+  local svc="$1" timeout="$2" waited=0 cid state
+  while [ "${waited}" -lt "${timeout}" ]; do
+    cid="$(docker compose -p "${STACK_NAME}" -f "${COMPOSE_FILE}" ps -q "${svc}")"
+    state="$(docker inspect --format '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}}' "${cid}" 2>/dev/null || true)"
+    case "${state}" in "running healthy"|"running ") return 0 ;; esac
+    sleep "${POLL_INTERVAL}"; waited=$((waited + POLL_INTERVAL))
+  done
+  echo "ERROR: ${svc} did not reach running state within ${timeout}s (last state: ${state})." >&2
+  docker compose -p "${STACK_NAME}" -f "${COMPOSE_FILE}" logs --tail 30 "${svc}" >&2 || true
+  return 1
+}
 
-echo "==> Waiting for rollout to converge (timeout: ${TIMEOUT_SECONDS}s) ..."
-elapsed=0
-while [ "${elapsed}" -lt "${TIMEOUT_SECONDS}" ]; do
-  update_state="$(docker service inspect "${SERVICE}" --format '{{.UpdateStatus.State}}' 2>/dev/null || echo "")"
-
-  if [ "${update_state}" = "rollback_completed" ] || [ "${update_state}" = "rollback_paused" ]; then
-    echo "ERROR: Deploy failed health checks and was rolled back (UpdateStatus: ${update_state})." >&2
-    echo "--- docker service ps ${SERVICE} ---" >&2
-    docker service ps "${SERVICE}" --no-trunc >&2
-    exit 1
-  fi
-
-  # Converged means: a task running the image we just built is, on that SAME
-  # task line, actually in the "Running" state. This must NOT be two
-  # independent whole-output greps (one for the tag, one for "Running") —
-  # during the start-first transition window both the old task (image=old
-  # tag, state=Running) and new task (image=new tag, state=Starting) can
-  # appear together with desired-state=running, and two separate greps would
-  # each match a *different* line and false-positive on convergence before
-  # the new task is actually up.
-  task_pattern="^itsm-web:${IMAGE_TAG}[^|]*\|.*[Rr]unning"
-  task_converged=false
-  while IFS= read -r line; do
-    [ -z "${line}" ] && continue
-    if [[ "${line}" =~ ${task_pattern} ]]; then
-      task_converged=true
-      break
-    fi
-  done < <(docker service ps "${SERVICE}" --filter "desired-state=running" \
-    --format '{{.Image}}|{{.CurrentState}}' 2>/dev/null || true)
-
-  if [ "${task_converged}" = true ]; then
-    if [ "${update_state}" = "completed" ] || [ -z "${update_state}" ] || [ "${update_state}" = "<no value>" ]; then
-      echo "==> Rollout converged: itsm-web:${IMAGE_TAG} is running and healthy."
-      web_converged=true
-      break
-    fi
-  fi
-
-  sleep "${POLL_INTERVAL}"
-  elapsed=$((elapsed + POLL_INTERVAL))
+for svc in postgres web worker; do
+  echo "==> Waiting for ${svc} ..."
+  wait_running "${svc}" "${TIMEOUT_SECONDS}" || exit 1
 done
 
-if [ "${web_converged:-false}" != true ]; then
-  echo "ERROR: Timed out after ${TIMEOUT_SECONDS}s waiting for rollout to converge." >&2
-  echo "--- docker service ps ${SERVICE} ---" >&2
-  docker service ps "${SERVICE}" --no-trunc >&2
-  exit 1
-fi
-
-# The worker service (background jobs: SLA escalation, notifications,
-# recurring tickets, webhooks) has no HEALTHCHECK and no start-first update
-# config — a stalled/crashing worker deploy would otherwise return exit 0
-# here just because `web` came up fine, while jobs silently stop running.
-# This is a lighter check than web's (no rollback semantics to wait on,
-# since restart_policy: any handles that on its own): confirm a task on the
-# new image tag reaches Running, then re-check a few seconds later that it's
-# STILL Running (catches an immediate crash-loop, e.g. a bad DATABASE_URL).
-echo "==> Waiting for itsm-worker:${IMAGE_TAG} to come up (timeout: ${WORKER_TIMEOUT_SECONDS}s) ..."
-worker_pattern="^itsm-worker:${IMAGE_TAG}[^|]*\|.*[Rr]unning"
-worker_elapsed=0
-worker_up=false
-while [ "${worker_elapsed}" -lt "${WORKER_TIMEOUT_SECONDS}" ]; do
-  while IFS= read -r line; do
-    [ -z "${line}" ] && continue
-    if [[ "${line}" =~ ${worker_pattern} ]]; then
-      worker_up=true
-      break
-    fi
-  done < <(docker service ps "${WORKER_SERVICE}" --filter "desired-state=running" \
-    --format '{{.Image}}|{{.CurrentState}}' 2>/dev/null || true)
-
-  [ "${worker_up}" = true ] && break
-  sleep "${POLL_INTERVAL}"
-  worker_elapsed=$((worker_elapsed + POLL_INTERVAL))
-done
-
-if [ "${worker_up}" != true ]; then
-  echo "ERROR: itsm-worker:${IMAGE_TAG} did not reach Running within ${WORKER_TIMEOUT_SECONDS}s." >&2
-  echo "--- docker service ps ${WORKER_SERVICE} ---" >&2
-  docker service ps "${WORKER_SERVICE}" --no-trunc >&2
-  echo "--- docker service logs ${WORKER_SERVICE} (last 30 lines) ---" >&2
-  docker service logs --tail 30 "${WORKER_SERVICE}" >&2 || true
-  exit 1
-fi
-
-echo "==> Worker task is Running, confirming it's stable (waiting ${WORKER_STABILITY_CHECK_SECONDS}s) ..."
+echo "==> Stability check (${WORKER_STABILITY_CHECK_SECONDS}s) ..."
 sleep "${WORKER_STABILITY_CHECK_SECONDS}"
-still_up=false
-while IFS= read -r line; do
-  [ -z "${line}" ] && continue
-  if [[ "${line}" =~ ${worker_pattern} ]]; then
-    still_up=true
-    break
-  fi
-done < <(docker service ps "${WORKER_SERVICE}" --filter "desired-state=running" \
-  --format '{{.Image}}|{{.CurrentState}}' 2>/dev/null || true)
-
-if [ "${still_up}" != true ]; then
-  echo "ERROR: itsm-worker:${IMAGE_TAG} came up but is no longer Running (crash loop?)." >&2
-  echo "--- docker service ps ${WORKER_SERVICE} ---" >&2
-  docker service ps "${WORKER_SERVICE}" --no-trunc >&2
-  echo "--- docker service logs ${WORKER_SERVICE} (last 30 lines) ---" >&2
-  docker service logs --tail 30 "${WORKER_SERVICE}" >&2 || true
-  exit 1
-fi
-
-echo "==> itsm-worker:${IMAGE_TAG} is running and stable."
-docker stack services "${STACK_NAME}"
-exit 0
+for svc in web worker; do
+  wait_running "${svc}" 1 || { echo "ERROR: ${svc} is no longer running (crash loop?)." >&2; exit 1; }
+done
+echo "==> itsm-web:${IMAGE_TAG} and itsm-worker:${IMAGE_TAG} are running and stable."
+docker compose -p "${STACK_NAME}" -f "${COMPOSE_FILE}" ps
