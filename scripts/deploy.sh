@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
-# Zero-downtime build + deploy for the on-premise production stack.
+# Build + deploy for the on-premise production stack (plain Docker Compose).
 #
-# 1. Builds apps/web's Docker image tagged with the current short git SHA.
-# 2. Deploys/updates the "itsm" Docker Swarm stack from docker-compose.prod.yml.
-# 3. Waits for the rolling update to actually converge (new task healthy and
-#    running, old task gone) before reporting success — a `docker stack
-#    deploy` that returns immediately is NOT proof the update finished.
-#
-# One-time prerequisite: `docker swarm init` (see README.md, "Producción").
+# 1. Derives .env.worker and ./secrets/* (worker file secrets) from .env.production.
+# 2. Builds itsm-web and itsm-worker images tagged with the current short git SHA.
+# 3. `docker compose -p itsm -f docker-compose.prod.yml up -d`.
+# 4. Waits until postgres/web are healthy and worker is running, then checks
+#    they are still up after a short stability window (crash-loop detection).
 #
 # Usage:
 #   ./scripts/deploy.sh
 #
-# Every run — first install and every subsequent update — is the same
-# command. Swarm's start-first update_config (docker-compose.prod.yml) is
-# what makes re-running this zero-downtime: the new container must pass the
-# Dockerfile's HEALTHCHECK (GET /api/health) before the old one is stopped.
+# Same command for the first install and every update. NOT zero-downtime:
+# compose stops the old web container before starting the new one (a few
+# seconds of downtime), and there is no automatic rollback - see README.md,
+# "Producción", for the manual IMAGE_TAG=<old-sha> rollback.
 
 set -euo pipefail
 
@@ -37,7 +35,7 @@ if [ ! -f ".env.production" ]; then
 fi
 
 # Worker env file: everything in .env.production except the keys that reach the
-# worker as Swarm secrets (or that it doesn't use at all).
+# worker as file secrets under ./secrets (or that it doesn't use at all).
 grep -v -E '^(DATABASE_URL|SMTP_PASSWORD|AI_API_KEY|POSTGRES_PASSWORD|SEED_ADMIN_PASSWORD|AUTH_SECRET)=' .env.production > .env.worker
 chmod 600 .env.worker
 mkdir -p secrets && chmod 700 secrets

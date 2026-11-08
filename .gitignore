@@ -50,3 +50,6 @@ packages/db/drizzle/meta/
 # DB dumps (may contain password hashes / PII, reference-only, never commit)
 /backups/
 secrets/
+
+# Claude Code local session lock
+.claude/scheduled_tasks.lock
