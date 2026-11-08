@@ -62,7 +62,7 @@ function buildServer(userId: string): McpServer {
         `get_${key}`,
         {
           description: `Obtiene un "${key.replace(/s$/, "")}" por id. ADVERTENCIA: no verifica que el registro pertenezca a tu entidad activa - un id de otra entidad también se devuelve si existe. No asumas que el resultado es de tu organización sin confirmarlo por otro medio.`,
-          inputSchema: { id: z.string().uuid() },
+          inputSchema: { id: z.guid() },
         },
         async ({ id }) => {
           const context = await resolveAuthContext({ userId, activeEntityId: null, activeProfileId: null });

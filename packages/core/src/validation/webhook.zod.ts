@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createWebhookSchema = z.object({
-  entityId: z.string().uuid(),
+  entityId: z.guid(),
   name: z.string().min(1).max(255),
   itemType: z.string().min(1).max(100),
   event: z.enum(["create", "update", "delete"]),

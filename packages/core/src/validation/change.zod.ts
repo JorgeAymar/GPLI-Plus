@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 export const createChangeSchema = z.object({
-  entityId: z.string().uuid(),
+  entityId: z.guid(),
   title: z.string().min(1).max(255),
   content: z.string().min(1).max(20000),
   urgency: z.number().int().min(1).max(5).optional(),
   impact: z.number().int().min(1).max(5).optional(),
   priority: z.number().int().min(1).max(5).optional(),
-  categoryDropdownItemId: z.string().uuid().nullable().optional(),
+  categoryDropdownItemId: z.guid().nullable().optional(),
   plannedStartAt: z.coerce.date().nullable().optional(),
   plannedEndAt: z.coerce.date().nullable().optional(),
 });

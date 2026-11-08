@@ -38,7 +38,7 @@ function renderHtmlBody(plainBody: string): string {
 }
 
 export class SmtpTransport implements NotificationTransport {
-  private transporter: nodemailer.Transporter;
+  private transporter: ReturnType<typeof nodemailer.createTransport>;
 
   constructor() {
     this.transporter = nodemailer.createTransport({

@@ -9,7 +9,7 @@ export const createUserSchema = z.object({
     .regex(/^[a-zA-Z0-9_.-]+$/, "Only letters, digits, dots, dashes and underscores"),
   password: z.string().min(8),
   displayName: z.string().min(1).max(255),
-  defaultEntityId: z.string().uuid().nullable().optional(),
+  defaultEntityId: z.guid().nullable().optional(),
 });
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 

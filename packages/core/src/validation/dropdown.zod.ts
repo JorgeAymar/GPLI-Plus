@@ -12,9 +12,9 @@ export const createDropdownCategorySchema = z.object({
 export type CreateDropdownCategoryInput = z.infer<typeof createDropdownCategorySchema>;
 
 export const createDropdownItemSchema = z.object({
-  categoryId: z.string().uuid(),
-  entityId: z.string().uuid(),
-  parentId: z.string().uuid().nullable().optional(),
+  categoryId: z.guid(),
+  entityId: z.guid(),
+  parentId: z.guid().nullable().optional(),
   name: z.string().min(1).max(255),
   comment: z.string().max(1000).nullable().optional(),
 });

@@ -4,8 +4,8 @@ export const contractTypeSchema = z.enum(["maintenance", "lease", "license", "su
 export const billingFrequencySchema = z.enum(["monthly", "quarterly", "annual", "one_time"]);
 
 export const createContractSchema = z.object({
-  entityId: z.string().uuid(),
-  supplierId: z.string().uuid().nullable().optional(),
+  entityId: z.guid(),
+  supplierId: z.guid().nullable().optional(),
   name: z.string().min(1).max(255),
   contractType: contractTypeSchema.optional(),
   billingFrequency: billingFrequencySchema.optional(),
@@ -18,7 +18,7 @@ export const createContractSchema = z.object({
 export type CreateContractInput = z.infer<typeof createContractSchema>;
 
 export const linkContractAssetSchema = z.object({
-  contractId: z.string().uuid(),
-  assetId: z.string().uuid(),
+  contractId: z.guid(),
+  assetId: z.guid(),
 });
 export type LinkContractAssetInput = z.infer<typeof linkContractAssetSchema>;

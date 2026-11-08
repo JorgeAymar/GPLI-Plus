@@ -8,9 +8,9 @@ import { z } from "zod";
 export const createSavedSearchSchema = z.object({
   name: z.string().min(1).max(255),
   itemType: z.string().min(1).max(100),
-  ownerUserId: z.string().uuid(),
+  ownerUserId: z.guid(),
   isPrivate: z.boolean().optional(),
-  entityId: z.string().uuid(),
+  entityId: z.guid(),
   isRecursive: z.boolean().optional(),
   queryJson: z.record(z.string(), z.unknown()).optional(),
   type: z.enum(["bookmark", "alert"]).optional(),
@@ -19,7 +19,7 @@ export const createSavedSearchSchema = z.object({
 export type CreateSavedSearchInput = z.infer<typeof createSavedSearchSchema>;
 
 export const createSavedSearchAlertSchema = z.object({
-  savedSearchId: z.string().uuid(),
+  savedSearchId: z.guid(),
   operator: z.enum(["lt", "lte", "eq", "gt", "gte", "neq"]),
   thresholdValue: z.number().int(),
   frequencyMinutes: z.number().int().positive().optional(),

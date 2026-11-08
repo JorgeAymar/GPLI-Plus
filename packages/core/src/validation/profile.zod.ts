@@ -8,9 +8,9 @@ export const createProfileSchema = z.object({
 export type CreateProfileInput = z.infer<typeof createProfileSchema>;
 
 export const assignUserProfileSchema = z.object({
-  userId: z.string().uuid(),
-  profileId: z.string().uuid(),
-  entityId: z.string().uuid(),
+  userId: z.guid(),
+  profileId: z.guid(),
+  entityId: z.guid(),
   isRecursive: z.boolean().optional(),
   isDefault: z.boolean().optional(),
 });

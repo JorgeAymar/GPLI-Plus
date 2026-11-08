@@ -2,8 +2,8 @@ import { z } from "zod";
 
 export const addImpactRelationSchema = z
   .object({
-    sourceAssetId: z.string().uuid(),
-    impactedAssetId: z.string().uuid(),
+    sourceAssetId: z.guid(),
+    impactedAssetId: z.guid(),
     label: z.string().max(255).nullable().optional(),
   })
   .refine((data) => data.sourceAssetId !== data.impactedAssetId, {

@@ -36,7 +36,7 @@ function baseZodForField(field: AssetFieldDefinition): z.ZodTypeAny {
     case "date":
       return z.coerce.date();
     case "dropdown":
-      return z.string().uuid(); // references dropdown_items.id
+      return z.guid(); // references dropdown_items.id
   }
 }
 

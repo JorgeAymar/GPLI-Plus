@@ -12,21 +12,21 @@
     "test:mcp-integration": "vitest run -c vitest.integration.config.ts app/api/mcp/mcp-route.integration.test.ts"
   },
   "dependencies": {
-    "@auth/drizzle-adapter": "^1.11.2",
+    "@auth/drizzle-adapter": "^1.11.3",
     "@itsm/core": "workspace:*",
     "@itsm/db": "workspace:*",
-    "@modelcontextprotocol/sdk": "1.29.0",
-    "next": "16.2.10",
-    "next-auth": "5.0.0-beta.31",
-    "next-intl": "4.13.2",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "next": "16.4.5",
+    "next-auth": "5.0.0-beta.32",
+    "next-intl": "4.14.9",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "react-markdown": "^10.1.0",
     "recharts": "^3.9.2",
-    "zod": "^3.24.0"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@auth/core": "0.41.2",
+    "@auth/core": "0.41.3",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -34,9 +34,9 @@
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "eslint": "^9",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.4.5",
     "tailwindcss": "^4.3.3",
     "typescript": "^5",
-    "vitest": "^3.0.0"
+    "vitest": "^4.1.12"
   }
 }

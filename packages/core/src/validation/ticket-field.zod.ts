@@ -13,7 +13,7 @@ export const createTicketFieldDefinitionSchema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, "Solo letras, dígitos y guión bajo"),
   label: z.string().min(1).max(255),
   fieldType: ticketFieldTypeSchema,
-  dropdownCategoryId: z.string().uuid().nullable().optional(),
+  dropdownCategoryId: z.guid().nullable().optional(),
   isRequired: z.boolean().optional(),
   sortOrder: z.number().int().optional(),
 });

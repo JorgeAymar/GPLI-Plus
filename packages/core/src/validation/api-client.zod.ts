@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createApiClientSchema = z.object({
-  entityId: z.string().uuid(),
+  entityId: z.guid(),
   name: z.string().min(1).max(255),
   scopes: z.array(z.string()).min(1),
 });

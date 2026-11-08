@@ -16,7 +16,7 @@ export const createAssetDefinitionSchema = z.object({
 export type CreateAssetDefinitionInput = z.infer<typeof createAssetDefinitionSchema>;
 
 export const createAssetFieldDefinitionSchema = z.object({
-  assetDefinitionId: z.string().uuid(),
+  assetDefinitionId: z.guid(),
   key: z
     .string()
     .min(1)
@@ -24,7 +24,7 @@ export const createAssetFieldDefinitionSchema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, "Solo letras, dígitos y guión bajo"),
   label: z.string().min(1).max(255),
   fieldType: assetFieldTypeSchema,
-  dropdownCategoryId: z.string().uuid().nullable().optional(),
+  dropdownCategoryId: z.guid().nullable().optional(),
   isRequired: z.boolean().optional(),
   defaultValue: z.string().max(1000).nullable().optional(),
   sortOrder: z.number().int().optional(),

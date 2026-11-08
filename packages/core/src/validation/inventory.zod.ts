@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const submitInventorySchema = z.object({
   deviceId: z.string().min(1),
-  entityId: z.string().uuid(),
+  entityId: z.guid(),
   hostname: z.string().min(1),
   serialNumber: z.string().nullable().optional(),
   macAddresses: z.array(z.string()).optional(),

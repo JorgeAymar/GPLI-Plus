@@ -13,7 +13,7 @@ export const ruleCriteriaOperatorSchema = z.enum([
 export const ruleActionTypeSchema = z.enum(["assign", "append", "regex_result", "stop_processing"]);
 
 export const createRuleSchema = z.object({
-  entityId: z.string().uuid(),
+  entityId: z.guid(),
   ruleType: z.string().min(1).max(100),
   name: z.string().min(1).max(255),
   ranking: z.number().int().optional(),
@@ -24,7 +24,7 @@ export const createRuleSchema = z.object({
 export type CreateRuleInput = z.infer<typeof createRuleSchema>;
 
 export const addRuleCriteriaSchema = z.object({
-  ruleId: z.string().uuid(),
+  ruleId: z.guid(),
   field: z.string().min(1).max(100),
   operator: ruleCriteriaOperatorSchema,
   value: z.string().min(1).max(1000),
@@ -32,7 +32,7 @@ export const addRuleCriteriaSchema = z.object({
 export type AddRuleCriteriaInput = z.infer<typeof addRuleCriteriaSchema>;
 
 export const addRuleActionSchema = z.object({
-  ruleId: z.string().uuid(),
+  ruleId: z.guid(),
   actionType: ruleActionTypeSchema,
   field: z.string().min(1).max(100),
   value: z.string().min(1).max(1000),

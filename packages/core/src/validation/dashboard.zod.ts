@@ -7,7 +7,7 @@ export const createDashboardSchema = z.object({
 export type CreateDashboardInput = z.infer<typeof createDashboardSchema>;
 
 export const addDashboardCardSchema = z.object({
-  dashboardId: z.string().uuid(),
+  dashboardId: z.guid(),
   cardKey: z.string().min(1),
   positionX: z.number().int().optional(),
   positionY: z.number().int().optional(),
