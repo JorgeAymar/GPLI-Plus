@@ -45,7 +45,7 @@ packages/db/drizzle/meta/
 /source/
 
 # graphify (regenerable knowledge-graph artifacts, run /graphify to rebuild)
-/graphify-out/
+graphify-out/
 
 # DB dumps (may contain password hashes / PII, reference-only, never commit)
 /backups/
@@ -53,3 +53,6 @@ secrets/
 
 # Claude Code local session lock
 .claude/scheduled_tasks.lock
+
+# Third-party reference material kept locally only (copyrighted, not ours to redistribute)
+E_REPORT_GLPI_2025_EN.pdf

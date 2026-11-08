@@ -1189,7 +1189,7 @@ Expected: 4/4 pass (3 original + auth setup), with the language test now also as
 - [ ] **Step 5: Run the full test suites to confirm no regressions**
 
 ```bash
-cd ~/Desktop/proyectos-dev/GLPI-Plus
+cd <raíz del repo>
 npx turbo run test --force
 npx turbo run typecheck --force
 npm run e2e
