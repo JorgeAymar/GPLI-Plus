@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
@@ -181,7 +182,7 @@ export function AssistantChat() {
       // an existing one moves to the top by updatedAt).
       refreshConversations();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(actionErrorMessage(err));
     } finally {
       setIsSending(false);
     }
@@ -209,7 +210,7 @@ export function AssistantChat() {
       setConversationId(data.id);
       setMessages(data.messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(actionErrorMessage(err));
     }
   }
 

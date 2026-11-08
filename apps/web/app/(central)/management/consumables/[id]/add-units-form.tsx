@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { addConsumableUnitsAction } from "@/actions/consumables.actions";
 import { useActionState } from "react";
 
@@ -14,7 +15,7 @@ function makeAction(consumableItemId: string) {
       await addConsumableUnitsAction({ consumableItemId, quantity });
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

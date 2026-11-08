@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { createInstallationAction } from "@/actions/software.actions";
 import { useActionState } from "react";
 
@@ -28,7 +29,7 @@ function makeAction(assetId: string) {
       });
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

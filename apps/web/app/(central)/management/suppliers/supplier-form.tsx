@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { createSupplierAction } from "@/actions/suppliers.actions";
 import { useFormSuccessToast } from "@/components/toast";
 import { useActionState, useRef } from "react";
@@ -20,7 +21,7 @@ function makeAction(entityId: string) {
       });
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

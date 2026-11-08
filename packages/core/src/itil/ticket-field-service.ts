@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { db, ticketFieldDefinitions, type TicketFieldDefinition, type TicketFieldType } from "@itsm/db";
 import { eq, isNull, or } from "drizzle-orm";
 import { z } from "zod";
@@ -23,7 +24,7 @@ export async function createTicketFieldDefinition(input: {
       sortOrder: input.sortOrder ?? 0,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert ticket field definition");
+  if (!created) throw new UserError("Failed to insert ticket field definition");
   return created;
 }
 

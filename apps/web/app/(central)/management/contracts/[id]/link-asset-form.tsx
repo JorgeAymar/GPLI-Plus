@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { linkContractAssetAction } from "@/actions/contracts.actions";
 import type { Asset } from "@itsm/db";
 import { useActionState } from "react";
@@ -14,7 +15,7 @@ function makeAction(contractId: string) {
       await linkContractAssetAction({ contractId, assetId: formData.get("assetId") as string });
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import {
   assets,
   contractAssets,
@@ -38,7 +39,7 @@ export async function createContract(input: {
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert contract");
+  if (!created) throw new UserError("Failed to insert contract");
   return created;
 }
 

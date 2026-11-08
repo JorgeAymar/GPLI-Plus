@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { createMyApiClientAction } from "@/actions/account.actions";
 import { useTranslations } from "next-intl";
 import { useActionState } from "react";
@@ -16,7 +17,7 @@ async function action(_prev: FormState | undefined, formData: FormData): Promise
     const result = await createMyApiClientAction({ name });
     return { rawKey: result.rawKey, clientName: result.client.name };
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "Error desconocido" };
+    return { error: actionErrorMessage(err) };
   }
 }
 

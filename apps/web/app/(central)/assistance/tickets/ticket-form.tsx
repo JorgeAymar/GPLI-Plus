@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { createTicketAction } from "@/actions/tickets.actions";
 import { useFormSuccessToast } from "@/components/toast";
 import type { DropdownItem, TicketFieldDefinition } from "@itsm/db";
@@ -51,7 +52,7 @@ function makeAction(entityId: string, fields: TicketFieldDefinition[]) {
       });
       return { ticketId: ticket.id };
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

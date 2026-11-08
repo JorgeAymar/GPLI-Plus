@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { and, eq } from "drizzle-orm";
 import { db, resourceVisibilityRules, userGroups, type ResourceVisibilityRule, type VisibilityGranteeKind } from "@itsm/db";
 import type { AuthContext } from "../auth/get-auth-context";
@@ -20,7 +21,7 @@ export async function addVisibilityRule(input: {
       isRecursive: input.isRecursive ?? false,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert resource visibility rule");
+  if (!created) throw new UserError("Failed to insert resource visibility rule");
   return created;
 }
 

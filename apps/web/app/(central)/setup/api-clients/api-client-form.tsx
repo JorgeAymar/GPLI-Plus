@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { createApiClientAction } from "@/actions/api-clients.actions";
 import { useActionState, useState } from "react";
 
@@ -17,7 +18,7 @@ function makeAction(entityId: string) {
       const result = await createApiClientAction({ entityId, name, scopes });
       return { rawKey: result.rawKey, clientName: result.client.name };
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

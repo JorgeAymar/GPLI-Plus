@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { db, recurringTicketTemplates, type RecurringTicketTemplate, type TicketType } from "@itsm/db";
 import { and, eq, inArray, lte } from "drizzle-orm";
 import { listSubtree } from "../entities/entity-service";
@@ -25,7 +26,7 @@ export async function createRecurringTicketTemplate(input: {
       nextRunAt: new Date(Date.now() + input.intervalMinutes * 60_000),
     })
     .returning();
-  if (!created) throw new Error("Failed to insert recurring ticket template");
+  if (!created) throw new UserError("Failed to insert recurring ticket template");
   return created;
 }
 

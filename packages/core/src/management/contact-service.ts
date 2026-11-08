@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { contacts, db, type Contact } from "@itsm/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { listSubtree } from "../entities/entity-service";
@@ -12,7 +13,7 @@ export async function createContact(input: {
   comment?: string | null;
 }): Promise<Contact> {
   const [created] = await db.insert(contacts).values(input).returning();
-  if (!created) throw new Error("Failed to insert contact");
+  if (!created) throw new UserError("Failed to insert contact");
   return created;
 }
 
@@ -39,6 +40,6 @@ export async function listContactsForSupplier(supplierId: string): Promise<Conta
 
 export async function softDeleteContact(id: string): Promise<Contact> {
   const [updated] = await db.update(contacts).set({ deletedAt: new Date() }).where(eq(contacts.id, id)).returning();
-  if (!updated) throw new Error(`Contact ${id} not found`);
+  if (!updated) throw new UserError(`Contact ${id} not found`);
   return updated;
 }

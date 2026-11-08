@@ -1,5 +1,6 @@
 "use server";
 
+import { UserError } from "@itsm/core";
 import { requireAuthContext } from "@/lib/session";
 import {
   MODULE,
@@ -26,7 +27,7 @@ import { z } from "zod";
 function parseInput<Schema extends z.ZodTypeAny>(schema: Schema, input: unknown): z.infer<Schema> {
   const result = schema.safeParse(input);
   if (!result.success) {
-    throw new Error(result.error.issues.map((issue) => issue.message).join("; "));
+    throw new UserError(result.error.issues.map((issue) => issue.message).join("; "));
   }
   return result.data;
 }

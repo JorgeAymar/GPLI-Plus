@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { updateMyLanguageAction } from "@/actions/account.actions";
 import type { SUPPORTED_LANGUAGES } from "@itsm/core";
 import { useTranslations } from "next-intl";
@@ -35,7 +36,7 @@ export function LanguageForm({
       router.refresh();
       return { saved: true };
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   }
 

@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { assets, db, networkEquipment, type Asset, type NetworkEquipment } from "@itsm/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { recordAuditLog } from "../audit/audit-service";
@@ -9,7 +10,7 @@ import { validateCustomFields } from "./dynamic-schema";
 
 async function requireNetworkEquipmentDefinition() {
   const definition = await getAssetDefinitionByKey(ASSET_DEFINITION_KEY.NETWORK_EQUIPMENT);
-  if (!definition) throw new Error('Asset definition "network_equipment" not found - run the seed script first');
+  if (!definition) throw new UserError('Asset definition "network_equipment" not found - run the seed script first');
   return definition;
 }
 
@@ -39,7 +40,7 @@ export async function createNetworkEquipment(
         customFields: validatedCustomFields,
       })
       .returning();
-    if (!asset) throw new Error("Failed to insert asset");
+    if (!asset) throw new UserError("Failed to insert asset");
 
     const [equipment] = await tx
       .insert(networkEquipment)
@@ -52,7 +53,7 @@ export async function createNetworkEquipment(
         portsCount: input.portsCount ?? null,
       })
       .returning();
-    if (!equipment) throw new Error("Failed to insert network equipment");
+    if (!equipment) throw new UserError("Failed to insert network equipment");
 
     await recordAuditLog({
       entityId: asset.entityId,

@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { and, eq, sql } from "drizzle-orm";
 import { db, entities, profileModuleRights, profiles, userProfiles, type NewProfile, type Profile } from "@itsm/db";
 
@@ -23,12 +24,12 @@ export async function createProfile(input: {
     const cause = err instanceof Error ? err.cause : undefined;
     if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
       const constraint = "constraint" in cause ? cause.constraint : undefined;
-      if (constraint === "profiles_name_unique") throw new Error("Ya existe un perfil con ese nombre.");
-      throw new Error("Ya existe un perfil con esos datos.");
+      if (constraint === "profiles_name_unique") throw new UserError("Ya existe un perfil con ese nombre.");
+      throw new UserError("Ya existe un perfil con esos datos.");
     }
-    throw new Error("No se pudo crear el perfil.");
+    throw new UserError("No se pudo crear el perfil.");
   }
-  if (!created) throw new Error("No se pudo crear el perfil.");
+  if (!created) throw new UserError("No se pudo crear el perfil.");
   return created;
 }
 
@@ -77,7 +78,7 @@ export async function assignUserProfile(input: {
       isDefault: input.isDefault ?? false,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert user_profiles assignment");
+  if (!created) throw new UserError("Failed to insert user_profiles assignment");
   return created;
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { createTicketFieldDefinitionAction } from "@/actions/ticket-fields.actions";
 import type { DropdownCategory } from "@itsm/db";
 import { useActionState } from "react";
@@ -25,7 +26,7 @@ async function action(_prev: FormState | undefined, formData: FormData): Promise
     });
     return {};
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "Error desconocido" };
+    return { error: actionErrorMessage(err) };
   }
 }
 

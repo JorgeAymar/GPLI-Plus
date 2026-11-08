@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db, users, type User } from "@itsm/db";
@@ -36,13 +37,13 @@ export async function createUser(input: {
     const cause = err instanceof Error ? err.cause : undefined;
     if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
       const constraint = "constraint" in cause ? cause.constraint : undefined;
-      if (constraint === "users_email_unique") throw new Error("Ya existe un usuario con este email.");
-      if (constraint === "users_username_unique") throw new Error("Ya existe un usuario con este nombre de usuario.");
-      throw new Error("Ya existe un usuario con esos datos.");
+      if (constraint === "users_email_unique") throw new UserError("Ya existe un usuario con este email.");
+      if (constraint === "users_username_unique") throw new UserError("Ya existe un usuario con este nombre de usuario.");
+      throw new UserError("Ya existe un usuario con esos datos.");
     }
-    throw new Error("No se pudo crear el usuario.");
+    throw new UserError("No se pudo crear el usuario.");
   }
-  if (!created) throw new Error("No se pudo crear el usuario.");
+  if (!created) throw new UserError("No se pudo crear el usuario.");
   return created;
 }
 
@@ -78,13 +79,13 @@ export async function stampLastLogin(userId: string): Promise<void> {
 /** Validate `language` with `updateLanguageSchema` (packages/core/src/validation/user.zod.ts) before calling this - this function trusts its input, matching every other *-service.ts in this package. */
 export async function updateUserLanguage(userId: string, language: string): Promise<User> {
   const [updated] = await db.update(users).set({ language }).where(eq(users.id, userId)).returning();
-  if (!updated) throw new Error(`User ${userId} not found`);
+  if (!updated) throw new UserError(`User ${userId} not found`);
   return updated;
 }
 
 /** Self-service toggle for email-based login 2FA (see auth/two-factor-service.ts) - a plain boolean, no schema needed. */
 export async function updateUserTwoFactorEnabled(userId: string, enabled: boolean): Promise<User> {
   const [updated] = await db.update(users).set({ twoFactorEnabled: enabled }).where(eq(users.id, userId)).returning();
-  if (!updated) throw new Error(`User ${userId} not found`);
+  if (!updated) throw new UserError(`User ${userId} not found`);
   return updated;
 }

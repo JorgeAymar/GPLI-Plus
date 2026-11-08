@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { revokeMyApiClientAction } from "@/actions/account.actions";
 import { useTranslations } from "next-intl";
 import { useActionState } from "react";
@@ -13,7 +14,7 @@ async function action(_prev: RevokeState | undefined, formData: FormData): Promi
     await revokeMyApiClientAction(formData.get("id") as string);
     return {};
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "Error desconocido" };
+    return { error: actionErrorMessage(err) };
   }
 }
 

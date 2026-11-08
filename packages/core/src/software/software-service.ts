@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import {
   assetSoftwareInstallations,
   db,
@@ -30,7 +31,7 @@ export async function createSoftware(input: {
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert software");
+  if (!created) throw new UserError("Failed to insert software");
   return created;
 }
 
@@ -57,7 +58,7 @@ export async function createSoftwareVersion(input: {
     .insert(softwareVersions)
     .values({ softwareId: input.softwareId, name: input.name, osDropdownItemId: input.osDropdownItemId ?? null })
     .returning();
-  if (!created) throw new Error("Failed to insert software version");
+  if (!created) throw new UserError("Failed to insert software version");
   return created;
 }
 
@@ -92,7 +93,7 @@ export async function createSoftwareLicense(input: {
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert software license");
+  if (!created) throw new UserError("Failed to insert software license");
   return created;
 }
 
@@ -119,7 +120,7 @@ export async function createInstallation(input: {
       installDate: input.installDate ? new Date(input.installDate) : null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert installation");
+  if (!created) throw new UserError("Failed to insert installation");
   return created;
 }
 

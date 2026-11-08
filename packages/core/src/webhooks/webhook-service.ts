@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { createHmac } from "crypto";
 import {
   db,
@@ -31,7 +32,7 @@ export async function createWebhook(input: {
   // internal services, or loopback addresses - and unlike RSS feeds (which
   // only fetch on a schedule), an active webhook fires on every matching
   // event, making an unnoticed unsafe URL here more actively exploitable.
-  if (!isSafeExternalUrl(input.url)) throw new Error("La URL del webhook no es válida o apunta a una dirección no permitida.");
+  if (!isSafeExternalUrl(input.url)) throw new UserError("La URL del webhook no es válida o apunta a una dirección no permitida.");
 
   const [created] = await db
     .insert(webhooks)
@@ -46,7 +47,7 @@ export async function createWebhook(input: {
       maxRetries: input.maxRetries ?? 3,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert webhook");
+  if (!created) throw new UserError("Failed to insert webhook");
   return created;
 }
 

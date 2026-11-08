@@ -1,5 +1,6 @@
 "use server";
 
+import { UserError } from "@itsm/core";
 import { requireAuthContext } from "@/lib/session";
 import {
   MODULE,
@@ -27,7 +28,7 @@ import { z } from "zod";
 function parseInput<Schema extends z.ZodTypeAny>(schema: Schema, input: unknown): z.infer<Schema> {
   const result = schema.safeParse(input);
   if (!result.success) {
-    throw new Error(result.error.issues.map((issue) => issue.message).join("; "));
+    throw new UserError(result.error.issues.map((issue) => issue.message).join("; "));
   }
   return result.data;
 }
@@ -56,7 +57,7 @@ export async function createTicketAction(input: unknown) {
 async function requireTicketRight(id: string, required: number) {
   const context = await requireAuthContext();
   const ticket = await getTicket(id);
-  if (!ticket) throw new Error(`Ticket ${id} not found`);
+  if (!ticket) throw new UserError(`Ticket ${id} not found`);
   await requireRightOnEntity(context, MODULE.ASSISTANCE_TICKET, required, ticket.entityId);
   return context;
 }

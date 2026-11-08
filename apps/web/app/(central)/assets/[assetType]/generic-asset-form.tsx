@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { createAssetAction } from "@/actions/assets.actions";
 import type { AssetFieldDefinition, DropdownItem } from "@itsm/db";
 import { useActionState } from "react";
@@ -37,7 +38,7 @@ function makeAction(assetDefinitionId: string, entityId: string, fields: AssetFi
       });
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

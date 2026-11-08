@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { db, dropdownCategories, dropdownItems, type DropdownCategory, type DropdownItem } from "@itsm/db";
 import { and, eq, inArray } from "drizzle-orm";
 import { listAncestors } from "../entities/entity-service";
@@ -16,12 +17,12 @@ export async function createDropdownCategory(input: { key: string; name: string;
     const cause = err instanceof Error ? err.cause : undefined;
     if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
       const constraint = "constraint" in cause ? cause.constraint : undefined;
-      if (constraint === "dropdown_categories_key_unique") throw new Error("Ya existe una categoría con esa clave (key).");
-      throw new Error("Ya existe una categoría con esos datos.");
+      if (constraint === "dropdown_categories_key_unique") throw new UserError("Ya existe una categoría con esa clave (key).");
+      throw new UserError("Ya existe una categoría con esos datos.");
     }
-    throw new Error("No se pudo crear la categoría.");
+    throw new UserError("No se pudo crear la categoría.");
   }
-  if (!created) throw new Error("No se pudo crear la categoría.");
+  if (!created) throw new UserError("No se pudo crear la categoría.");
   return created;
 }
 
@@ -56,7 +57,7 @@ export async function createDropdownItem(input: {
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert dropdown item");
+  if (!created) throw new UserError("Failed to insert dropdown item");
   return created;
 }
 
@@ -75,6 +76,6 @@ export async function updateDropdownItem(
   input: Partial<{ name: string; comment: string | null; isActive: boolean }>,
 ): Promise<DropdownItem> {
   const [updated] = await db.update(dropdownItems).set(input).where(eq(dropdownItems.id, id)).returning();
-  if (!updated) throw new Error(`Dropdown item ${id} not found`);
+  if (!updated) throw new UserError(`Dropdown item ${id} not found`);
   return updated;
 }

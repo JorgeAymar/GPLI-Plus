@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { removeDocumentAction } from "@/actions/documents.actions";
 import { useState, useTransition } from "react";
 
@@ -27,7 +28,7 @@ export function RemoveDocumentButton({
             try {
               await removeDocumentAction(documentId, itemType, itemId, revalidatePathTarget);
             } catch (err) {
-              setError(err instanceof Error ? err.message : "Error desconocido");
+              setError(actionErrorMessage(err));
             }
           })
         }

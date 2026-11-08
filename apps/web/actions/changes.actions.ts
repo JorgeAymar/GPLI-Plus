@@ -1,5 +1,6 @@
 "use server";
 
+import { UserError } from "@itsm/core";
 import { requireAuthContext } from "@/lib/session";
 import {
   MODULE,
@@ -29,7 +30,7 @@ export async function createChangeAction(input: unknown) {
 async function requireChangeRight(id: string, required: number) {
   const context = await requireAuthContext();
   const change = await getChange(id);
-  if (!change) throw new Error(`Change ${id} not found`);
+  if (!change) throw new UserError(`Change ${id} not found`);
   await requireRightOnEntity(context, MODULE.ASSISTANCE_CHANGE, required, change.entityId);
   return context;
 }

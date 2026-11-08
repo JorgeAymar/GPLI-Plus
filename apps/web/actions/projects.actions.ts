@@ -1,5 +1,6 @@
 "use server";
 
+import { UserError } from "@itsm/core";
 import { requireAuthContext } from "@/lib/session";
 import {
   MODULE,
@@ -48,7 +49,7 @@ export async function createProjectAction(input: unknown) {
 async function requireProjectRight(projectId: string, required: number) {
   const context = await requireAuthContext();
   const project = await getProject(projectId);
-  if (!project) throw new Error(`Project ${projectId} not found`);
+  if (!project) throw new UserError(`Project ${projectId} not found`);
   await requireRightOnEntity(context, MODULE.TOOLS_PROJECT, required, project.entityId);
   return context;
 }

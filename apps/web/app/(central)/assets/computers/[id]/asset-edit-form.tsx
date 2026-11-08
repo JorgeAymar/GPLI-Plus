@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { updateAssetAction } from "@/actions/assets.actions";
 import { useFormSuccessToast } from "@/components/toast";
 import type { Asset } from "@itsm/db";
@@ -25,7 +26,7 @@ function makeAction(assetId: string, router: ReturnType<typeof useRouter>) {
       router.refresh();
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

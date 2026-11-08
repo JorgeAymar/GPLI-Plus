@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { removeDashboardCardAction } from "@/actions/dashboards.actions";
 import { useActionState } from "react";
 
@@ -13,7 +14,7 @@ function makeAction(id: string, dashboardId: string) {
       await removeDashboardCardAction(id, dashboardId);
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

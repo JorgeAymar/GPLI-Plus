@@ -1,3 +1,4 @@
+import { actionErrorMessage } from "@/lib/action-error";
 import { requireAuthContext } from "@/lib/session";
 import {
   GLPI_PLUS_SYSTEM_PROMPT,
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
         controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
         controller.close();
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Error desconocido";
+        const message = actionErrorMessage(err);
         send({ type: "error", message });
         controller.close();
       }

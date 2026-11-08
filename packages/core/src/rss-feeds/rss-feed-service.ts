@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { desc, eq } from "drizzle-orm";
 import { db, rssFeedCachedItems, rssFeeds, type RssFeed, type RssFeedCachedItem } from "@itsm/db";
 import Parser from "rss-parser";
@@ -17,7 +18,7 @@ export async function createRssFeed(input: {
   // rejected immediately at creation instead of silently failing on the
   // next scheduled refresh - the zod schema layer only validates URL
   // *shape*, not safety (see validation/rss-feed.zod.test.ts).
-  if (!isSafeExternalUrl(input.url)) throw new Error("La URL del feed no es válida o apunta a una dirección no permitida.");
+  if (!isSafeExternalUrl(input.url)) throw new UserError("La URL del feed no es válida o apunta a una dirección no permitida.");
 
   const [created] = await db
     .insert(rssFeeds)
@@ -29,7 +30,7 @@ export async function createRssFeed(input: {
       maxItems: input.maxItems ?? 20,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert RSS feed");
+  if (!created) throw new UserError("Failed to insert RSS feed");
   return created;
 }
 
@@ -69,11 +70,11 @@ const ALLOWED_DESCRIPTION_TAGS = ["b", "i", "em", "strong", "a", "p", "br"];
  */
 export async function refreshRssFeed(feedId: string): Promise<{ fetched: number }> {
   const feed = await getRssFeed(feedId);
-  if (!feed) throw new Error(`RSS feed ${feedId} not found`);
+  if (!feed) throw new UserError(`RSS feed ${feedId} not found`);
 
   if (!isSafeExternalUrl(feed.url)) {
     await db.update(rssFeeds).set({ haveError: true, updatedAt: new Date() }).where(eq(rssFeeds.id, feedId));
-    throw new Error(`RSS feed ${feedId} has an unsafe URL: ${feed.url}`);
+    throw new UserError(`RSS feed ${feedId} has an unsafe URL: ${feed.url}`);
   }
 
   try {

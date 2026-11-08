@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { eq } from "drizzle-orm";
 import { db, ldapAuthSources, type LdapAuthSource, type User } from "@itsm/db";
 // ldapjs has no first-class ESM/promise API - it's the classic Node
@@ -40,7 +41,7 @@ export async function createLdapAuthSource(input: {
       isActive: input.isActive ?? true,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert ldap_auth_sources row");
+  if (!created) throw new UserError("Failed to insert ldap_auth_sources row");
   return created;
 }
 
@@ -174,7 +175,7 @@ export async function tryLdapLogin(
 export async function syncLdapUser(ldapAttributes: Record<string, string>, source: LdapAuthSource): Promise<User> {
   const email = ldapAttributes.mail ?? ldapAttributes.email;
   if (!email) {
-    throw new Error(`LDAP entry from source "${source.name}" has no "mail"/"email" attribute - cannot sync user`);
+    throw new UserError(`LDAP entry from source "${source.name}" has no "mail"/"email" attribute - cannot sync user`);
   }
 
   const existing = await findUserByEmail(email);

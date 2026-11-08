@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { createEntityAction } from "@/actions/entities.actions";
 import type { Entity } from "@itsm/db";
 import { useActionState } from "react";
@@ -17,7 +18,7 @@ async function action(_prev: FormState | undefined, formData: FormData): Promise
     });
     return {};
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "Error desconocido" };
+    return { error: actionErrorMessage(err) };
   }
 }
 

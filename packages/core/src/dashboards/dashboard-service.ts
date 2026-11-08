@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import {
   dashboardCards,
   dashboards,
@@ -28,12 +29,12 @@ export async function createDashboard(input: { key: string; name: string; ownerU
     const cause = err instanceof Error ? err.cause : undefined;
     if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
       const constraint = "constraint" in cause ? cause.constraint : undefined;
-      if (constraint === "dashboards_key_unique") throw new Error("Ya existe un dashboard con esa clave.");
-      throw new Error("Ya existe un dashboard con esos datos.");
+      if (constraint === "dashboards_key_unique") throw new UserError("Ya existe un dashboard con esa clave.");
+      throw new UserError("Ya existe un dashboard con esos datos.");
     }
-    throw new Error("No se pudo crear el dashboard.");
+    throw new UserError("No se pudo crear el dashboard.");
   }
-  if (!created) throw new Error("No se pudo crear el dashboard.");
+  if (!created) throw new UserError("No se pudo crear el dashboard.");
   return created;
 }
 
@@ -80,7 +81,7 @@ export async function addDashboardCard(input: {
       ...(input.options !== undefined ? { options: input.options } : {}),
     })
     .returning();
-  if (!created) throw new Error("Failed to insert dashboard card");
+  if (!created) throw new UserError("Failed to insert dashboard card");
   return created;
 }
 
@@ -102,7 +103,7 @@ export async function updateDashboardCardPosition(
     })
     .where(eq(dashboardCards.id, id))
     .returning();
-  if (!updated) throw new Error(`Failed to update dashboard card ${id}`);
+  if (!updated) throw new UserError(`Failed to update dashboard card ${id}`);
   return updated;
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { updateProblemAction } from "@/actions/problems.actions";
 import { useFormSuccessToast } from "@/components/toast";
 import type { Problem } from "@itsm/db";
@@ -23,7 +24,7 @@ function makeAction(problemId: string) {
       });
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

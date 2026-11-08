@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { consumableItems, consumables, db, type Consumable, type ConsumableItem } from "@itsm/db";
 import { and, asc, count, eq, inArray, isNull } from "drizzle-orm";
 import { listSubtree } from "../entities/entity-service";
@@ -19,7 +20,7 @@ export async function createConsumableItem(input: {
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert consumable item");
+  if (!created) throw new UserError("Failed to insert consumable item");
   return created;
 }
 
@@ -56,21 +57,21 @@ export async function listConsumables(consumableItemId: string): Promise<Consuma
 
 export async function useConsumable(id: string, assignedAssetId: string): Promise<Consumable> {
   const [existing] = await db.select().from(consumables).where(eq(consumables.id, id));
-  if (!existing) throw new Error(`Consumable ${id} not found`);
-  if (existing.status !== "new") throw new Error(`Consumable ${id} is not available (status: ${existing.status})`);
+  if (!existing) throw new UserError(`Consumable ${id} not found`);
+  if (existing.status !== "new") throw new UserError(`Consumable ${id} is not available (status: ${existing.status})`);
 
   const [updated] = await db
     .update(consumables)
     .set({ status: "in_use", assignedAssetId, useDate: new Date() })
     .where(eq(consumables.id, id))
     .returning();
-  if (!updated) throw new Error(`Consumable ${id} not found`);
+  if (!updated) throw new UserError(`Consumable ${id} not found`);
   return updated;
 }
 
 export async function retireConsumable(id: string): Promise<Consumable> {
   const [updated] = await db.update(consumables).set({ status: "used" }).where(eq(consumables.id, id)).returning();
-  if (!updated) throw new Error(`Consumable ${id} not found`);
+  if (!updated) throw new UserError(`Consumable ${id} not found`);
   return updated;
 }
 

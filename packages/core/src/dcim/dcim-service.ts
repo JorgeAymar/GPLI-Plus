@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import {
   cables,
   clusterMembers,
@@ -54,7 +55,7 @@ export async function placeInRack(input: {
   const orientation = input.orientation ?? "front";
 
   const conflict = await findOverlappingRackSlot(input.rackAssetId, orientation, input.positionU, unitHeight);
-  if (conflict) throw new Error(rackOverlapMessage(conflict, input.positionU, unitHeight));
+  if (conflict) throw new UserError(rackOverlapMessage(conflict, input.positionU, unitHeight));
 
   const [created] = await db
     .insert(rackSlots)
@@ -66,7 +67,7 @@ export async function placeInRack(input: {
       orientation,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert rack slot");
+  if (!created) throw new UserError("Failed to insert rack slot");
   return created;
 }
 
@@ -93,7 +94,7 @@ export async function placeInEnclosure(input: {
         isNotNull(enclosureSlots.occupantAssetId),
       ),
     );
-  if (existing) throw new Error(`Conflicto de posición: el slot ${input.positionSlot} del chasis ya está ocupado`);
+  if (existing) throw new UserError(`Conflicto de posición: el slot ${input.positionSlot} del chasis ya está ocupado`);
 
   const [created] = await db
     .insert(enclosureSlots)
@@ -103,7 +104,7 @@ export async function placeInEnclosure(input: {
       positionSlot: input.positionSlot,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert enclosure slot");
+  if (!created) throw new UserError("Failed to insert enclosure slot");
   return created;
 }
 
@@ -121,7 +122,7 @@ export async function removeFromEnclosure(id: string): Promise<void> {
 
 export async function addClusterMember(clusterAssetId: string, memberAssetId: string): Promise<ClusterMember> {
   const [created] = await db.insert(clusterMembers).values({ clusterAssetId, memberAssetId }).returning();
-  if (!created) throw new Error("Failed to insert cluster member");
+  if (!created) throw new UserError("Failed to insert cluster member");
   return created;
 }
 
@@ -152,7 +153,7 @@ export async function createCable(input: {
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert cable");
+  if (!created) throw new UserError("Failed to insert cable");
   return created;
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { removeImpactRelationAction } from "@/actions/impact.actions";
 import { useActionState } from "react";
 
@@ -13,7 +14,7 @@ function makeAction(id: string, viewAssetId: string) {
       await removeImpactRelationAction(id, viewAssetId);
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

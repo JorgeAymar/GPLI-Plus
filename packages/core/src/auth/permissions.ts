@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { getEffectiveRights } from "../rbac/profile-service";
 import type { AuthContext } from "./get-auth-context";
 
@@ -18,7 +19,7 @@ export function hasRight(rights: number, required: number): boolean {
   return (rights & required) === required;
 }
 
-export class ForbiddenError extends Error {
+export class ForbiddenError extends UserError {
   constructor(moduleKey: string, required: number) {
     super(`Missing permission (mask ${required}) for module "${moduleKey}"`);
     this.name = "ForbiddenError";

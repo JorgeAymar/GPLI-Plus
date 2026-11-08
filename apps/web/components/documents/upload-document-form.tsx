@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { uploadDocumentAction } from "@/actions/documents.actions";
 import { useActionState, useRef } from "react";
 
@@ -15,7 +16,7 @@ function makeAction(itemType: string, itemId: string, revalidatePathTarget: stri
       await uploadDocumentAction(formData, revalidatePathTarget);
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

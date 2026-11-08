@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { db, groups, userGroups, users, type Group } from "@itsm/db";
 import { and, eq, inArray } from "drizzle-orm";
 import { listSubtree } from "../entities/entity-service";
@@ -11,7 +12,7 @@ export async function createGroup(input: { parentId?: string | null; entityId: s
       name: input.name,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert group");
+  if (!created) throw new UserError("Failed to insert group");
   return created;
 }
 
@@ -26,7 +27,7 @@ export async function updateGroup(id: string, input: Partial<{ name: string; par
     .set({ ...input, updatedAt: new Date() })
     .where(eq(groups.id, id))
     .returning();
-  if (!updated) throw new Error(`Group ${id} not found`);
+  if (!updated) throw new UserError(`Group ${id} not found`);
   return updated;
 }
 

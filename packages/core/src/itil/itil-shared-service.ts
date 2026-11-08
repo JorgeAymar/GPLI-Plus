@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import {
   db,
   itilActors,
@@ -33,7 +34,7 @@ export async function addActor(
     .insert(itilActors)
     .values({ itilType, itilId, actorRole: input.actorRole, actorKind: input.actorKind, actorId: input.actorId })
     .returning();
-  if (!created) throw new Error("Failed to insert itil actor");
+  if (!created) throw new UserError("Failed to insert itil actor");
   return created;
 }
 
@@ -62,7 +63,7 @@ export async function addTimelineItem(
       timeSpentMinutes: input.timeSpentMinutes ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert itil timeline item");
+  if (!created) throw new UserError("Failed to insert itil timeline item");
   return created;
 }
 
@@ -89,7 +90,7 @@ export async function addValidation(
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert itil validation");
+  if (!created) throw new UserError("Failed to insert itil validation");
   return created;
 }
 
@@ -110,7 +111,7 @@ export async function respondToValidation(
     .set({ status, comment: comment ?? null, respondedAt: new Date() })
     .where(eq(itilValidations.id, id))
     .returning();
-  if (!updated) throw new Error(`Validation ${id} not found`);
+  if (!updated) throw new UserError(`Validation ${id} not found`);
   return updated;
 }
 
@@ -130,7 +131,7 @@ export async function addCost(
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert itil cost");
+  if (!created) throw new UserError("Failed to insert itil cost");
   return created;
 }
 

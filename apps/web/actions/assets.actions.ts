@@ -1,5 +1,6 @@
 "use server";
 
+import { UserError } from "@itsm/core";
 import { requireAuthContext } from "@/lib/session";
 import {
   RIGHT,
@@ -24,7 +25,7 @@ import { revalidatePath } from "next/cache";
 async function requireRightForAssetDefinition(assetDefinitionId: string, required: number): Promise<AuthContext> {
   const context = await requireAuthContext();
   const definition = await getAssetDefinition(assetDefinitionId);
-  if (!definition) throw new Error(`Asset definition ${assetDefinitionId} not found`);
+  if (!definition) throw new UserError(`Asset definition ${assetDefinitionId} not found`);
   await requireRight(context, moduleKeyForAssetDefinition(definition), required);
   return context;
 }
@@ -38,9 +39,9 @@ async function requireRightForAssetDefinition(assetDefinitionId: string, require
 async function requireRightForAsset(assetId: string, required: number): Promise<AuthContext> {
   const context = await requireAuthContext();
   const asset = await getAsset(assetId);
-  if (!asset) throw new Error(`Asset ${assetId} not found`);
+  if (!asset) throw new UserError(`Asset ${assetId} not found`);
   const definition = await getAssetDefinition(asset.assetDefinitionId);
-  if (!definition) throw new Error(`Asset definition ${asset.assetDefinitionId} not found`);
+  if (!definition) throw new UserError(`Asset definition ${asset.assetDefinitionId} not found`);
   await requireRightOnEntity(context, moduleKeyForAssetDefinition(definition), required, asset.entityId);
   return context;
 }

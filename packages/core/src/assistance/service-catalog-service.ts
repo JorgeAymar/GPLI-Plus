@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { db, serviceCatalogItems, type ServiceCatalogItem, type TicketType } from "@itsm/db";
 import { and, eq, inArray } from "drizzle-orm";
 import { listSubtree } from "../entities/entity-service";
@@ -21,7 +22,7 @@ export async function createServiceCatalogItem(input: {
       sortOrder: input.sortOrder ?? 0,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert service catalog item");
+  if (!created) throw new UserError("Failed to insert service catalog item");
   return created;
 }
 
@@ -69,6 +70,6 @@ export async function updateServiceCatalogItem(
   }>,
 ): Promise<ServiceCatalogItem> {
   const [updated] = await db.update(serviceCatalogItems).set(input).where(eq(serviceCatalogItems.id, id)).returning();
-  if (!updated) throw new Error(`Service catalog item ${id} not found`);
+  if (!updated) throw new UserError(`Service catalog item ${id} not found`);
   return updated;
 }

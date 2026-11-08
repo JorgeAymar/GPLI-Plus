@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { changes, db, type Change, type ItilStatus } from "@itsm/db";
 import { and, eq, inArray } from "drizzle-orm";
 import { recordAuditLog } from "../audit/audit-service";
@@ -21,7 +22,7 @@ export async function createChange(input: CreateChangeInput, requesterUserId: st
       plannedEndAt: input.plannedEndAt ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert change");
+  if (!created) throw new UserError("Failed to insert change");
 
   await addActor("change", created.id, { actorRole: "requester", actorKind: "user", actorId: requesterUserId });
 
@@ -62,10 +63,10 @@ export async function updateChange(
   actorUserId: string | null,
 ): Promise<Change> {
   const before = await getChange(id);
-  if (!before) throw new Error(`Change ${id} not found`);
+  if (!before) throw new UserError(`Change ${id} not found`);
 
   const [updated] = await db.update(changes).set({ ...input, updatedAt: new Date() }).where(eq(changes.id, id)).returning();
-  if (!updated) throw new Error(`Change ${id} not found`);
+  if (!updated) throw new UserError(`Change ${id} not found`);
 
   await recordAuditLog({ entityId: updated.entityId, actorUserId, action: "update", objectType: "change", objectId: id, before, after: updated });
   return updated;
@@ -73,14 +74,14 @@ export async function updateChange(
 
 export async function updateChangeStatus(id: string, status: ItilStatus, actorUserId: string | null): Promise<Change> {
   const before = await getChange(id);
-  if (!before) throw new Error(`Change ${id} not found`);
+  if (!before) throw new UserError(`Change ${id} not found`);
 
   const patch: { status: ItilStatus; updatedAt: Date; solvedAt?: Date; closedAt?: Date } = { status, updatedAt: new Date() };
   if (status === "solved") patch.solvedAt = new Date();
   if (status === "closed") patch.closedAt = new Date();
 
   const [updated] = await db.update(changes).set(patch).where(eq(changes.id, id)).returning();
-  if (!updated) throw new Error(`Change ${id} not found`);
+  if (!updated) throw new UserError(`Change ${id} not found`);
 
   await recordAuditLog({
     entityId: updated.entityId,

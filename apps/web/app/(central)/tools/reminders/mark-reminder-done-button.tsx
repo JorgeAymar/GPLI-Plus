@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { markReminderDoneAction } from "@/actions/reminders.actions";
 import { useActionState } from "react";
 
@@ -13,7 +14,7 @@ function makeAction(id: string) {
       await markReminderDoneAction(id);
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

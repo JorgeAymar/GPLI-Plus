@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { db, itilActors, tickets, type ItilStatus, type Ticket } from "@itsm/db";
 import { and, count, desc, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
 import { recordAuditLog } from "../audit/audit-service";
@@ -27,7 +28,7 @@ export async function createTicket(input: CreateTicketInput, requesterUserId: st
       customFields: validatedCustomFields,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert ticket");
+  if (!created) throw new UserError("Failed to insert ticket");
 
   await addActor("ticket", created.id, { actorRole: "requester", actorKind: "user", actorId: requesterUserId });
 
@@ -102,7 +103,7 @@ export async function updateTicket(
   actorUserId: string | null,
 ): Promise<Ticket> {
   const before = await getTicket(id);
-  if (!before) throw new Error(`Ticket ${id} not found`);
+  if (!before) throw new UserError(`Ticket ${id} not found`);
 
   // Only re-validate custom_fields when the input actually touches it - avoids forcing every
   // plain-field update (e.g. just `title`) to also re-validate an unrelated JSONB blob.
@@ -116,7 +117,7 @@ export async function updateTicket(
     .set({ ...input, customFields, updatedAt: new Date() })
     .where(eq(tickets.id, id))
     .returning();
-  if (!updated) throw new Error(`Ticket ${id} not found`);
+  if (!updated) throw new UserError(`Ticket ${id} not found`);
 
   await recordAuditLog({ entityId: updated.entityId, actorUserId, action: "update", objectType: "ticket", objectId: id, before, after: updated });
 
@@ -128,14 +129,14 @@ export async function updateTicket(
 /** Status transitions stamp solvedAt/closedAt as a side effect - kept separate from generic field updates. */
 export async function updateTicketStatus(id: string, status: ItilStatus, actorUserId: string | null): Promise<Ticket> {
   const before = await getTicket(id);
-  if (!before) throw new Error(`Ticket ${id} not found`);
+  if (!before) throw new UserError(`Ticket ${id} not found`);
 
   const patch: { status: ItilStatus; updatedAt: Date; solvedAt?: Date; closedAt?: Date } = { status, updatedAt: new Date() };
   if (status === "solved") patch.solvedAt = new Date();
   if (status === "closed") patch.closedAt = new Date();
 
   const [updated] = await db.update(tickets).set(patch).where(eq(tickets.id, id)).returning();
-  if (!updated) throw new Error(`Ticket ${id} not found`);
+  if (!updated) throw new UserError(`Ticket ${id} not found`);
 
   await recordAuditLog({
     entityId: updated.entityId,

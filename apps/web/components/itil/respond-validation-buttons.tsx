@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { respondToValidationAction } from "@/actions/itil-shared.actions";
 import type { ItilType } from "@itsm/db";
 import { useState, useTransition } from "react";
@@ -14,7 +15,7 @@ export function RespondValidationButtons({ id, itilType, itilId }: { id: string;
         await respondToValidationAction(id, itilType, itilId, { status });
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Error desconocido");
+        setError(actionErrorMessage(err));
       }
     });
   }

@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { assets, db, reservationItems, reservations, type Asset, type Reservation, type ReservationItem } from "@itsm/db";
 import { and, asc, eq, gt, inArray, isNull, lt } from "drizzle-orm";
 import { listSubtree } from "../entities/entity-service";
@@ -21,12 +22,12 @@ export async function createReservationItem(input: { assetId: string; comment?: 
     const cause = err instanceof Error ? err.cause : undefined;
     if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
       const constraint = "constraint" in cause ? cause.constraint : undefined;
-      if (constraint === "reservation_items_asset_id_unique") throw new Error("Este activo ya está habilitado para reserva.");
-      throw new Error("Ya existe un ítem de reserva con esos datos.");
+      if (constraint === "reservation_items_asset_id_unique") throw new UserError("Este activo ya está habilitado para reserva.");
+      throw new UserError("Ya existe un ítem de reserva con esos datos.");
     }
-    throw new Error("No se pudo habilitar el activo para reserva.");
+    throw new UserError("No se pudo habilitar el activo para reserva.");
   }
-  if (!created) throw new Error("No se pudo habilitar el activo para reserva.");
+  if (!created) throw new UserError("No se pudo habilitar el activo para reserva.");
   return created;
 }
 
@@ -81,7 +82,7 @@ export async function createReservation(input: {
   comment?: string | null;
 }): Promise<Reservation> {
   const conflict = await findOverlappingReservation(input.reservationItemId, input.beginAt, input.endAt);
-  if (conflict) throw new Error(conflictMessage(conflict));
+  if (conflict) throw new UserError(conflictMessage(conflict));
 
   const [created] = await db
     .insert(reservations)
@@ -93,7 +94,7 @@ export async function createReservation(input: {
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert reservation");
+  if (!created) throw new UserError("Failed to insert reservation");
   return created;
 }
 
@@ -131,7 +132,7 @@ export async function createRecurringReservations(input: {
         seriesGroupId,
       })
       .returning();
-    if (!row) throw new Error("Failed to insert reservation");
+    if (!row) throw new UserError("Failed to insert reservation");
     created.push(row);
   }
 

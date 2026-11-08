@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { certificates, db, type Certificate, type CertificateType } from "@itsm/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { listSubtree } from "../entities/entity-service";
@@ -27,7 +28,7 @@ export async function createCertificate(input: {
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert certificate");
+  if (!created) throw new UserError("Failed to insert certificate");
   return created;
 }
 

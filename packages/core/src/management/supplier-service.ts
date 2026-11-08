@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { db, suppliers, type Supplier } from "@itsm/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { listSubtree } from "../entities/entity-service";
@@ -12,7 +13,7 @@ export async function createSupplier(input: {
   comment?: string | null;
 }): Promise<Supplier> {
   const [created] = await db.insert(suppliers).values(input).returning();
-  if (!created) throw new Error("Failed to insert supplier");
+  if (!created) throw new UserError("Failed to insert supplier");
   return created;
 }
 
@@ -32,6 +33,6 @@ export async function listSuppliers(entityId: string, options?: { includeSubtree
 
 export async function softDeleteSupplier(id: string): Promise<Supplier> {
   const [updated] = await db.update(suppliers).set({ deletedAt: new Date() }).where(eq(suppliers.id, id)).returning();
-  if (!updated) throw new Error(`Supplier ${id} not found`);
+  if (!updated) throw new UserError(`Supplier ${id} not found`);
   return updated;
 }

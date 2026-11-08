@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { createReservationAction } from "@/actions/reservations.actions";
 import { useActionState, useState } from "react";
 
@@ -29,7 +30,7 @@ function makeAction(reservationItemId: string) {
     } catch (err) {
       // Propagated verbatim from createReservation() - shows the real
       // "Conflicto de horario: ..." message on a schedule overlap.
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

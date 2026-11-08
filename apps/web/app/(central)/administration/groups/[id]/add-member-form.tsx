@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { addUserToGroupAction } from "@/actions/groups.actions";
 import { useActionState } from "react";
 
@@ -22,7 +23,7 @@ function makeAction(groupId: string) {
       });
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

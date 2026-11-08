@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import {
   auditLog,
   db,
@@ -25,7 +26,7 @@ export async function createKbCategory(input: { parentId?: string | null; name: 
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert KB category");
+  if (!created) throw new UserError("Failed to insert KB category");
   return created;
 }
 
@@ -61,7 +62,7 @@ export async function createKbArticle(
       endDate: input.endDate ? new Date(input.endDate) : null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert KB article");
+  if (!created) throw new UserError("Failed to insert KB article");
 
   await recordAuditLog({
     entityId: created.entityId,
@@ -97,7 +98,7 @@ export async function updateKbArticle(
   actorUserId: string,
 ): Promise<KbArticle> {
   const before = await getKbArticle(id);
-  if (!before) throw new Error(`KB article ${id} not found`);
+  if (!before) throw new UserError(`KB article ${id} not found`);
 
   const [updated] = await db
     .update(kbArticles)
@@ -114,7 +115,7 @@ export async function updateKbArticle(
     })
     .where(eq(kbArticles.id, id))
     .returning();
-  if (!updated) throw new Error(`Failed to update KB article ${id}`);
+  if (!updated) throw new UserError(`Failed to update KB article ${id}`);
 
   await recordAuditLog({
     entityId: updated.entityId,
@@ -208,7 +209,7 @@ export async function addKbComment(input: {
       content: input.content,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert KB article comment");
+  if (!created) throw new UserError("Failed to insert KB article comment");
   return created;
 }
 
@@ -234,13 +235,13 @@ export async function listKbArticleRevisions(articleId: string): Promise<AuditLo
  */
 export async function revertKbArticle(articleId: string, auditLogId: string, actorUserId: string): Promise<KbArticle> {
   const [entry] = await db.select().from(auditLog).where(eq(auditLog.id, auditLogId));
-  if (!entry) throw new Error(`Audit log entry ${auditLogId} not found`);
+  if (!entry) throw new UserError(`Audit log entry ${auditLogId} not found`);
   if (entry.objectType !== "kb_article" || entry.objectId !== articleId) {
-    throw new Error(`Audit log entry ${auditLogId} does not belong to KB article ${articleId}`);
+    throw new UserError(`Audit log entry ${auditLogId} does not belong to KB article ${articleId}`);
   }
 
   const before = entry.before as Partial<KbArticle> | null;
-  if (!before) throw new Error(`Audit log entry ${auditLogId} has no "before" snapshot to revert to`);
+  if (!before) throw new UserError(`Audit log entry ${auditLogId} has no "before" snapshot to revert to`);
 
   return updateKbArticle(
     articleId,

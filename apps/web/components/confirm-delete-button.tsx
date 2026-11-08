@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -36,7 +37,7 @@ export function ConfirmDeleteButton({
         await action(id);
         router.refresh();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Error desconocido");
+        setError(actionErrorMessage(err));
       }
     });
   }

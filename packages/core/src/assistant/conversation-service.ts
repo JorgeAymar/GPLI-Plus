@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { db, assistantConversations, assistantMessages, type AssistantConversation, type AssistantMessage } from "@itsm/db";
 import { and, asc, count, desc, eq } from "drizzle-orm";
 
@@ -36,7 +37,7 @@ export async function deleteConversation(id: string, userId: string): Promise<vo
 
 export async function createConversation(userId: string): Promise<string> {
   const [conversation] = await db.insert(assistantConversations).values({ userId }).returning({ id: assistantConversations.id });
-  if (!conversation) throw new Error("No se pudo crear la conversación.");
+  if (!conversation) throw new UserError("No se pudo crear la conversación.");
   return conversation.id;
 }
 

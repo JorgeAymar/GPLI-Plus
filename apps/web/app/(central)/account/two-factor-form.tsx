@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { updateMyTwoFactorAction } from "@/actions/account.actions";
 import { useTranslations } from "next-intl";
 import { useActionState } from "react";
@@ -19,7 +20,7 @@ export function TwoFactorForm({ initialEnabled }: { initialEnabled: boolean }) {
       const user = await updateMyTwoFactorAction(nextEnabled);
       return { enabled: user.twoFactorEnabled, saved: true };
     } catch (err) {
-      return { ...prev, error: err instanceof Error ? err.message : "Error desconocido" };
+      return { ...prev, error: actionErrorMessage(err) };
     }
   }
 

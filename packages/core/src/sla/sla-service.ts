@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import {
   changes,
   db,
@@ -31,7 +32,7 @@ export async function createSlaPolicy(input: {
       ttrMinutes: input.ttrMinutes ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert SLA policy");
+  if (!created) throw new UserError("Failed to insert SLA policy");
   return created;
 }
 
@@ -56,10 +57,10 @@ export async function assignSla(
   input: { slaPolicyId: string; slaType: SlaType },
 ): Promise<ItilSlaAssignment> {
   const policy = await getSlaPolicy(input.slaPolicyId);
-  if (!policy) throw new Error(`SLA policy ${input.slaPolicyId} not found`);
+  if (!policy) throw new UserError(`SLA policy ${input.slaPolicyId} not found`);
 
   const targetMinutes = input.slaType === "tto" ? policy.ttoMinutes : policy.ttrMinutes;
-  if (targetMinutes == null) throw new Error(`SLA policy "${policy.name}" has no ${input.slaType} target configured`);
+  if (targetMinutes == null) throw new UserError(`SLA policy "${policy.name}" has no ${input.slaType} target configured`);
 
   const dueAt = new Date(Date.now() + targetMinutes * 60_000);
 
@@ -67,7 +68,7 @@ export async function assignSla(
     .insert(itilSlaAssignments)
     .values({ itilType, itilId, slaPolicyId: input.slaPolicyId, slaType: input.slaType, dueAt })
     .returning();
-  if (!created) throw new Error("Failed to insert SLA assignment");
+  if (!created) throw new UserError("Failed to insert SLA assignment");
   return created;
 }
 

@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import {
   assetComponents,
   assets,
@@ -18,7 +19,7 @@ import { validateCustomFields } from "./dynamic-schema";
 
 async function requireComputerDefinition() {
   const definition = await getAssetDefinitionByKey(ASSET_DEFINITION_KEY.COMPUTER);
-  if (!definition) throw new Error('Asset definition "computer" not found - run the seed script first');
+  if (!definition) throw new UserError('Asset definition "computer" not found - run the seed script first');
   return definition;
 }
 
@@ -48,7 +49,7 @@ export async function createComputer(
         customFields: validatedCustomFields,
       })
       .returning();
-    if (!asset) throw new Error("Failed to insert asset");
+    if (!asset) throw new UserError("Failed to insert asset");
 
     const [computer] = await tx
       .insert(computers)
@@ -59,7 +60,7 @@ export async function createComputer(
         domain: input.domain ?? null,
       })
       .returning();
-    if (!computer) throw new Error("Failed to insert computer");
+    if (!computer) throw new UserError("Failed to insert computer");
 
     await recordAuditLog({
       entityId: asset.entityId,
@@ -117,7 +118,7 @@ export async function addAssetComponent(input: {
       serialNumber: input.serialNumber ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert asset component");
+  if (!created) throw new UserError("Failed to insert asset component");
   return created;
 }
 

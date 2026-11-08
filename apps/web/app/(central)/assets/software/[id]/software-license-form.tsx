@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { createSoftwareLicenseAction } from "@/actions/software.actions";
 import type { SoftwareVersion } from "@itsm/db";
 import { useActionState } from "react";
@@ -25,7 +26,7 @@ function makeAction(entityId: string, softwareId: string) {
       });
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

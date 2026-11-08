@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import {
   db,
   projectCosts,
@@ -45,7 +46,7 @@ export async function createProject(input: CreateProjectInput): Promise<Project>
       groupId: input.groupId ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert project");
+  if (!created) throw new UserError("Failed to insert project");
   return created;
 }
 
@@ -60,7 +61,7 @@ export async function updateProject(id: string, input: UpdateProjectInput): Prom
     .set({ ...input, updatedAt: new Date() })
     .where(eq(projects.id, id))
     .returning();
-  if (!updated) throw new Error(`Project ${id} not found`);
+  if (!updated) throw new UserError(`Project ${id} not found`);
   return updated;
 }
 
@@ -103,7 +104,7 @@ export async function createProjectTask(input: CreateProjectTaskInput): Promise<
       planEndAt: input.planEndAt ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert project task");
+  if (!created) throw new UserError("Failed to insert project task");
   return created;
 }
 
@@ -113,7 +114,7 @@ export async function updateProjectTask(id: string, input: UpdateProjectTaskInpu
     .set({ ...input, updatedAt: new Date() })
     .where(eq(projectTasks.id, id))
     .returning();
-  if (!updated) throw new Error(`Project task ${id} not found`);
+  if (!updated) throw new UserError(`Project task ${id} not found`);
   return updated;
 }
 
@@ -132,7 +133,7 @@ export async function listProjectTasks(projectId: string): Promise<ProjectTask[]
  */
 export async function recalculateProjectPercentDone(projectId: string): Promise<Project> {
   const project = await getProject(projectId);
-  if (!project) throw new Error(`Project ${projectId} not found`);
+  if (!project) throw new UserError(`Project ${projectId} not found`);
   if (!project.autoPercentDone) return project;
 
   const [subProjects, topLevelTasks] = await Promise.all([
@@ -163,7 +164,7 @@ export async function addProjectTeamMember(input: CreateProjectTeamMemberInput):
       role: input.role ?? "member",
     })
     .returning();
-  if (!created) throw new Error("Failed to insert project team member");
+  if (!created) throw new UserError("Failed to insert project team member");
   return created;
 }
 
@@ -205,7 +206,7 @@ function isReachable(startTaskId: string, targetTaskId: string, links: ProjectTa
 export async function addProjectTaskLink(input: CreateProjectTaskLinkInput): Promise<ProjectTaskLink> {
   const existingLinks = await db.select().from(projectTaskLinks);
   if (isReachable(input.targetTaskId, input.sourceTaskId, existingLinks)) {
-    throw new Error("Esta dependencia crearía un ciclo");
+    throw new UserError("Esta dependencia crearía un ciclo");
   }
 
   const [created] = await db
@@ -217,7 +218,7 @@ export async function addProjectTaskLink(input: CreateProjectTaskLinkInput): Pro
       lagMinutes: input.lagMinutes ?? 0,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert project task link");
+  if (!created) throw new UserError("Failed to insert project task link");
   return created;
 }
 
@@ -243,7 +244,7 @@ export async function addProjectCost(input: CreateProjectCostInput): Promise<Pro
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert project cost");
+  if (!created) throw new UserError("Failed to insert project cost");
   return created;
 }
 

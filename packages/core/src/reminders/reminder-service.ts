@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { db, reminders, type Reminder, type VisibilityGranteeKind } from "@itsm/db";
 import { eq, inArray } from "drizzle-orm";
 import type { AuthContext } from "../auth/get-auth-context";
@@ -21,7 +22,7 @@ export async function createReminder(input: {
       remindAt: input.remindAt ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert reminder");
+  if (!created) throw new UserError("Failed to insert reminder");
   return created;
 }
 
@@ -60,7 +61,7 @@ export async function markReminderDone(id: string): Promise<Reminder> {
     .set({ isDone: true, updatedAt: new Date() })
     .where(eq(reminders.id, id))
     .returning();
-  if (!updated) throw new Error(`Failed to update reminder ${id}`);
+  if (!updated) throw new UserError(`Failed to update reminder ${id}`);
   return updated;
 }
 

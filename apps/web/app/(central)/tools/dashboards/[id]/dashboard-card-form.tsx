@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { addDashboardCardAction } from "@/actions/dashboards.actions";
 import type { CardKey } from "@itsm/core";
 import { useActionState } from "react";
@@ -29,7 +30,7 @@ function makeAction(dashboardId: string) {
       });
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

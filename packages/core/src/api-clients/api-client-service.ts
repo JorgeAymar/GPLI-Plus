@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { and, eq } from "drizzle-orm";
@@ -45,7 +46,7 @@ export async function createApiClient(input: {
       scopes: input.scopes,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert API client");
+  if (!created) throw new UserError("Failed to insert API client");
 
   return { client: created, rawKey };
 }
@@ -71,7 +72,7 @@ export async function createPersonalApiClient(input: { userId: string; name: str
       scopes: [],
     })
     .returning();
-  if (!created) throw new Error("Failed to insert personal API client");
+  if (!created) throw new UserError("Failed to insert personal API client");
 
   return { client: created, rawKey };
 }
@@ -121,7 +122,7 @@ export async function listMyApiClients(userId: string): Promise<ApiClient[]> {
 /** Soft-revoke only - never hard-deletes, so `verifyApiKey` keeps failing closed for old keys but audit history survives. */
 export async function revokeApiClient(id: string): Promise<ApiClient> {
   const [updated] = await db.update(apiClients).set({ isActive: false }).where(eq(apiClients.id, id)).returning();
-  if (!updated) throw new Error(`API client ${id} not found`);
+  if (!updated) throw new UserError(`API client ${id} not found`);
   return updated;
 }
 
@@ -133,7 +134,7 @@ export async function revokeApiClient(id: string): Promise<ApiClient> {
 export async function revokeMyApiClient(id: string, userId: string): Promise<ApiClient> {
   const [client] = await db.select().from(apiClients).where(eq(apiClients.id, id));
   if (!client || client.userId !== userId) {
-    throw new Error(`API client ${id} not found`);
+    throw new UserError(`API client ${id} not found`);
   }
   return revokeApiClient(id);
 }

@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { db, impactRelations, type ImpactRelation } from "@itsm/db";
 import { eq } from "drizzle-orm";
 import { getAsset } from "../assets/asset-service";
@@ -14,7 +15,7 @@ export async function addImpactRelation(input: AddImpactRelationInput): Promise<
       label: input.label ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert impact relation");
+  if (!created) throw new UserError("Failed to insert impact relation");
   return created;
 }
 
@@ -81,7 +82,7 @@ export async function buildImpactGraph(
   const direction = options?.direction ?? "both";
 
   const rootAsset = await getAsset(rootAssetId);
-  if (!rootAsset) throw new Error(`Asset ${rootAssetId} not found`);
+  if (!rootAsset) throw new UserError(`Asset ${rootAssetId} not found`);
 
   const nodesById = new Map<string, ImpactGraphNode>();
   nodesById.set(rootAssetId, { assetId: rootAssetId, name: rootAsset.name, depth: 0 });

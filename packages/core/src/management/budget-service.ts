@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { budgets, db, type Budget } from "@itsm/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { listSubtree } from "../entities/entity-service";
@@ -21,7 +22,7 @@ export async function createBudget(input: {
       comment: input.comment ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert budget");
+  if (!created) throw new UserError("Failed to insert budget");
   return created;
 }
 

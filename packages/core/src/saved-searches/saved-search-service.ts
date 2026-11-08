@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { and, count, eq, inArray, isNull, or } from "drizzle-orm";
 import {
   assets,
@@ -39,7 +40,7 @@ export async function createSavedSearch(input: {
       doCount: input.doCount ?? "auto",
     })
     .returning();
-  if (!created) throw new Error("Failed to insert saved search");
+  if (!created) throw new UserError("Failed to insert saved search");
   return created;
 }
 
@@ -71,7 +72,7 @@ export async function createSavedSearchAlert(input: {
       isActive: input.isActive ?? true,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert saved search alert");
+  if (!created) throw new UserError("Failed to insert saved search alert");
   return created;
 }
 

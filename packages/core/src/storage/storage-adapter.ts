@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
@@ -51,5 +52,5 @@ export function createStorageAdapter(): StorageAdapter {
   if (driver === "local") {
     return new LocalFsAdapter(process.env.STORAGE_LOCAL_PATH ?? "./.data/documents");
   }
-  throw new Error(`Unsupported STORAGE_DRIVER "${driver}" - only "local" is implemented today.`);
+  throw new UserError(`Unsupported STORAGE_DRIVER "${driver}" - only "local" is implemented today.`);
 }

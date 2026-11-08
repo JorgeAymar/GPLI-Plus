@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { eq } from "drizzle-orm";
 import {
   assetDefinitions,
@@ -36,12 +37,12 @@ export async function createAssetDefinition(input: {
     const cause = err instanceof Error ? err.cause : undefined;
     if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
       const constraint = "constraint" in cause ? cause.constraint : undefined;
-      if (constraint === "asset_definitions_key_unique") throw new Error("Ya existe un tipo de activo con esa clave (key).");
-      throw new Error("Ya existe un tipo de activo con esos datos.");
+      if (constraint === "asset_definitions_key_unique") throw new UserError("Ya existe un tipo de activo con esa clave (key).");
+      throw new UserError("Ya existe un tipo de activo con esos datos.");
     }
-    throw new Error("No se pudo crear el tipo de activo.");
+    throw new UserError("No se pudo crear el tipo de activo.");
   }
-  if (!created) throw new Error("No se pudo crear el tipo de activo.");
+  if (!created) throw new UserError("No se pudo crear el tipo de activo.");
   return created;
 }
 
@@ -64,7 +65,7 @@ export async function updateAssetDefinition(
   input: Partial<{ name: string; icon: string | null; hasExtensionTable: boolean; isActive: boolean }>,
 ): Promise<AssetDefinition> {
   const [updated] = await db.update(assetDefinitions).set(input).where(eq(assetDefinitions.id, id)).returning();
-  if (!updated) throw new Error(`Asset definition ${id} not found`);
+  if (!updated) throw new UserError(`Asset definition ${id} not found`);
   return updated;
 }
 
@@ -100,12 +101,12 @@ export async function createAssetFieldDefinition(input: {
     const cause = err instanceof Error ? err.cause : undefined;
     if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
       const constraint = "constraint" in cause ? cause.constraint : undefined;
-      if (constraint === "asset_field_def_unique_key") throw new Error("Ya existe un campo con esa clave (key) en este tipo de activo.");
-      throw new Error("Ya existe un campo con esos datos.");
+      if (constraint === "asset_field_def_unique_key") throw new UserError("Ya existe un campo con esa clave (key) en este tipo de activo.");
+      throw new UserError("Ya existe un campo con esos datos.");
     }
-    throw new Error("No se pudo crear el campo.");
+    throw new UserError("No se pudo crear el campo.");
   }
-  if (!created) throw new Error("No se pudo crear el campo.");
+  if (!created) throw new UserError("No se pudo crear el campo.");
   return created;
 }
 

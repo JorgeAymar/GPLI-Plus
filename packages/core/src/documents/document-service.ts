@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { randomUUID } from "node:crypto";
 import { db, documentItems, documents, type Document } from "@itsm/db";
 import { and, desc, eq } from "drizzle-orm";
@@ -31,7 +32,7 @@ export async function uploadDocument(input: {
       uploadedByUserId: input.uploadedByUserId,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert document");
+  if (!created) throw new UserError("Failed to insert document");
   return created;
 }
 

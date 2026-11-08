@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { assets, db, type Asset } from "@itsm/db";
 import { and, eq, ilike, inArray, isNull, or, type SQL } from "drizzle-orm";
 import { recordAuditLog } from "../audit/audit-service";
@@ -27,7 +28,7 @@ export async function createAsset(input: CreateAssetInput, actorUserId: string |
       customFields: validatedCustomFields,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert asset");
+  if (!created) throw new UserError("Failed to insert asset");
 
   await recordAuditLog({
     entityId: created.entityId,
@@ -76,7 +77,7 @@ export async function updateAsset(
   actorUserId: string | null,
 ): Promise<Asset> {
   const before = await getAsset(id);
-  if (!before) throw new Error(`Asset ${id} not found`);
+  if (!before) throw new UserError(`Asset ${id} not found`);
 
   const customFields =
     input.customFields !== undefined ? await validateCustomFields(before.assetDefinitionId, input.customFields) : undefined;
@@ -86,7 +87,7 @@ export async function updateAsset(
     .set({ ...input, customFields, updatedAt: new Date() })
     .where(eq(assets.id, id))
     .returning();
-  if (!updated) throw new Error(`Asset ${id} not found`);
+  if (!updated) throw new UserError(`Asset ${id} not found`);
 
   await recordAuditLog({
     entityId: updated.entityId,
@@ -110,14 +111,14 @@ export async function assignAsset(
   actorUserId: string | null,
 ): Promise<Asset> {
   const before = await getAsset(id);
-  if (!before) throw new Error(`Asset ${id} not found`);
+  if (!before) throw new UserError(`Asset ${id} not found`);
 
   const [updated] = await db
     .update(assets)
     .set({ userId: input.userId ?? null, groupId: input.groupId ?? null, updatedAt: new Date() })
     .where(eq(assets.id, id))
     .returning();
-  if (!updated) throw new Error(`Asset ${id} not found`);
+  if (!updated) throw new UserError(`Asset ${id} not found`);
 
   await recordAuditLog({
     entityId: updated.entityId,
@@ -135,10 +136,10 @@ export async function assignAsset(
 /** RIGHT.DELETE - moves the asset to trash without removing the row. */
 export async function softDeleteAsset(id: string, actorUserId: string | null): Promise<Asset> {
   const before = await getAsset(id);
-  if (!before) throw new Error(`Asset ${id} not found`);
+  if (!before) throw new UserError(`Asset ${id} not found`);
 
   const [updated] = await db.update(assets).set({ deletedAt: new Date() }).where(eq(assets.id, id)).returning();
-  if (!updated) throw new Error(`Asset ${id} not found`);
+  if (!updated) throw new UserError(`Asset ${id} not found`);
 
   await recordAuditLog({ entityId: updated.entityId, actorUserId, action: "delete", objectType: "asset", objectId: updated.id, before });
 
@@ -147,7 +148,7 @@ export async function softDeleteAsset(id: string, actorUserId: string | null): P
 
 export async function restoreAsset(id: string, actorUserId: string | null): Promise<Asset> {
   const [updated] = await db.update(assets).set({ deletedAt: null }).where(eq(assets.id, id)).returning();
-  if (!updated) throw new Error(`Asset ${id} not found`);
+  if (!updated) throw new UserError(`Asset ${id} not found`);
 
   await recordAuditLog({ entityId: updated.entityId, actorUserId, action: "restore", objectType: "asset", objectId: updated.id });
 
@@ -157,7 +158,7 @@ export async function restoreAsset(id: string, actorUserId: string | null): Prom
 /** RIGHT.PURGE - hard delete, unrecoverable. */
 export async function purgeAsset(id: string, actorUserId: string | null): Promise<void> {
   const before = await getAsset(id);
-  if (!before) throw new Error(`Asset ${id} not found`);
+  if (!before) throw new UserError(`Asset ${id} not found`);
 
   await db.delete(assets).where(eq(assets.id, id));
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { retireConsumableAction, useConsumableAction } from "@/actions/consumables.actions";
 import type { Asset } from "@itsm/db";
 import { useActionState } from "react";
@@ -14,7 +15,7 @@ function makeUseAction(consumableId: string) {
       await useConsumableAction({ id: consumableId, assignedAssetId: formData.get("assignedAssetId") as string });
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }
@@ -55,7 +56,7 @@ function makeRetireAction(consumableItemId: string, consumableId: string) {
       await retireConsumableAction(consumableItemId, consumableId);
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

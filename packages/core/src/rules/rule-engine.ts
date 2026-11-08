@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { db, ruleActions, ruleCriteria, rules, type Rule, type RuleAction, type RuleCriterion } from "@itsm/db";
 import { and, asc, eq } from "drizzle-orm";
 
@@ -22,7 +23,7 @@ export async function createRule(input: {
       stopOnMatch: input.stopOnMatch ?? false,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert rule");
+  if (!created) throw new UserError("Failed to insert rule");
   return created;
 }
 
@@ -50,7 +51,7 @@ export async function addRuleCriteria(input: {
   value: string;
 }): Promise<RuleCriterion> {
   const [created] = await db.insert(ruleCriteria).values(input).returning();
-  if (!created) throw new Error("Failed to insert rule criterion");
+  if (!created) throw new UserError("Failed to insert rule criterion");
   return created;
 }
 
@@ -65,7 +66,7 @@ export async function addRuleAction(input: {
   value: string;
 }): Promise<RuleAction> {
   const [created] = await db.insert(ruleActions).values(input).returning();
-  if (!created) throw new Error("Failed to insert rule action");
+  if (!created) throw new UserError("Failed to insert rule action");
   return created;
 }
 

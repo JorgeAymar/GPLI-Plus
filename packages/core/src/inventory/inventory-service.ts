@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import {
   assets,
   db,
@@ -24,7 +25,7 @@ export async function getOrCreateInventoryAgent(deviceId: string, entityId: stri
   if (existing) return existing;
 
   const [created] = await db.insert(inventoryAgents).values({ deviceId, entityId, name }).returning();
-  if (!created) throw new Error("Failed to insert inventory agent");
+  if (!created) throw new UserError("Failed to insert inventory agent");
   return created;
 }
 
@@ -58,7 +59,7 @@ export async function lockField(assetId: string, fieldName: string): Promise<Inv
     .select()
     .from(inventoryLockedFields)
     .where(and(eq(inventoryLockedFields.assetId, assetId), eq(inventoryLockedFields.fieldName, fieldName)));
-  if (!existing) throw new Error("Failed to lock field");
+  if (!existing) throw new UserError("Failed to lock field");
   return existing;
 }
 
@@ -91,7 +92,7 @@ export async function submitInventory(
     .insert(inventorySubmissions)
     .values({ agentId: agent.id, rawPayload: input, status: "pending" })
     .returning();
-  if (!submission) throw new Error("Failed to insert inventory submission");
+  if (!submission) throw new UserError("Failed to insert inventory submission");
 
   try {
     const { output } = await evaluateRules("asset_import", input.entityId, {
@@ -129,7 +130,7 @@ export async function submitInventory(
       created = false;
     } else {
       const definition = await getAssetDefinitionByKey(ASSET_DEFINITION_KEY.COMPUTER);
-      if (!definition) throw new Error('Asset definition "computer" not found - run the seed script first');
+      if (!definition) throw new UserError('Asset definition "computer" not found - run the seed script first');
 
       // Only send customFields keys the "computer" type actually defines - anything else is silently dropped.
       const fieldDefs = await listAssetFieldDefinitions(definition.id);
@@ -154,7 +155,7 @@ export async function submitInventory(
       .set({ status: "processed", processedAt: new Date() })
       .where(eq(inventorySubmissions.id, submission.id))
       .returning();
-    if (!processed) throw new Error("Failed to update inventory submission");
+    if (!processed) throw new UserError("Failed to update inventory submission");
 
     return { assetId, created, submissionId: submission.id };
   } catch (err) {
@@ -179,11 +180,11 @@ export async function acceptSubmissionAsUnmanaged(
   actorUserId: string | null,
 ): Promise<{ assetId: string }> {
   const [submission] = await db.select().from(inventorySubmissions).where(eq(inventorySubmissions.id, submissionId));
-  if (!submission) throw new Error(`Inventory submission ${submissionId} not found`);
-  if (submission.status === "processed") throw new Error("Esta submission ya fue procesada");
+  if (!submission) throw new UserError(`Inventory submission ${submissionId} not found`);
+  if (submission.status === "processed") throw new UserError("Esta submission ya fue procesada");
 
   const definition = await getAssetDefinitionByKey(ASSET_DEFINITION_KEY.UNMANAGED_DEVICE);
-  if (!definition) throw new Error('Asset definition "unmanaged_device" not found - run the seed script first');
+  if (!definition) throw new UserError('Asset definition "unmanaged_device" not found - run the seed script first');
 
   const hostname = (submission.rawPayload as { hostname?: string } | null)?.hostname ?? "Dispositivo sin nombre";
 

@@ -1,6 +1,7 @@
+import { UserError } from "../errors/user-error";
 function requireAiUrl(): string {
   const url = process.env.AI_URL;
-  if (!url) throw new Error("AI_URL no está configurado.");
+  if (!url) throw new UserError("AI_URL no está configurado.");
   return url;
 }
 
@@ -39,7 +40,7 @@ function ollamaHeaders(): Record<string, string> {
 
 /** Reads an Ollama `stream: true` /api/chat response and yields text deltas. */
 async function* readOllamaStream(res: Response): AsyncGenerator<string> {
-  if (!res.body) throw new Error("Ollama no devolvió cuerpo de respuesta");
+  if (!res.body) throw new UserError("Ollama no devolvió cuerpo de respuesta");
 
   const reader = res.body.getReader();
   const dec = new TextDecoder();
@@ -73,7 +74,7 @@ export async function* streamOllama(model: string, messages: OllamaMessage[], sy
   });
 
   if (!res.ok || !res.body) {
-    throw new Error(`Ollama responded with ${res.status}`);
+    throw new UserError(`Ollama responded with ${res.status}`);
   }
 
   yield* readOllamaStream(res);
@@ -112,7 +113,7 @@ export async function* streamOllamaWithTools(
     body: JSON.stringify({ model, messages: base, tools, stream: false }),
   });
   if (!decisionRes.ok) {
-    throw new Error(`Ollama responded with ${decisionRes.status}`);
+    throw new UserError(`Ollama responded with ${decisionRes.status}`);
   }
   const decision = (await decisionRes.json()) as { message?: OllamaMessage };
   const assistantMessage: OllamaMessage = decision.message ?? { role: "assistant", content: "" };
@@ -153,7 +154,7 @@ export async function* streamOllamaWithTools(
     body: JSON.stringify({ model, messages: followUpMessages, stream: true }),
   });
   if (!finalRes.ok || !finalRes.body) {
-    throw new Error(`Ollama responded with ${finalRes.status}`);
+    throw new UserError(`Ollama responded with ${finalRes.status}`);
   }
 
   yield* readOllamaStream(finalRes);

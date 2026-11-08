@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import { db, problems, type ItilStatus, type Problem } from "@itsm/db";
 import { and, eq, inArray } from "drizzle-orm";
 import { recordAuditLog } from "../audit/audit-service";
@@ -19,7 +20,7 @@ export async function createProblem(input: CreateProblemInput, requesterUserId: 
       categoryDropdownItemId: input.categoryDropdownItemId ?? null,
     })
     .returning();
-  if (!created) throw new Error("Failed to insert problem");
+  if (!created) throw new UserError("Failed to insert problem");
 
   await addActor("problem", created.id, { actorRole: "requester", actorKind: "user", actorId: requesterUserId });
 
@@ -60,10 +61,10 @@ export async function updateProblem(
   actorUserId: string | null,
 ): Promise<Problem> {
   const before = await getProblem(id);
-  if (!before) throw new Error(`Problem ${id} not found`);
+  if (!before) throw new UserError(`Problem ${id} not found`);
 
   const [updated] = await db.update(problems).set({ ...input, updatedAt: new Date() }).where(eq(problems.id, id)).returning();
-  if (!updated) throw new Error(`Problem ${id} not found`);
+  if (!updated) throw new UserError(`Problem ${id} not found`);
 
   await recordAuditLog({ entityId: updated.entityId, actorUserId, action: "update", objectType: "problem", objectId: id, before, after: updated });
   return updated;
@@ -71,14 +72,14 @@ export async function updateProblem(
 
 export async function updateProblemStatus(id: string, status: ItilStatus, actorUserId: string | null): Promise<Problem> {
   const before = await getProblem(id);
-  if (!before) throw new Error(`Problem ${id} not found`);
+  if (!before) throw new UserError(`Problem ${id} not found`);
 
   const patch: { status: ItilStatus; updatedAt: Date; solvedAt?: Date; closedAt?: Date } = { status, updatedAt: new Date() };
   if (status === "solved") patch.solvedAt = new Date();
   if (status === "closed") patch.closedAt = new Date();
 
   const [updated] = await db.update(problems).set(patch).where(eq(problems.id, id)).returning();
-  if (!updated) throw new Error(`Problem ${id} not found`);
+  if (!updated) throw new UserError(`Problem ${id} not found`);
 
   await recordAuditLog({
     entityId: updated.entityId,

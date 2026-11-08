@@ -1,3 +1,4 @@
+import { UserError } from "../errors/user-error";
 import {
   db,
   notificationTemplates,
@@ -25,12 +26,12 @@ export async function createNotificationTemplate(input: {
     const cause = err instanceof Error ? err.cause : undefined;
     if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
       const constraint = "constraint" in cause ? cause.constraint : undefined;
-      if (constraint === "notification_templates_key_unique") throw new Error("Ya existe una plantilla con esa clave (key).");
-      throw new Error("Ya existe una plantilla con esos datos.");
+      if (constraint === "notification_templates_key_unique") throw new UserError("Ya existe una plantilla con esa clave (key).");
+      throw new UserError("Ya existe una plantilla con esos datos.");
     }
-    throw new Error("No se pudo crear la plantilla.");
+    throw new UserError("No se pudo crear la plantilla.");
   }
-  if (!created) throw new Error("No se pudo crear la plantilla.");
+  if (!created) throw new UserError("No se pudo crear la plantilla.");
   return created;
 }
 
@@ -57,7 +58,7 @@ export async function queueNotification(
   context: Record<string, unknown> = {},
 ): Promise<QueuedNotification> {
   const [created] = await db.insert(queuedNotifications).values({ templateKey, recipientUserId, context }).returning();
-  if (!created) throw new Error("Failed to insert queued notification");
+  if (!created) throw new UserError("Failed to insert queued notification");
   return created;
 }
 

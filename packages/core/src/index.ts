@@ -1,3 +1,4 @@
+export * from "./errors/user-error";
 export * from "./auth/get-auth-context";
 export * from "./auth/permissions";
 export * from "./auth/modules";

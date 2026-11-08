@@ -1,5 +1,6 @@
 "use server";
 
+import { UserError } from "@itsm/core";
 import { moduleForItemType } from "@/lib/document-access";
 import { requireAuthContext } from "@/lib/session";
 import {
@@ -22,7 +23,7 @@ export async function uploadDocumentAction(formData: FormData, revalidatePathTar
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    throw new Error("Seleccioná un archivo para subir");
+    throw new UserError("Seleccioná un archivo para subir");
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());

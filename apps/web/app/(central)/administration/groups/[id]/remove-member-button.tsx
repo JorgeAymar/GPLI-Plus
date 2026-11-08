@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { removeUserFromGroupAction } from "@/actions/groups.actions";
 import { useState, useTransition } from "react";
 
@@ -17,7 +18,7 @@ export function RemoveMemberButton({ userId, groupId }: { userId: string; groupI
             try {
               await removeUserFromGroupAction(userId, groupId);
             } catch (err) {
-              setError(err instanceof Error ? err.message : "Error desconocido");
+              setError(actionErrorMessage(err));
             }
           })
         }

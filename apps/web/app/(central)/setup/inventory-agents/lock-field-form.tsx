@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { lockInventoryFieldAction } from "@/actions/inventory.actions";
 import { useActionState } from "react";
 
@@ -13,7 +14,7 @@ function makeAction(assetId: string) {
       await lockInventoryFieldAction(assetId, formData.get("fieldName") as string);
       return {};
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Error desconocido" };
+      return { error: actionErrorMessage(err) };
     }
   };
 }

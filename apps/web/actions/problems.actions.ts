@@ -1,5 +1,6 @@
 "use server";
 
+import { UserError } from "@itsm/core";
 import { requireAuthContext } from "@/lib/session";
 import {
   MODULE,
@@ -29,7 +30,7 @@ export async function createProblemAction(input: unknown) {
 async function requireProblemRight(id: string, required: number) {
   const context = await requireAuthContext();
   const problem = await getProblem(id);
-  if (!problem) throw new Error(`Problem ${id} not found`);
+  if (!problem) throw new UserError(`Problem ${id} not found`);
   await requireRightOnEntity(context, MODULE.ASSISTANCE_PROBLEM, required, problem.entityId);
   return context;
 }

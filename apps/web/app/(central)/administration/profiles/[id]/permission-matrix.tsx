@@ -1,5 +1,6 @@
 "use client";
 
+import { actionErrorMessage } from "@/lib/action-error";
 import { setModuleRightAction } from "@/actions/profiles.actions";
 import { useMemo, useState } from "react";
 
@@ -129,7 +130,7 @@ export function PermissionMatrix({ profileId, moduleKeys, rightBits, initialRigh
       await setModuleRightAction(profileId, moduleKey, next);
     } catch (err) {
       setRights((prev) => ({ ...prev, [moduleKey]: current }));
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(actionErrorMessage(err));
     } finally {
       setPendingKey(null);
     }
